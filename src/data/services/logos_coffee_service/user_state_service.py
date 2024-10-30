@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from src.data.services.logos_coffee_service.database import database
-from src.data.services.logos_coffee_service.models import UserState
+from src.data.services.logos_coffee_service.models import UserStateOrm
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -11,18 +11,20 @@ class UserData:
     user_id: int
     chat_id: int
 
-async def __create_user_state(s:AsyncSession, user_data: UserData):
-    user_state = UserState(bot_id = user_data.bot_id, user_id = user_data.user_id, chat_id = user_data.chat_id,
-                           state = None, data = dict())
+async def __create_user_state(s:AsyncSession, user_data: UserData) -> UserStateOrm:
+    user_state = UserStateOrm(bot_id = user_data.bot_id, user_id = user_data.user_id, chat_id = user_data.chat_id,
+                              state = None, data = dict())
     s.add(user_state)
     return user_state
 
-async def __get_user_state_or_create(s:AsyncSession, user_data: UserData):
-    res = await s.execute(select(UserState))
+async def __get_user_state_or_create(s:AsyncSession, user_data: UserData) -> UserStateOrm:
+    where = ((UserStateOrm.user_id == user_data.user_id), (UserStateOrm.bot_id == user_data.bot_id),
+             (UserStateOrm.chat_id == user_data.chat_id))
+    res = await s.execute(select(UserStateOrm).filter(*where))
     user_state = res.scalar_one_or_none()
     if not user_state:
         await __create_user_state(s, user_data)
-        res = await s.execute(select(UserState))
+        res = await s.execute(select(UserStateOrm).filter(*where))
         user_state = res.scalar_one_or_none()
     return user_state
 

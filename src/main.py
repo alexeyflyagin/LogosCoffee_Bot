@@ -18,4 +18,5 @@ async def main():
 
 
 if __name__ == '__main__':
+    # migrations.upgrade_head()
     asyncio.run(main())
