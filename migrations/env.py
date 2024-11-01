@@ -4,8 +4,8 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
-from src.data.services.logos_coffee_service.models import *
-from src.config import DB_URL
+from data.services.models import *
+from config import DB_URL
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

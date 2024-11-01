@@ -1,6 +1,7 @@
+from loguru import logger
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
-from src import config
+import config
 
 
 class LogosCoffeeDatabase:
@@ -8,11 +9,9 @@ class LogosCoffeeDatabase:
         self.engine = create_async_engine(url)
         self.session_factory = async_sessionmaker(self.engine)
 
-    async def connect(self):
-        self.engine.begin()
-
     async def disconnect(self):
         await self.engine.dispose()
+        logger.info(f"Disconnected from the database.")
 
 
 database = LogosCoffeeDatabase(config.DB_URL)

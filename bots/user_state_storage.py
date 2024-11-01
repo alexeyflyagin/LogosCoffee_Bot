@@ -1,9 +1,8 @@
 from typing import Dict, Any, Optional
 
 from aiogram.fsm.storage.base import BaseStorage, StorageKey, StateType
-from src.data.services.logos_coffee_service import user_state_service as service
-from src.data.services.logos_coffee_service.database import database
-from src.data.services.logos_coffee_service.user_state_service import UserData
+from data.services.user_state import user_state_service as service
+from data.services.user_state.user_state_service import UserData
 
 
 def get_user_data_from_key_storage(key: StorageKey):
@@ -31,7 +30,7 @@ class UserStateStorage(BaseStorage):
         return res
 
     async def close(self) -> None:
-        await database.disconnect()
+        pass
 
 
 storage = UserStateStorage()

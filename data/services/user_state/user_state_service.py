@@ -1,6 +1,6 @@
 from dataclasses import dataclass
-from src.data.services.logos_coffee_service.database import database
-from src.data.services.logos_coffee_service.models import UserStateOrm
+from data.services.database import database
+from data.services.models import UserStateOrm
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
