@@ -3,9 +3,9 @@ import sys
 from asyncio import CancelledError
 
 from loguru import logger
-from bots.admin_bot import admin_bot
-from bots.employee_bot import employee_bot
-from bots.client_bot import client_bot
+from presentation.admin_bot import admin_bot
+from presentation.employee_bot import employee_bot
+from presentation.client_bot import client_bot
 from data.services.database import database
 
 async def main():
