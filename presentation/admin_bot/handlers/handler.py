@@ -16,7 +16,7 @@ TOKEN = "token"
 async def start_handler(msg: Message, state: FSMContext, command: CommandObject):
     token = command.args
     if token is None:
-        await msg.answer(strings.TOKEN_WAS_NOT_ENTERED)
+        await msg.answer(strings.LOG_IN__TOKEN_WAS_NOT_ENTERED)
         return
     try:
         await service.log_in(token)
@@ -24,6 +24,6 @@ async def start_handler(msg: Message, state: FSMContext, command: CommandObject)
         await state.set_state(MainStates.Main)
         await msg.answer(strings.LOG_IN__SUCCESSFUL)
     except InvalidToken:
-        await msg.answer(strings.INVALID_TOKEN)
+        await msg.answer(strings.LOG_IN__INVALID_TOKEN)
     except (DatabaseError, UnknownError):
         await msg.answer(strings.UNKNOWN_ERROR)

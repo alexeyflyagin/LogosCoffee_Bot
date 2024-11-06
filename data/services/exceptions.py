@@ -20,3 +20,6 @@ class UnknownError(LCException):
     def __init__(self, e: Exception):
         super().__init__(f"Occurred an unexpected error: {e}")
 
+class TokenGenerateError(LCException):
+    def __init__(self):
+        super().__init__("Token generation was wrong")

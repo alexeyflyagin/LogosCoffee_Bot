@@ -1,11 +1,28 @@
 from aiogram import Router
-from aiogram.filters import Command
+from aiogram.filters import Command, CommandObject
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
+
+from data.services.employee_service import employee_service as service
+from data.services.exceptions import *
+from presentation import strings
+from presentation.employee_bot.constants import *
+from presentation.employee_bot.states import *
 
 router = Router()
 
 @router.message(Command("start"))
-async def start_handler(msg: Message, state: FSMContext):
-    await state.set_state(None)
-    await msg.answer("Started")
+async def start_handler(msg: Message, state: FSMContext, command: CommandObject):
+    token = command.args
+    if token is None:
+        await msg.answer(strings.LOG_IN__TOKEN_WAS_NOT_ENTERED)
+        return
+    try:
+        await service.log_in(token)
+        await state.set_data({TOKEN: token})
+        await state.set_state(MainStates.Main)
+        await msg.answer(strings.LOG_IN__SUCCESSFUL)
+    except InvalidToken:
+        await msg.answer(strings.LOG_IN__INVALID_TOKEN)
+    except (DatabaseError, UnknownError):
+        await msg.answer(strings.UNKNOWN_ERROR)

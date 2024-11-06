@@ -6,13 +6,13 @@ from typeguard import typechecked
 
 from data.services.database import database
 from data.services.exceptions import *
-from data.services.models import *
+from data.services.models import EmployeeAccountOrm
 
 @typechecked
 async def log_in(token: str):
     try:
         async with database.session_factory() as s:
-            query = await s.execute(select(AdminAccountOrm).filter(AdminAccountOrm.token == token))
+            query = await s.execute(select(EmployeeAccountOrm).filter(EmployeeAccountOrm.token == token))
             account = query.scalars().first()
             if account is None:
                 raise InvalidToken(token)
@@ -25,5 +25,3 @@ async def log_in(token: str):
     except Exception as e:
         logger.exception(e)
         raise UnknownError(e)
-
-
