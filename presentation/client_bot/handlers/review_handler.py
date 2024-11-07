@@ -10,26 +10,26 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, ReplyKeyboardRemove
 
 from presentation.checks import check_content_type, ContentTypeException
-from presentation.client_bot import command_strings
-from presentation.client_bot.handlers.utils import reset_state, get_token, invalid_token_error
+from presentation.client_bot.handlers.utils import reset_state, get_token, invalid_token_error, unknown_error
 from presentation.client_bot.states import *
+from presentation.strings_builder import random_str
 
 router = Router()
 
 
-@router.message(MainStates.Main, F.text == command_strings.MAKE_REVIEW)
+@router.message(MainStates.Main, F.text == strings.BTN.WRITE_REVIEW)
 async def start_make_review_handler(msg: Message, state: FSMContext):
     token = await get_token(state)
     try:
         await service.can_make_review(token)
-        await msg.answer(strings.CLIENT__REVIEW__ENTER_TEXT, reply_markup=ReplyKeyboardRemove())
+        await msg.answer(strings.CLIENT.REVIEW.ENTER_REVIEW_CONTENT, reply_markup=ReplyKeyboardRemove())
         await state.set_state(EnterReviewStates.EnterText)
     except CooldownError:
-        await msg.answer(strings.CLIENT__REVIEW__COOLDOWN_ERROR)
+        await msg.answer(random_str(strings.CLIENT.REVIEW.REVIEW__COOLDOWN_ERROR))
     except InvalidToken:
         await invalid_token_error(msg, state)
     except (DatabaseError, UnknownError):
-        await msg.answer(strings.UNKNOWN_ERROR)
+        await unknown_error(msg, state)
 
 @router.message(EnterReviewStates.EnterText)
 async def content_review_handler(msg: Message, state: FSMContext):
@@ -37,14 +37,12 @@ async def content_review_handler(msg: Message, state: FSMContext):
     try:
         check_content_type(msg, ContentType.TEXT)
         await service.make_review(token, msg.text)
-        await reset_state(msg, state, strings.CLIENT__REVIEW__ANSWER)
+        await reset_state(msg, state, random_str(strings.CLIENT.REVIEW.SUCCESSFUL))
     except CooldownError:
-        await msg.answer(strings.CLIENT__REVIEW__COOLDOWN_ERROR)
-    except EmptyTextError:
-        await msg.answer(strings.CLIENT__REVIEW__EMPTY_TEXT_ERROR)
+        await msg.answer(random_str(strings.CLIENT.REVIEW.REVIEW__COOLDOWN_ERROR))
     except ContentTypeException as e:
         await msg.answer(e.msg)
     except InvalidToken:
         await invalid_token_error(msg, state)
-    except (DatabaseError, UnknownError):
-        await msg.answer(strings.UNKNOWN_ERROR)
+    except (DatabaseError, UnknownError, EmptyTextError):
+        await unknown_error(msg, state)

@@ -77,7 +77,7 @@ async def log_in(phone_number: str) -> ClientAuthorizationData:
             s.add(new_client)
             await s.commit()
             return ClientAuthorizationData(token=token)
-    except SQLAlchemyError as e:
+    except (InvalidToken, SQLAlchemyError) as e:
         await s.rollback()
         logger.error(e)
         raise DatabaseError(e)
@@ -93,7 +93,7 @@ async def can_make_review(token: str):
         async with database.session_factory() as s:
             account = await __validate_token(s, token)
             await __can_make_review(s, account)
-    except CooldownError as e:
+    except (InvalidToken, CooldownError) as e:
         logger.warning(e)
         raise
     except SQLAlchemyError as e:

@@ -13,12 +13,12 @@ router = Router()
 
 @router.message(State(None))
 async def start_handler(msg: Message, state: FSMContext):
-    await msg.answer(strings.CLIENT_URLS)
-    await msg.answer(strings.CLIENT_AUTHORIZE_STATE1_MSG, reply_markup=keyboards.AUTHORIZATION_KEYBOARD)
+    await msg.answer(strings.CLIENT.LINKS)
+    await msg.answer(strings.CLIENT.AUTHORIZATION.PRESS_BTN, reply_markup=keyboards.AUTHORIZATION_KEYBOARD)
     await state.set_state(LoginStates.PressButton)
 
 
 @router.message(EnterReviewStates(), Command(commands.CANCEL_COMMAND))
 async def cancel_handler(msg: Message, state: FSMContext):
-    await reset_state(msg, state, strings.CANCEL_ACTION)
+    await reset_state(msg, state, strings.GENERAL.ACTION_CANCELED)
 
