@@ -41,6 +41,8 @@ class BTN(StrGroup):
 class GENERAL(StrGroup):
     ACTION_CANCELED = "Действие отменено 👌"
 
+    CANCEL_ACTION = "Отменить дейстиве - /cancel"
+
     SELECT_ACTION = "Выберите действие."
 
     class LOGIN(StrGroup):
@@ -85,8 +87,8 @@ class CLIENT(StrGroup):
 
     class REVIEW(StrGroup):
         ENTER_REVIEW_CONTENT = dedent(f"""\
-            Введите текст отзыва ✍️
-            {i('(Отзыв будет отправлен анонимно)')}
+            Введите текст отзыва ✍️ {i('(Отзыв будет отправлен анонимно)')}
+            {GENERAL.CANCEL_ACTION}
         """)
 
         class REVIEW__COOLDOWN_ERROR(StrGroup):

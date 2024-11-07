@@ -43,7 +43,7 @@ async def __validate_token(s: AsyncSession, token: str | None) -> ClientAccountO
 async def __can_make_review(s: AsyncSession, account: ClientAccountOrm):
     if account.date_last_review is not None:
         delta_time = datetime.now() - account.date_last_review
-        if delta_time < timedelta(days=1):
+        if delta_time < timedelta(hours=1):
             raise CooldownError(delta_time)
 
 
