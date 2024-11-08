@@ -20,7 +20,7 @@ async def start_handler(msg: Message, state: FSMContext, command: CommandObject)
         await msg.answer(strings.GENERAL.LOGIN.TOKEN_WAS_NOT_ENTERED)
         return
     try:
-        await admin_service.login(token)
+        await admin_service.login(41)
         await state.set_data({TOKEN: token})
         await state.set_state(MainStates.Main)
         await msg.answer(random_str(strings.GENERAL.LOGIN.SUCCESSFUL))

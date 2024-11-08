@@ -14,8 +14,7 @@ class EmployeeServiceImpl(EmployeeService):
     def __init__(self, session_manager: SessionManager):
         self.__session_manager = session_manager
 
-
-    async def login(self, token: str):
+    async def login(self, token: str | None):
         try:
             async with self.__session_manager.get_session() as s:
                 query = await s.execute(select(EmployeeAccountOrm).filter(EmployeeAccountOrm.token == token))

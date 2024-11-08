@@ -48,7 +48,6 @@ class ClientServiceImpl(ClientService):
             if delta_time < timedelta(hours=1):
                 raise CooldownError(delta_time)
 
-
     async def validate_token(self, token: str | None):
         try:
             async with self.__session_manager.get_session() as s:
@@ -84,7 +83,7 @@ class ClientServiceImpl(ClientService):
             logger.exception(e)
             raise UnknownError(e)
 
-    async def can_make_review(self, token: str):
+    async def can_make_review(self, token: str | None):
         try:
             async with self.__session_manager.get_session() as s:
                 account = await self.__validate_token(s, token)
@@ -99,7 +98,8 @@ class ClientServiceImpl(ClientService):
             logger.exception(e)
             raise UnknownError(e)
 
-    async def make_review(self, token: str, text: str):
+
+    async def make_review(self, token: str | None, text: str):
         try:
             async with self.__session_manager.get_session() as s:
                 account = await self.__validate_token(s, token)

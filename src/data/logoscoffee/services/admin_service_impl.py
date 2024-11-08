@@ -15,7 +15,7 @@ class AdminServiceImpl(AdminService):
         self.__session_manager = session_manager
 
 
-    async def login(self, token: str):
+    async def login(self, token: str | None):
         try:
             async with self.__session_manager.get_session() as s:
                 query = await s.execute(select(AdminAccountOrm).filter(AdminAccountOrm.token == token))

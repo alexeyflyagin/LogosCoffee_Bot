@@ -31,7 +31,6 @@ class UserStateServiceImpl(UserStateService):
             user_state = res.scalar_one_or_none()
         return user_state
 
-
     async def set_state(self, user_data: UserData, state: str | None):
         async with self.__session_manager.get_session() as s:
             user_state = await self.__get_user_state_or_create(s, user_data)
