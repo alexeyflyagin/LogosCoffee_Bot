@@ -9,9 +9,11 @@ from typing import Sequence, Union
 
 from alembic import op
 import sqlalchemy as sa
+from sqlalchemy import insert
 from sqlalchemy.dialects import mysql
 
-import config
+from src import config
+from src.data.logoscoffee.db.models import EmployeeAccountOrm
 
 # revision identifiers, used by Alembic.
 revision: str = '0fe70f86cc11'
@@ -28,7 +30,9 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint('id'),
         sa.UniqueConstraint('token')
     )
-    op.execute(f"INSERT INTO employee_account (token) VALUES ('{config.DEFAULT_EMPLOYEE_TOKEN_FOR_LOGIN}')")
+    op.execute(
+        insert(EmployeeAccountOrm).values(token=config.DEFAULT_EMPLOYEE_TOKEN_FOR_LOGIN)
+    )
     # ### end Alembic commands ###
 
 
