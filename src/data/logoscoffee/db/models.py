@@ -1,25 +1,12 @@
 from datetime import datetime
-from enum import unique
 
-from sqlalchemy import BIGINT, JSON, TypeDecorator, Integer
+from sqlalchemy import BIGINT, JSON, DateTime
 from sqlalchemy.dialects.mysql import VARCHAR
 from sqlalchemy.orm import declarative_base, Mapped
 from sqlalchemy.orm import mapped_column
 
+
 Base = declarative_base()
-
-class UnixTimestamp(TypeDecorator):
-    impl = Integer
-
-    def process_bind_param(self, value, dialect):
-        if isinstance(value, datetime):
-            return int(value.timestamp())
-        return value
-
-    def process_result_value(self, value, dialect):
-        if value is not None:
-            return datetime.fromtimestamp(value)
-        return value
 
 
 class UserStateOrm(Base):
@@ -46,12 +33,12 @@ class ClientAccountOrm(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     token: Mapped[str] = mapped_column(VARCHAR(8), unique=True)
     phone_number: Mapped[str] = mapped_column(VARCHAR, unique=True)
-    date_registration: Mapped[datetime] = mapped_column(UnixTimestamp)
+    date_registration: Mapped[datetime] = mapped_column()
     loyalty_points: Mapped[int] = mapped_column(default=0)
-    date_last_review: Mapped[datetime] = mapped_column(UnixTimestamp)
+    date_last_review: Mapped[datetime] = mapped_column(nullable=True)
 
 class ReviewOrm(Base):
     __tablename__ = "review"
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    date_create: Mapped[datetime] = mapped_column(UnixTimestamp)
+    date_create: Mapped[datetime] = mapped_column()
     text_content: Mapped[str] = mapped_column(VARCHAR)

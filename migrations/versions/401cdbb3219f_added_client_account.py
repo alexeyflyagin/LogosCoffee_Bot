@@ -24,9 +24,9 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('token', mysql.VARCHAR(length=8), nullable=False),
     sa.Column('phone_number', mysql.VARCHAR(), nullable=False),
-    sa.Column('date_registration', sa.Integer(), nullable=False),
+    sa.Column('date_registration', sa.DateTime(), nullable=False),
     sa.Column('loyalty_points', sa.Integer(), default=0, nullable=False),
-    sa.Column('date_last_review', sa.Integer(), nullable=True),
+    sa.Column('date_last_review', sa.DateTime(), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('phone_number'),
     sa.UniqueConstraint('token')
