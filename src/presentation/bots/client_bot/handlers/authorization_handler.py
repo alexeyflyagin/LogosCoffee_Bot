@@ -3,8 +3,8 @@ from aiogram.enums import ContentType
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
-from src import di
 from src.data.logoscoffee.exceptions import UnknownError, DatabaseError
+from src.data.logoscoffee.interfaces.client_service import ClientService
 from src.presentation.resources import strings
 from src.presentation.bots.client_bot import keyboards
 from src.presentation.bots.client_bot.constants import TOKEN
@@ -13,7 +13,7 @@ from src.presentation.bots.client_bot.states import LoginStates, MainStates
 from src.presentation.resources.strings_builder.strings_builder import random_str
 
 router = Router()
-client_service = di.container.client_service()
+client_service: ClientService
 
 async def send_authorization_request_msg(msg: Message):
     await msg.answer(strings.CLIENT.AUTHORIZATION.PRESS_BTN, reply_markup=keyboards.AUTHORIZATION_KEYBOARD)

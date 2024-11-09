@@ -3,16 +3,15 @@ from aiogram.filters import Command, CommandObject
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
-from src import di
-from src.data.logoscoffee.services import employee_service_impl as service
 from src.data.logoscoffee.exceptions import *
+from src.data.logoscoffee.interfaces.employee_service import EmployeeService
 from src.presentation.resources import strings
 from src.presentation.bots.employee_bot.constants import *
 from src.presentation.bots.employee_bot.states import *
 from src.presentation.resources.strings_builder.strings_builder import random_str
 
 router = Router()
-employee_service = di.container.employee_service()
+employee_service: EmployeeService
 
 @router.message(Command("start"))
 async def start_handler(msg: Message, state: FSMContext, command: CommandObject):

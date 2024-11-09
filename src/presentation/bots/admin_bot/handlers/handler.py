@@ -3,15 +3,15 @@ from aiogram.filters import Command, CommandObject
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
-from src import di
 from src.data.logoscoffee.exceptions import InvalidToken, DatabaseError, UnknownError
+from src.data.logoscoffee.interfaces.admin_service import AdminService
 from src.presentation.bots.admin_bot.constants import TOKEN
 from src.presentation.resources import strings
 from src.presentation.bots.admin_bot.states import *
 from src.presentation.resources.strings_builder.strings_builder import random_str
 
 router = Router()
-admin_service = di.container.admin_service()
+admin_service: AdminService
 
 @router.message(Command("start"))
 async def start_handler(msg: Message, state: FSMContext, command: CommandObject):

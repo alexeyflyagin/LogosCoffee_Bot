@@ -1,6 +1,5 @@
 from aiogram.filters import Command
 
-from src import di
 from src.presentation.resources import strings
 from aiogram import Router
 from aiogram.fsm.context import FSMContext

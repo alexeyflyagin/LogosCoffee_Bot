@@ -2,8 +2,8 @@ from aiogram.enums import ContentType
 
 from aiogram import F
 
-from src import di
 from src.data.logoscoffee.exceptions import DatabaseError, UnknownError, EmptyTextError, CooldownError, InvalidToken
+from src.data.logoscoffee.interfaces.client_service import ClientService
 from src.presentation.resources import strings
 from aiogram import Router
 from aiogram.fsm.context import FSMContext
@@ -16,7 +16,7 @@ from src.presentation.resources.strings_builder.strings_builder import random_st
 
 
 router = Router()
-client_service = di.container.client_service()
+client_service: ClientService
 
 
 @router.message(MainStates.Main, F.text == strings.BTN.WRITE_REVIEW)
