@@ -23,9 +23,11 @@ def client_handlers__inject():
     review_handler.client_service = di.client_service()
 
 def admin_handlers__inject():
-    from src.presentation.bots.admin_bot.handlers import handler
+    from src.presentation.bots.admin_bot.handlers import handler, end_handler, promotional_offer_handler
     handler.admin_service = di.admin_service()
     handler.event_service = di.event_service()
+    promotional_offer_handler.admin_service = di.admin_service()
+    end_handler.admin_service = di.admin_service()
 
 def employee_handlers__inject():
     from src.presentation.bots.employee_bot.handlers import handler

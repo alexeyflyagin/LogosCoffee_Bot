@@ -40,3 +40,7 @@ class AlreadySubscribedError(LCException):
 class AlreadyUnsubscribedError(LCException):
     def __init__(self, user_state_id: int, event_name: str):
         super().__init__(f"Already is unsubscribed to this event('{event_name}'): {user_state_id}")
+
+class PromotionalOfferDoesNotExist(LCException):
+    def __init__(self, **kwargs):
+        super().__init__(f"Promotional offer ({kwargs}) does not exist")

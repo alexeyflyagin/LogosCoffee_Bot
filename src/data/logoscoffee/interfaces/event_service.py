@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from src.data.logoscoffee.entities.event_entities import EventSubscriberEntity
+from src.data.logoscoffee.entities.orm_entities import EventSubscriberEntity
 
 
 class EventService(ABC):

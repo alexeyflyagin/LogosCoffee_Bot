@@ -54,4 +54,10 @@ class EventSubscriberOrm(Base):
 
     user_state = relationship("UserStateOrm")
 
-
+class PromotionalOfferOrm(Base):
+    __tablename__ = "promotional_offer"
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    date_create: Mapped[datetime] = mapped_column()
+    date_start: Mapped[datetime] = mapped_column(nullable=True)
+    text_content: Mapped[str] = mapped_column(nullable=True)
+    preview_photo_url: Mapped[str] = mapped_column(nullable=True)

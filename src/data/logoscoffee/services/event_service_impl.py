@@ -6,7 +6,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import joinedload
 
 from src.data.logoscoffee.db.models import EventSubscriberOrm, UserStateOrm
-from src.data.logoscoffee.entities.event_entities import EventSubscriberEntity, UserStateEntity
+from src.data.logoscoffee.entities.orm_entities import EventSubscriberEntity, UserStateEntity
 from src.data.logoscoffee.exceptions import DatabaseError, UnknownError, AlreadySubscribedError, \
     AlreadyUnsubscribedError
 from src.data.logoscoffee.interfaces.event_service import EventService
