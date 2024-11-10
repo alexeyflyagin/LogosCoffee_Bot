@@ -1,8 +1,8 @@
 from datetime import datetime
 
-from sqlalchemy import BIGINT, JSON, DateTime
+from sqlalchemy import BIGINT, JSON, DateTime, ForeignKey
 from sqlalchemy.dialects.mysql import VARCHAR
-from sqlalchemy.orm import declarative_base, Mapped
+from sqlalchemy.orm import declarative_base, Mapped, relationship
 from sqlalchemy.orm import mapped_column
 
 
@@ -17,6 +17,8 @@ class UserStateOrm(Base):
     chat_id: Mapped[int] = mapped_column(BIGINT)
     state: Mapped[str] = mapped_column(nullable=True)
     data: Mapped[dict] = mapped_column(JSON)
+
+    event_subscribers = relationship("EventSubscriberOrm", back_populates="user_state", cascade="all, delete")
 
 class AdminAccountOrm(Base):
     __tablename__ = "admin_account"
@@ -42,3 +44,14 @@ class ReviewOrm(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     date_create: Mapped[datetime] = mapped_column()
     text_content: Mapped[str] = mapped_column(VARCHAR)
+
+class EventSubscriberOrm(Base):
+    __tablename__ = "event_subscriber"
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    event_name: Mapped[str] = mapped_column()
+    date_create: Mapped[datetime] = mapped_column()
+    user_state_id: Mapped[int] = mapped_column(ForeignKey("user_state.id", ondelete="CASCADE"))
+
+    user_state = relationship("UserStateOrm")
+
+

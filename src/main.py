@@ -1,6 +1,5 @@
 import asyncio
 import sys
-from asyncio import CancelledError
 
 from loguru import logger
 
@@ -16,9 +15,12 @@ async def main():
             di.client_bot().run(),
             di.employee_bot().run(),
         )
-    except CancelledError:
+    finally:
         await di.session_manager().disconnect()
 
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        pass

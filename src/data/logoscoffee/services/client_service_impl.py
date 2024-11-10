@@ -43,10 +43,11 @@ class ClientServiceImpl(ClientService):
         return res
 
     async def __can_make_review(self, account: ClientAccountOrm):
-        if account.date_last_review is not None:
-            delta_time = datetime.now() - account.date_last_review
-            if delta_time < timedelta(hours=1):
-                raise CooldownError(delta_time)
+        pass
+        # if account.date_last_review is not None:
+        #     delta_time = datetime.now() - account.date_last_review
+        #     if delta_time < timedelta(hours=1):
+        #         raise CooldownError(delta_time)
 
     async def validate_token(self, token: str | None):
         try:

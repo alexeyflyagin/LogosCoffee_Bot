@@ -1,8 +1,12 @@
+import asyncio
 from asyncio import CancelledError
+from datetime import datetime
+from html import escape
 
 from aiogram import Bot, Dispatcher
 from loguru import logger
 
+from src.data.logoscoffee.exceptions import UnknownError, DatabaseError
 from src.presentation.bots.admin_bot.handlers import handler
 from src.presentation.bots.bot import BaseBot
 
@@ -18,7 +22,26 @@ class AdminBot(BaseBot):
             self.dp.include_routers(handler.router)
             await self.bot.delete_webhook(drop_pending_updates=True)
             logger.info(f"Admin bot is started.")
-            await self.dp.start_polling(self.bot),
+            await asyncio.gather(
+                self.dp.start_polling(self.bot),
+                self.__new_review_polling(),
+            )
         except CancelledError:
             logger.info(f"Admin bot is finished.")
+
+    async def __new_review_polling(self):
+        last_update_time = datetime.now()
+        while True:
+            try:
+                reviews = await handler.admin_service.get_new_reviews(last_update_time)
+                last_update_time = datetime.now()
+                if reviews:
+                    subscribers = await handler.event_service.get_subscribers("new_review")
+                    for subscriber in subscribers:
+                        for review in reviews:
+                            await self.bot.send_message(subscriber.user_state.chat_id, escape(review.text_content))
+                    logger.debug(f'{reviews}')
+            except (DatabaseError, UnknownError, Exception):
+                pass
+            await asyncio.sleep(1)
 

@@ -8,6 +8,7 @@ from src.data.logoscoffee.db.session_manager_impl import SessionManagerImpl
 from src.data.logoscoffee.services.admin_service_impl import AdminServiceImpl
 from src.data.logoscoffee.services.client_service_impl import ClientServiceImpl
 from src.data.logoscoffee.services.employee_service_impl import EmployeeServiceImpl
+from src.data.logoscoffee.services.event_service_impl import EventServiceImpl
 from src.data.logoscoffee.services.user_state_service_impl import UserStateServiceImpl
 from src.presentation.bots.admin_bot.bot import AdminBot
 from src.presentation.bots.client_bot.bot import ClientBot
@@ -24,6 +25,7 @@ def client_handlers__inject():
 def admin_handlers__inject():
     from src.presentation.bots.admin_bot.handlers import handler
     handler.admin_service = di.admin_service()
+    handler.event_service = di.event_service()
 
 def employee_handlers__inject():
     from src.presentation.bots.employee_bot.handlers import handler
@@ -58,6 +60,11 @@ class Container(containers.DeclarativeContainer):
 
     user_state_service = providers.Factory(
         UserStateServiceImpl,
+        session_manager=session_manager,
+    )
+
+    event_service = providers.Factory(
+        EventServiceImpl,
         session_manager=session_manager,
     )
 

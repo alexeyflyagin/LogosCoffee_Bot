@@ -32,3 +32,11 @@ class CooldownError(LCException):
     def __init__(self, left_time: timedelta):
         super().__init__(f"Action attempted before cooldown period has elapsed.")
         self.left_time = left_time
+
+class AlreadySubscribedError(LCException):
+    def __init__(self, user_state_id: int, event_name: str):
+        super().__init__(f"Already is subscribed to this event('{event_name}'): {user_state_id}")
+
+class AlreadyUnsubscribedError(LCException):
+    def __init__(self, user_state_id: int, event_name: str):
+        super().__init__(f"Already is unsubscribed to this event('{event_name}'): {user_state_id}")
