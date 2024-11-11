@@ -5,8 +5,6 @@ from aiogram.filters.callback_data import CallbackData
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, ReplyKeyboardRemove, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 from aiogram.utils.keyboard import InlineKeyboardBuilder
-from loguru import logger
-from mypy.dmypy.client import action
 
 from src.data.logoscoffee.exceptions import InvalidToken, DatabaseError, UnknownError, PromotionalOfferDoesNotExist
 from src.data.logoscoffee.interfaces.admin_service import AdminService
@@ -29,6 +27,7 @@ class PromotionalOfferCD(CallbackData, prefix=constants.CD_PREFIX__PROMOTIONAL_O
 
     class Action:
         PUBLISH = 0
+        DELETE = 1
 
 
 def promotional_offer_markup(token: str, offer_id: int) -> InlineKeyboardMarkup:

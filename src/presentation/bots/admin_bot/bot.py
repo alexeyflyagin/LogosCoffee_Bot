@@ -38,12 +38,10 @@ class AdminBot(BaseBot):
                 reviews = await handler.admin_service.get_new_reviews(last_update_time)
                 last_update_time = datetime.now()
                 if reviews:
-                    subscribers = await handler.event_service.get_subscribers(constants.EVENT_NEW_REVIEW)
-                    check_time = datetime.now()
-                    for subscriber in subscribers:
-                        for review in reviews:
-                            for i in range(50):
-                                await self.bot.send_message(subscriber.user_state.chat_id, f"{i} - " + escape(review.text_content))
+                    subscribers = await handler.event_service.get_subscribers(constants.EVENT__NEW_REVIEW)
+                    for review in reviews:
+                        for subscriber in subscribers:
+                            await self.bot.send_message(subscriber.user_state.chat_id, escape(review.text_content))
                     logger.debug(f'{reviews}')
             except (DatabaseError, UnknownError, Exception):
                 pass

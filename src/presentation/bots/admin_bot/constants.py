@@ -1,4 +1,4 @@
 TOKEN = "token"
-EVENT_NEW_REVIEW = "new_review"
+EVENT__NEW_REVIEW = "new_review"
 
 CD_PREFIX__PROMOTIONAL_OFFER = "pr_o"

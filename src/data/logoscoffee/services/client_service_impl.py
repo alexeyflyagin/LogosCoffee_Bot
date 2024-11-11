@@ -1,16 +1,16 @@
 import random
 import string
 
-from asyncpg.pgproto.pgproto import timedelta
 from loguru import logger
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.data.logoscoffee.checks import check_text_is_not_empty
+from src.data.logoscoffee.entities.orm_entities import PromotionalOfferEntity
 from src.data.logoscoffee.interfaces.client_service import ClientAuthorizationData, ClientService
 from src.data.logoscoffee.exceptions import *
-from src.data.logoscoffee.db.models import ClientAccountOrm, ReviewOrm
+from src.data.logoscoffee.db.models import ClientAccountOrm, ReviewOrm, PromotionalOfferOrm
 from src.data.logoscoffee.session_manager import SessionManager
 
 TOKEN_SYMBOLS = string.ascii_letters + string.digits + "-_"
@@ -48,6 +48,22 @@ class ClientServiceImpl(ClientService):
         #     delta_time = datetime.now() - account.date_last_review
         #     if delta_time < timedelta(hours=1):
         #         raise CooldownError(delta_time)
+
+    async def get_new_offers(self, last_update_time) -> list[PromotionalOfferEntity]:
+        try:
+            async with self.__session_manager.get_session() as s:
+                res = await s.execute(select(PromotionalOfferOrm).filter(PromotionalOfferOrm.date_start >= last_update_time))
+                offers = res.scalars().all()
+                entities = [PromotionalOfferEntity.model_validate(i) for i in offers]
+                return entities
+        except SQLAlchemyError as e:
+            logger.error(e)
+            raise DatabaseError(e)
+        except Exception as e:
+            logger.exception(e)
+            raise UnknownError(e)
+
+
 
     async def validate_token(self, token: str | None):
         try:
