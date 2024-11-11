@@ -40,7 +40,6 @@ class ClientBot(BaseBot):
             try:
                 offers = await authorization_handler.client_service.get_new_offers(last_update_time)
                 last_update_time = datetime.now()
-                logger.debug(offers)
                 if offers:
                     subscribers = await authorization_handler.event_service.get_subscribers(constants.EVENT__NEW_OFFER)
                     for offer in offers:

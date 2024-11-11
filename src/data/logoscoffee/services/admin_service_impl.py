@@ -118,6 +118,23 @@ class AdminServiceImpl(AdminService):
             logger.exception(e)
             raise UnknownError(e)
 
+    async def delete_promotional_offer(self, token: str | None, offer_id: int):
+        try:
+            async with self.__session_manager.get_session() as s:
+                await self.__validate_token(s, token)
+                offer = await self.__get_promotional_offer(s, offer_id)
+                await s.delete(offer)
+                await s.commit()
+        except (PromotionalOfferDoesNotExist, InvalidToken) as e:
+            logger.warning(e)
+            raise
+        except SQLAlchemyError as e:
+            logger.error(e)
+            raise DatabaseError(e)
+        except Exception as e:
+            logger.exception(e)
+            raise UnknownError(e)
+
 
     async def start_promotional_offer(self, token: str | None, offer_id: int):
         try:

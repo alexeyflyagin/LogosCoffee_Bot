@@ -33,7 +33,9 @@ class PromotionalOfferCD(CallbackData, prefix=constants.CD_PREFIX__PROMOTIONAL_O
 def promotional_offer_markup(token: str, offer_id: int) -> InlineKeyboardMarkup:
     ikb = InlineKeyboardBuilder()
     publish_data = PromotionalOfferCD(token=token, offer_id=offer_id, action=PromotionalOfferCD.Action.PUBLISH).pack()
+    delete_data = PromotionalOfferCD(token=token, offer_id=offer_id, action=PromotionalOfferCD.Action.DELETE).pack()
     ikb.add(InlineKeyboardButton(text=strings.BTN.PUBLISH, callback_data=publish_data))
+    ikb.add(InlineKeyboardButton(text=strings.BTN.DELETE, callback_data=delete_data))
     return ikb.as_markup()
 
 
@@ -77,10 +79,16 @@ async def make_promotional_offer__content__handler(msg: Message, state: FSMConte
 @router.callback_query(PromotionalOfferCD.filter())
 async def promotional_offer_callback(callback: CallbackQuery, state: FSMContext):
     try:
+        token = await get_token(state)
+        await admin_service.validate_token(token)
         data = PromotionalOfferCD.unpack(callback.data)
         if data.action == data.Action.PUBLISH:
             await admin_service.start_promotional_offer(data.token, data.offer_id)
-            await callback.answer("ок")
+            await callback.message.edit_text(callback.message.text + "\n\n(опубликованно)", reply_markup=None)
+            await callback.answer("успешно опубликовано") # TODO поменять надписи
+        elif data.action == data.Action.DELETE:
+            await admin_service.delete_promotional_offer(token, data.offer_id)
+            await callback.answer("успешно удаленно")
     except PromotionalOfferDoesNotExist:
         await callback.answer("Акция не найдена.")
     except InvalidToken:

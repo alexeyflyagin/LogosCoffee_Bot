@@ -38,6 +38,7 @@ class BTN(StrGroup):
     WRITE_PROMOTIONAL_OFFER = "Написать акционное письмо" # TODO
     READ_REVIEWS = "Прочитать отзывы" # TODO
     PUBLISH = "Опубликовать" # TODO
+    DELETE = "Удалить" # TODO
 
 
 

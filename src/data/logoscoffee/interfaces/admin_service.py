@@ -27,5 +27,9 @@ class AdminService(ABC):
         pass
 
     @abstractmethod
+    async def delete_promotional_offer(self, token: str | None, offer_id: int):
+        pass
+
+    @abstractmethod
     async def start_promotional_offer(self, token: str | None, promotional_offer_id: int):
         pass
