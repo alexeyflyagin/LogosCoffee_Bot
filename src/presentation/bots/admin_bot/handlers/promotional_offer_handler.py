@@ -45,7 +45,7 @@ async def write_promotional_offer_handler(msg: Message, state: FSMContext):
         token = await get_token(state)
         await admin_service.validate_token(token)
         await state.set_state(MakePromotionalOffer.Content)
-        await msg.answer(strings.ADMIN.MAKE_PROMOTIONAL_OFFER.ENTER_CONTENT, reply_markup=ReplyKeyboardRemove())
+        await msg.answer(strings.ADMIN.MAKE_OFFER.ENTER_CONTENT, reply_markup=ReplyKeyboardRemove())
     except InvalidToken:
         await invalid_token_error(msg, state)
     except (DatabaseError, UnknownError):

@@ -1,6 +1,6 @@
 from textwrap import dedent
 
-from src.presentation.resources.strings_builder.strings_builder import b, i, StrGroup
+from src.presentation.resources.strings_builder.strings_builder import b, i, StrGroup, code
 
 CAFE_NAME = "LOGOSCOFFEE"
 
@@ -115,11 +115,22 @@ class CLIENT(StrGroup):
 
 class ADMIN(StrGroup):
 
-    class MAKE_PROMOTIONAL_OFFER(StrGroup):
+    class MAKE_OFFER(StrGroup):
         ENTER_CONTENT = dedent(f"""\
             Отправьте любой текст и можно ещё фотку
             {GENERAL.CANCEL_ACTION}
         """) # TODO
 
         SUCCESSFUL = "Успешно создано"
+
+    class OFFER(StrGroup):
+        class STATE(StrGroup):
+            ACTIVE = "Активна ({date})"
+            INACTIVE = "Неактивна"
+
+        MAIN = dedent(f"""\
+            Акция {code(f'#{{offer_id}}')}
+            Состояние: {{state}}
+            Создана: {{date_create}}
+        """)
 
