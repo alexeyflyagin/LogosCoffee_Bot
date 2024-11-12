@@ -1,14 +1,16 @@
+from loguru import logger
+
 from aiogram import Router
 from aiogram.filters import Command, CommandObject, CommandStart
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message
+from aiogram.types import Message, ReplyKeyboardRemove
 
-from src.data.logoscoffee.exceptions import DatabaseError, UnknownError, AlreadySubscribedError
+from src.data.logoscoffee.exceptions import DatabaseError, UnknownError, AlreadySubscribedError, InvalidKey
 from src.data.logoscoffee.interfaces.admin_service import AdminService
 from src.data.logoscoffee.interfaces.event_service import EventService
 from src.presentation.bots.admin_bot import constants, keyboards, commands
 from src.presentation.bots.admin_bot.constants import ACCOUNT_ID
-from src.presentation.bots.admin_bot.handlers.utils import reset_state
+from src.presentation.bots.admin_bot.handlers.utils import reset_state, unknown_error
 from src.presentation.resources import strings
 from src.presentation.bots.admin_bot.states import *
 from src.presentation.resources.strings_builder.strings_builder import random_str
@@ -21,7 +23,7 @@ event_service: EventService
 async def start_handler(msg: Message, state: FSMContext, command: CommandObject):
     key = command.args
     if key is None:
-        await msg.answer(strings.GENERAL.LOGIN.TOKEN_WAS_NOT_ENTERED)
+        await msg.answer(strings.GENERAL.LOGIN.KEY_WAS_NOT_ENTERED, reply_markup=ReplyKeyboardRemove())
         return
     try:
         account = await admin_service.login(key)
@@ -32,8 +34,10 @@ async def start_handler(msg: Message, state: FSMContext, command: CommandObject)
         await msg.delete()
     except AlreadySubscribedError:
         pass
+    except InvalidKey:
+        await msg.answer(text=strings.GENERAL.LOGIN.INVALID_KEY, reply_markup=ReplyKeyboardRemove())
     except (DatabaseError, UnknownError):
-        await msg.answer(random_str(strings.ERRORS.UNKNOWN))
+        await unknown_error(msg, state)
 
 @router.message(MakePromotionalOffer(), Command(commands.CANCEL_COMMAND))
 async def cancel_handler(msg: Message, state: FSMContext):

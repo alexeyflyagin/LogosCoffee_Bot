@@ -17,7 +17,7 @@ employee_service: EmployeeService
 async def start_handler(msg: Message, state: FSMContext, command: CommandObject):
     key = command.args
     if key is None:
-        await msg.answer(strings.GENERAL.LOGIN.TOKEN_WAS_NOT_ENTERED)
+        await msg.answer(strings.GENERAL.LOGIN.KEY_WAS_NOT_ENTERED)
         return
     try:
         account = await employee_service.login(key)

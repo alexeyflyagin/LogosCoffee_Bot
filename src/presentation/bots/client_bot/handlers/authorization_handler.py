@@ -5,9 +5,8 @@ from aiogram.types import Message
 
 from src.data.logoscoffee.exceptions import UnknownError, DatabaseError
 from src.data.logoscoffee.interfaces.client_service import ClientService
-from src.data.logoscoffee.interfaces.event_service import EventService
 from src.presentation.resources import strings
-from src.presentation.bots.client_bot import keyboards, constants
+from src.presentation.bots.client_bot import keyboards
 from src.presentation.bots.client_bot.constants import ACCOUNT_ID
 from src.presentation.bots.client_bot.handlers.utils import unknown_error
 from src.presentation.bots.client_bot.states import LoginStates, MainStates
@@ -15,7 +14,6 @@ from src.presentation.resources.strings_builder.strings_builder import random_st
 
 router = Router()
 client_service: ClientService
-event_service: EventService
 
 async def send_authorization_request_msg(msg: Message):
     await msg.answer(strings.CLIENT.AUTHORIZATION.PRESS_BTN, reply_markup=keyboards.AUTHORIZATION_KEYBOARD)
@@ -30,7 +28,6 @@ async def contact_handler(msg: Message, state: FSMContext):
         account = await client_service.login(msg.contact.phone_number)
         await state.set_data({ACCOUNT_ID: account.id})
         await state.set_state(MainStates.Main)
-        await event_service.subscribe(constants.EVENT__NEW_OFFER, msg.chat.id)
         await msg.answer(random_str(strings.CLIENT.AUTHORIZATION.SUCCESSFUL), reply_markup=keyboards.MAIN_KEYBOARD)
     except (DatabaseError, UnknownError):
         await unknown_error(msg, state)

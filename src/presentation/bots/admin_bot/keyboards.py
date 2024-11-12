@@ -9,7 +9,7 @@ MAIN_KEYBOARD = ReplyKeyboardMarkup(
     keyboard=[
         [KeyboardButton(text=strings.BTN.WRITE_PROMOTIONAL_OFFER)],
         [KeyboardButton(text=strings.BTN.REVIEWS)]
-    ], resize_keyboard=True
+    ], resize_keyboard=True, input_field_placeholder=strings.GENERAL.SELECT_ACTION,
 )
 
 

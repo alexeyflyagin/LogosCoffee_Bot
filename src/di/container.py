@@ -17,9 +17,9 @@ from src.presentation.user_state_storage import UserStateStorage
 
 
 def client_handlers__inject():
-    from src.presentation.bots.client_bot.handlers import authorization_handler, review_handler, end_handler
+    from src.presentation.bots.client_bot.handlers import handler,authorization_handler, review_handler, end_handler
     authorization_handler.client_service = di.client_service()
-    authorization_handler.event_service = di.event_service()
+    handler.event_service = di.event_service()
     end_handler.client_service = di.client_service()
     review_handler.client_service = di.client_service()
 

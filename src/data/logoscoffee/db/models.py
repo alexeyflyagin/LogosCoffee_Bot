@@ -23,7 +23,7 @@ class EventSubscriberOrm(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     event_name: Mapped[str] = mapped_column()
     date_create: Mapped[datetime] = mapped_column(default=datetime.now)
-    chat_id: Mapped[int] = mapped_column()
+    chat_id: Mapped[int] = mapped_column(BIGINT)
 
 
 class AdminAccountOrm(Base):

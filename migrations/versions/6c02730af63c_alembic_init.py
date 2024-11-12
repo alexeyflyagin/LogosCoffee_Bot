@@ -52,7 +52,7 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('event_name', sa.String(), nullable=False),
     sa.Column('date_create', sa.DateTime(), nullable=False),
-    sa.Column('chat_id', sa.Integer(), nullable=False),
+    sa.Column('chat_id', sa.BIGINT(), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('promotional_offer',
