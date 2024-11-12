@@ -1,5 +1,5 @@
 from aiogram import Router
-from aiogram.filters import Command, CommandObject
+from aiogram.filters import CommandObject, CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
@@ -13,18 +13,16 @@ from src.presentation.resources.strings_builder.strings_builder import random_st
 router = Router()
 employee_service: EmployeeService
 
-@router.message(Command("start"))
+@router.message(CommandStart())
 async def start_handler(msg: Message, state: FSMContext, command: CommandObject):
-    token = command.args
-    if token is None:
+    key = command.args
+    if key is None:
         await msg.answer(strings.GENERAL.LOGIN.TOKEN_WAS_NOT_ENTERED)
         return
     try:
-        await employee_service.login(token)
-        await state.set_data({TOKEN: token})
+        account = await employee_service.login(key)
+        await state.set_data({ACCOUNT_ID: account.id})
         await state.set_state(MainStates.Main)
         await msg.answer(random_str(strings.GENERAL.LOGIN.SUCCESSFUL))
-    except InvalidToken:
-        await msg.answer(strings.GENERAL.LOGIN.INVALID_TOKEN)
     except (DatabaseError, UnknownError):
         await msg.answer(random_str(strings.ERRORS.UNKNOWN))

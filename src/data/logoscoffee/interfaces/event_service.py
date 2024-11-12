@@ -10,13 +10,9 @@ class EventService(ABC):
         pass
 
     @abstractmethod
-    async def subscribe(self, event_name: str, user_state_id: int):
+    async def subscribe(self, event_name: str, chat_id: int):
         pass
 
     @abstractmethod
-    async def unsubscribe(self, event_name: str, user_state_id: int):
-        pass
-
-    @abstractmethod
-    async def get_user_state_id(self, bot_id: int, user_id: int, chat_id: int) -> int:
+    async def unsubscribe(self, event_name: str, chat_id: int):
         pass

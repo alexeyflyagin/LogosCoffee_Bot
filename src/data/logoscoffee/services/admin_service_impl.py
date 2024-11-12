@@ -4,8 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.data.logoscoffee import checks
-from src.data.logoscoffee.entities.orm_entities import PromotionalOfferEntity
+from src.data.logoscoffee.entities.orm_entities import PromotionalOfferEntity, AdminAccountEntity
 from src.data.logoscoffee.exceptions import *
 from src.data.logoscoffee.interfaces.admin_service import AdminService, ReviewEntity
 from src.data.logoscoffee.db.models import *
@@ -24,29 +23,6 @@ class AdminServiceImpl(AdminService):
             raise PromotionalOfferDoesNotExist(id=offer_id)
         return offer
 
-    async def __validate_token(self, s: AsyncSession, token: str | None) -> AdminAccountOrm:
-        if token is None:
-            raise InvalidToken(token)
-        res = await s.execute(select(AdminAccountOrm).filter(AdminAccountOrm.token == token).with_for_update())
-        res = res.scalars().first()
-        if res is None:
-            raise InvalidToken(token)
-        return res
-
-    async def validate_token(self, token: str | None):
-        try:
-            async with self.__session_manager.get_session() as s:
-                await self.__validate_token(s, token)
-        except InvalidToken as e:
-            logger.warning(e)
-            raise
-        except SQLAlchemyError as e:
-            logger.error(e)
-            raise DatabaseError(e)
-        except Exception as e:
-            logger.exception(e)
-            raise UnknownError(e)
-
     async def get_new_reviews(self, last_update: datetime) -> list[ReviewEntity]:
         try:
             async with self.__session_manager.get_session() as s:
@@ -62,14 +38,15 @@ class AdminServiceImpl(AdminService):
             raise UnknownError(e)
 
 
-    async def login(self, token: str | None):
+    async def login(self, key: str) -> AdminAccountEntity:
         try:
             async with self.__session_manager.get_session() as s:
-                query = await s.execute(select(AdminAccountOrm).filter(AdminAccountOrm.token == token))
+                query = await s.execute(select(AdminAccountOrm).filter(AdminAccountOrm.key == key))
                 account = query.scalars().first()
                 if account is None:
-                    raise InvalidToken(token)
-        except InvalidToken as e:
+                    raise InvalidKey(key)
+                return AdminAccountEntity.model_validate(account)
+        except InvalidKey as e:
             logger.warning(e)
             raise
         except SQLAlchemyError as e:
@@ -79,19 +56,15 @@ class AdminServiceImpl(AdminService):
             logger.exception(e)
             raise UnknownError(e)
 
-    async def make_promotional_offer(self, token: str | None, text_content: str | None, promotional_photo_url: str | None) -> PromotionalOfferEntity:
+    async def create_promotional_offer(self, text_content: str | None, preview_photo: str | None) -> PromotionalOfferEntity:
         try:
             async with self.__session_manager.get_session() as s:
-                await self.__validate_token(s, token)
-                offer = PromotionalOfferOrm(date_create=datetime.now(), text_content=text_content, preview_photo_url=promotional_photo_url)
+                offer = PromotionalOfferOrm(text_content=text_content, preview_photo=preview_photo)
                 s.add(offer)
                 await s.flush()
                 res = PromotionalOfferEntity.model_validate(offer)
                 await s.commit()
                 return res
-        except InvalidToken as e:
-            logger.warning(e)
-            raise
         except SQLAlchemyError as e:
             await s.rollback()
             logger.error(e)
@@ -101,14 +74,13 @@ class AdminServiceImpl(AdminService):
             logger.exception(e)
             raise UnknownError(e)
 
-    async def get_promotional_offer(self, token: str | None, offer_id: int) -> PromotionalOfferEntity:
+    async def get_promotional_offer(self, offer_id: int) -> PromotionalOfferEntity:
         try:
             async with self.__session_manager.get_session() as s:
-                await self.__validate_token(s, token)
                 offer = await self.__get_promotional_offer(s, offer_id)
                 offer_entity = PromotionalOfferEntity.model_validate(offer)
                 return offer_entity
-        except (PromotionalOfferDoesNotExist, InvalidToken) as e:
+        except PromotionalOfferDoesNotExist as e:
             logger.warning(e)
             raise
         except SQLAlchemyError as e:
@@ -118,14 +90,13 @@ class AdminServiceImpl(AdminService):
             logger.exception(e)
             raise UnknownError(e)
 
-    async def delete_promotional_offer(self, token: str | None, offer_id: int):
+    async def delete_promotional_offer(self, offer_id: int):
         try:
             async with self.__session_manager.get_session() as s:
-                await self.__validate_token(s, token)
                 offer = await self.__get_promotional_offer(s, offer_id)
                 await s.delete(offer)
                 await s.commit()
-        except (PromotionalOfferDoesNotExist, InvalidToken) as e:
+        except PromotionalOfferDoesNotExist as e:
             logger.warning(e)
             raise
         except SQLAlchemyError as e:
@@ -136,14 +107,13 @@ class AdminServiceImpl(AdminService):
             raise UnknownError(e)
 
 
-    async def start_promotional_offer(self, token: str | None, offer_id: int):
+    async def start_promotional_offer(self, offer_id: int):
         try:
             async with self.__session_manager.get_session() as s:
-                await self.__validate_token(s, token)
                 offer = await self.__get_promotional_offer(s, offer_id)
                 offer.date_start = datetime.now()
                 await s.commit()
-        except (PromotionalOfferDoesNotExist, InvalidToken) as e:
+        except PromotionalOfferDoesNotExist as e:
             await s.rollback()
             logger.warning(e)
             raise

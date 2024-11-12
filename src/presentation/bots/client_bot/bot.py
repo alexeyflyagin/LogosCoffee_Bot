@@ -1,7 +1,7 @@
 import asyncio
 from asyncio import CancelledError
 from datetime import datetime
-from time import sleep
+from html import escape
 
 from aiogram import Bot, Dispatcher
 from aiogram.types import URLInputFile
@@ -28,8 +28,8 @@ class ClientBot(BaseBot):
             await self.bot.delete_webhook(drop_pending_updates=True)
             logger.info(f"Client bot is started.")
             await asyncio.gather(
-                self.dp.start_polling(self.bot),
                 self.__offer_pooling(),
+                self.dp.start_polling(self.bot),
             )
         except CancelledError:
             logger.info(f"Client bot is finished.")
@@ -44,11 +44,14 @@ class ClientBot(BaseBot):
                     subscribers = await authorization_handler.event_service.get_subscribers(constants.EVENT__NEW_OFFER)
                     for offer in offers:
                         for subscriber in subscribers:
-                            if offer.preview_photo_url:
-                                photo = URLInputFile(offer.preview_photo_url)
-                                await self.bot.send_photo(subscriber.user_state.chat_id, photo, caption=offer.text_content)
+                            if offer.preview_photo:
+                                bot_token, file_id = offer.preview_photo.split(':::')
+                                bot = Bot(bot_token, self.bot.session)
+                                file = await bot.get_file(file_id)
+                                photo = URLInputFile(f"http://api.telegram.org/file/bot{bot_token}/{file.file_path}")
+                                await self.bot.send_photo(subscriber.chat_id, photo, caption=escape(offer.text_content))
                             else:
-                                await self.bot.send_message(subscriber.user_state.chat_id, offer.text_content)
+                                await self.bot.send_message(subscriber.chat_id, escape(offer.text_content))
             except Exception as e:
                 logger.error(e)
             await asyncio.sleep(1)

@@ -1,14 +1,12 @@
-import random
 import string
 
 from loguru import logger
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.data.logoscoffee.checks import check_text_is_not_empty
-from src.data.logoscoffee.entities.orm_entities import PromotionalOfferEntity
-from src.data.logoscoffee.interfaces.client_service import ClientAuthorizationData, ClientService
+from src.data.logoscoffee.entities.orm_entities import PromotionalOfferEntity, ClientAccountEntity
+from src.data.logoscoffee.interfaces.client_service import ClientService
 from src.data.logoscoffee.exceptions import *
 from src.data.logoscoffee.db.models import ClientAccountOrm, ReviewOrm, PromotionalOfferOrm
 from src.data.logoscoffee.session_manager import SessionManager
@@ -20,27 +18,6 @@ class ClientServiceImpl(ClientService):
 
     def __init__(self, session_manager: SessionManager):
         self.__session_manager = session_manager
-
-
-    async def __generate_token(self, s: AsyncSession) -> str:
-        try:
-            for i in range(300):
-                new_token = ''.join(random.choices(TOKEN_SYMBOLS, k=8))
-                query = await s.execute(select(ClientAccountOrm).filter(ClientAccountOrm.token == new_token))
-                if not query.scalars().first(): return new_token
-            raise TokenGenerateError()
-        except TokenGenerateError as e:
-            logger.critical(e)
-            raise
-
-    async def __validate_token(self, s: AsyncSession, token: str | None) -> ClientAccountOrm:
-        if token is None:
-            raise InvalidToken(token)
-        res = await s.execute(select(ClientAccountOrm).filter(ClientAccountOrm.token == token).with_for_update())
-        res = res.scalars().first()
-        if res is None:
-            raise InvalidToken(token)
-        return res
 
     async def __can_make_review(self, account: ClientAccountOrm):
         pass
@@ -64,34 +41,16 @@ class ClientServiceImpl(ClientService):
             raise UnknownError(e)
 
 
-
-    async def validate_token(self, token: str | None):
+    async def login(self, phone_number: str) -> ClientAccountEntity:
         try:
             async with self.__session_manager.get_session() as s:
-                await self.__validate_token(s, token)
-        except InvalidToken as e:
-            logger.warning(e)
-            raise
-        except SQLAlchemyError as e:
-            logger.error(e)
-            raise DatabaseError(e)
-        except Exception as e:
-            logger.exception(e)
-            raise UnknownError(e)
-
-    async def login(self, phone_number: str) -> ClientAuthorizationData:
-        try:
-            async with self.__session_manager.get_session() as s:
-                token = await self.__generate_token(s)
-                new_client = ClientAccountOrm(
-                    token=token,
-                    phone_number=phone_number,
-                    date_registration=datetime.now(),
-                )
+                new_client = ClientAccountOrm(phone_number=phone_number)
                 s.add(new_client)
+                await s.flush()
+                entity = ClientAccountEntity.model_validate(new_client)
                 await s.commit()
-                return ClientAuthorizationData(token=token)
-        except (InvalidToken, SQLAlchemyError) as e:
+                return entity
+        except SQLAlchemyError as e:
             await s.rollback()
             logger.error(e)
             raise DatabaseError(e)
@@ -100,12 +59,13 @@ class ClientServiceImpl(ClientService):
             logger.exception(e)
             raise UnknownError(e)
 
-    async def can_make_review(self, token: str | None):
+    async def can_create_review(self, account_id: int):
         try:
             async with self.__session_manager.get_session() as s:
-                account = await self.__validate_token(s, token)
+                res = await s.execute(select(ClientAccountOrm).filter(ClientAccountOrm.id == account_id))
+                account = res.scalars().first()
                 await self.__can_make_review(account)
-        except (InvalidToken, CooldownError) as e:
+        except CooldownError as e:
             logger.warning(e)
             raise
         except SQLAlchemyError as e:
@@ -116,10 +76,11 @@ class ClientServiceImpl(ClientService):
             raise UnknownError(e)
 
 
-    async def make_review(self, token: str | None, text: str):
+    async def create_review(self, account_id: int, text: str):
         try:
             async with self.__session_manager.get_session() as s:
-                account = await self.__validate_token(s, token)
+                res = await s.execute(select(ClientAccountOrm).filter(ClientAccountOrm.id == account_id).with_for_update())
+                account = res.scalars().first()
                 await self.__can_make_review(account)
                 current_time = datetime.now()
                 account.date_last_review = current_time

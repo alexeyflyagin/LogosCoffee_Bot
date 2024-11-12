@@ -1,27 +1,22 @@
 from abc import ABC, abstractmethod
-from src.data.logoscoffee.entities.client_entities import ClientAuthorizationData
-from src.data.logoscoffee.entities.orm_entities import PromotionalOfferEntity
+from src.data.logoscoffee.entities.orm_entities import PromotionalOfferEntity, ClientAccountEntity
 
 
 class ClientService(ABC):
 
     @abstractmethod
-    async def validate_token(self, token: str | None):
+    async def login(self, phone_number: str) -> ClientAccountEntity:
         pass
 
     @abstractmethod
-    async def login(self, phone_number: str) -> ClientAuthorizationData:
-        pass
-
-    @abstractmethod
-    async def can_make_review(self, token: str | None):
+    async def can_create_review(self, account_id: int):
         pass
 
     async def get_new_offers(self, last_update_time) -> list[PromotionalOfferEntity]:
         pass
 
     @abstractmethod
-    async def make_review(self, token: str | None, text: str):
+    async def create_review(self, account_id: int, text: str):
         pass
 
 

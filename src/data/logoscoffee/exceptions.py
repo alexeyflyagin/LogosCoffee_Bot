@@ -8,9 +8,9 @@ class LCException(Exception):
     def __str__(self):
         return self._message
 
-class InvalidToken(LCException):
-    def __init__(self, token: str | None):
-        super().__init__(f"The token was not found: {token}")
+class InvalidKey(LCException):
+    def __init__(self, key: str):
+        super().__init__(f"The key was not found: {key}")
 
 class DatabaseError(LCException):
     def __init__(self, e: Exception):

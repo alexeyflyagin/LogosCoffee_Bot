@@ -8,7 +8,7 @@ from src.data.logoscoffee.interfaces.client_service import ClientService
 from src.data.logoscoffee.interfaces.event_service import EventService
 from src.presentation.resources import strings
 from src.presentation.bots.client_bot import keyboards, constants
-from src.presentation.bots.client_bot.constants import TOKEN
+from src.presentation.bots.client_bot.constants import ACCOUNT_ID
 from src.presentation.bots.client_bot.handlers.utils import unknown_error
 from src.presentation.bots.client_bot.states import LoginStates, MainStates
 from src.presentation.resources.strings_builder.strings_builder import random_str
@@ -27,11 +27,10 @@ async def contact_handler(msg: Message, state: FSMContext):
         await send_authorization_request_msg(msg)
         return
     try:
-        log_in_data = await client_service.login(msg.contact.phone_number)
-        await state.set_data({TOKEN: log_in_data.token})
+        account = await client_service.login(msg.contact.phone_number)
+        await state.set_data({ACCOUNT_ID: account.id})
         await state.set_state(MainStates.Main)
-        user_state_id = await event_service.get_user_state_id(msg.bot.id, msg.from_user.id, msg.chat.id)
-        await event_service.subscribe(constants.EVENT__NEW_OFFER, user_state_id)
+        await event_service.subscribe(constants.EVENT__NEW_OFFER, msg.chat.id)
         await msg.answer(random_str(strings.CLIENT.AUTHORIZATION.SUCCESSFUL), reply_markup=keyboards.MAIN_KEYBOARD)
     except (DatabaseError, UnknownError):
         await unknown_error(msg, state)
