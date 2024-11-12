@@ -17,7 +17,7 @@ router = Router()
 admin_service: AdminService
 event_service: EventService
 
-@router.message(CommandStart())
+@router.message(State(None), CommandStart())
 async def start_handler(msg: Message, state: FSMContext, command: CommandObject):
     key = command.args
     if key is None:
@@ -29,6 +29,7 @@ async def start_handler(msg: Message, state: FSMContext, command: CommandObject)
         await state.set_state(MainStates.Main)
         await event_service.subscribe(constants.EVENT__NEW_REVIEW, msg.chat.id)
         await msg.answer(random_str(strings.GENERAL.LOGIN.SUCCESSFUL), reply_markup=keyboards.MAIN_KEYBOARD)
+        await msg.delete()
     except AlreadySubscribedError:
         pass
     except (DatabaseError, UnknownError):

@@ -1,5 +1,5 @@
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message
+from aiogram.types import Message, CallbackQuery
 
 from src.presentation.bots.admin_bot import constants, keyboards
 from src.presentation.bots.admin_bot.states import MainStates
@@ -15,9 +15,9 @@ async def unknown_error(msg: Message, state: FSMContext):
     await msg.answer(random_str(strings.ERRORS.UNKNOWN))
     await reset_state(msg, state, strings.GENERAL.ACTION_CANCELED)
 
+async def unknown_error_for_callback(callback: CallbackQuery, state: FSMContext):
+    await callback.answer(random_str(strings.ERRORS.UNKNOWN))
+
 async def get_account_id(state: FSMContext) -> int | None:
     data = await state.get_data()
     return data.get(constants.ACCOUNT_ID, None)
-
-def get_file_data(bot_token: str, file_id: str):
-    return f"{bot_token}:::{file_id}"

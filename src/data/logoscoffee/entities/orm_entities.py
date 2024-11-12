@@ -1,4 +1,5 @@
 from datetime import datetime
+from enum import Enum
 
 from attr import dataclass
 from pydantic import BaseModel
@@ -9,6 +10,7 @@ class AdminAccountEntity(BaseModel):
     id: int
     key: str
     date_authorized: datetime | None
+    date_last_offer_distributing: datetime | None
 
     class Config:
         from_attributes = True
@@ -47,7 +49,7 @@ class ReviewEntity(BaseModel):
 class PromotionalOfferEntity(BaseModel):
     id: int
     date_create: datetime
-    date_start: datetime | None
+    date_last_distribute: datetime | None
     text_content: str | None
     preview_photo: str | None
 

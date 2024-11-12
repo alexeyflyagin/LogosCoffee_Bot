@@ -27,6 +27,7 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('key', sa.String(), nullable=False),
     sa.Column('date_authorized', sa.DateTime(), nullable=True),
+    sa.Column('date_last_offer_distributing', sa.DateTime(), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('key')
     )
@@ -57,7 +58,7 @@ def upgrade() -> None:
     op.create_table('promotional_offer',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('date_create', sa.DateTime(), nullable=False),
-    sa.Column('date_start', sa.DateTime(), nullable=True),
+    sa.Column('date_last_distribute', sa.DateTime(), nullable=True),
     sa.Column('text_content', sa.String(), nullable=True),
     sa.Column('preview_photo', sa.String(), nullable=True),
     sa.PrimaryKeyConstraint('id')

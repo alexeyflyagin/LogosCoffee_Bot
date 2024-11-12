@@ -25,10 +25,10 @@ async def start_make_review_handler(msg: Message, state: FSMContext):
     account_id = await get_account_id(state)
     try:
         await client_service.can_create_review(account_id)
-        await msg.answer(strings.CLIENT.REVIEW.ENTER_REVIEW_CONTENT, reply_markup=ReplyKeyboardRemove())
+        await msg.answer(strings.CLIENT.REVIEW.ENTER_CONTENT, reply_markup=ReplyKeyboardRemove())
         await state.set_state(EnterReviewStates.EnterText)
     except CooldownError:
-        await msg.answer(random_str(strings.CLIENT.REVIEW.REVIEW__COOLDOWN_ERROR))
+        await msg.answer(random_str(strings.CLIENT.REVIEW.COOLDOWN_ERROR))
     except (DatabaseError, UnknownError):
         await unknown_error(msg, state)
 
@@ -40,7 +40,7 @@ async def content_review_handler(msg: Message, state: FSMContext):
         await client_service.create_review(account_id, msg.text)
         await reset_state(msg, state, random_str(strings.CLIENT.REVIEW.SUCCESSFUL))
     except CooldownError:
-        await msg.answer(random_str(strings.CLIENT.REVIEW.REVIEW__COOLDOWN_ERROR))
+        await msg.answer(random_str(strings.CLIENT.REVIEW.COOLDOWN_ERROR))
     except ContentTypeException as e:
         await msg.answer(e.msg)
     except (DatabaseError, UnknownError, EmptyTextError):

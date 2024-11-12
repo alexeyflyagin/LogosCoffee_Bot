@@ -29,7 +29,7 @@ class ClientServiceImpl(ClientService):
     async def get_new_offers(self, last_update_time) -> list[PromotionalOfferEntity]:
         try:
             async with self.__session_manager.get_session() as s:
-                res = await s.execute(select(PromotionalOfferOrm).filter(PromotionalOfferOrm.date_start >= last_update_time))
+                res = await s.execute(select(PromotionalOfferOrm).filter(PromotionalOfferOrm.date_last_distribute >= last_update_time))
                 offers = res.scalars().all()
                 entities = [PromotionalOfferEntity.model_validate(i) for i in offers]
                 return entities

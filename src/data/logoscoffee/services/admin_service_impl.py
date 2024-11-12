@@ -20,8 +20,14 @@ class AdminServiceImpl(AdminService):
         res = await s.execute(select(PromotionalOfferOrm).filter(PromotionalOfferOrm.id == offer_id))
         offer = res.scalars().first()
         if offer is None:
-            raise PromotionalOfferDoesNotExist(id=offer_id)
+            raise OfferDoesNotExist(id=offer_id)
         return offer
+
+    def __can_publish_promotional_offer(self, account: AdminAccountOrm):
+        if account.date_last_offer_distributing:
+            delta_time = datetime.now() - account.date_last_offer_distributing
+            if delta_time < timedelta(minutes=10):
+                raise CooldownError(delta_time)
 
     async def get_new_reviews(self, last_update: datetime) -> list[ReviewEntity]:
         try:
@@ -41,18 +47,25 @@ class AdminServiceImpl(AdminService):
     async def login(self, key: str) -> AdminAccountEntity:
         try:
             async with self.__session_manager.get_session() as s:
-                query = await s.execute(select(AdminAccountOrm).filter(AdminAccountOrm.key == key))
-                account = query.scalars().first()
-                if account is None:
+                res = await s.execute(select(AdminAccountOrm).filter(AdminAccountOrm.key == key))
+                account = res.scalars().first()
+                if account is None or account.date_authorized:
                     raise InvalidKey(key)
-                return AdminAccountEntity.model_validate(account)
+                account.date_authorized = datetime.now()
+                await s.flush()
+                entity = AdminAccountEntity.model_validate(account)
+                await s.commit()
+                return entity
         except InvalidKey as e:
+            await s.rollback()
             logger.warning(e)
             raise
         except SQLAlchemyError as e:
+            await s.rollback()
             logger.error(e)
             raise DatabaseError(e)
         except Exception as e:
+            await s.rollback()
             logger.exception(e)
             raise UnknownError(e)
 
@@ -80,7 +93,7 @@ class AdminServiceImpl(AdminService):
                 offer = await self.__get_promotional_offer(s, offer_id)
                 offer_entity = PromotionalOfferEntity.model_validate(offer)
                 return offer_entity
-        except PromotionalOfferDoesNotExist as e:
+        except OfferDoesNotExist as e:
             logger.warning(e)
             raise
         except SQLAlchemyError as e:
@@ -96,7 +109,7 @@ class AdminServiceImpl(AdminService):
                 offer = await self.__get_promotional_offer(s, offer_id)
                 await s.delete(offer)
                 await s.commit()
-        except PromotionalOfferDoesNotExist as e:
+        except OfferDoesNotExist as e:
             logger.warning(e)
             raise
         except SQLAlchemyError as e:
@@ -107,13 +120,17 @@ class AdminServiceImpl(AdminService):
             raise UnknownError(e)
 
 
-    async def start_promotional_offer(self, offer_id: int):
+    async def distribute_promotional_offer(self, account_id: int, offer_id: int):
         try:
             async with self.__session_manager.get_session() as s:
+                res = await s.execute(select(AdminAccountOrm).filter(AdminAccountOrm.id == account_id).with_for_update())
+                account = res.scalars().first()
+                self.__can_publish_promotional_offer(account)
+                account.date_last_offer_distributing = datetime.now()
                 offer = await self.__get_promotional_offer(s, offer_id)
-                offer.date_start = datetime.now()
+                offer.date_last_distribute = datetime.now()
                 await s.commit()
-        except PromotionalOfferDoesNotExist as e:
+        except (OfferDoesNotExist, CooldownError) as e:
             await s.rollback()
             logger.warning(e)
             raise
