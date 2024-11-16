@@ -1,8 +1,7 @@
 from datetime import datetime
-from enum import Enum
 
 from attr import dataclass
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 @dataclass
@@ -12,8 +11,7 @@ class AdminAccountEntity(BaseModel):
     date_authorized: datetime | None
     date_last_offer_distributing: datetime | None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes = True)
 
 @dataclass
 class EmployeeAccountEntity(BaseModel):
@@ -21,8 +19,7 @@ class EmployeeAccountEntity(BaseModel):
     key: str
     date_authorized: datetime | None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes = True)
 
 @dataclass
 class ClientAccountEntity(BaseModel):
@@ -33,8 +30,7 @@ class ClientAccountEntity(BaseModel):
     loyalty_points: int
     date_last_review: datetime | None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes = True)
 
 @dataclass
 class ReviewEntity(BaseModel):
@@ -42,8 +38,7 @@ class ReviewEntity(BaseModel):
     date_create: datetime
     text_content: str
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes = True)
 
 @dataclass
 class PromotionalOfferEntity(BaseModel):
@@ -53,8 +48,7 @@ class PromotionalOfferEntity(BaseModel):
     text_content: str | None
     preview_photo: str | None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes = True)
 
 @dataclass
 class UserStateEntity(BaseModel):
@@ -65,8 +59,7 @@ class UserStateEntity(BaseModel):
     state: str
     data: dict
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes = True)
 
 
 @dataclass
@@ -76,5 +69,4 @@ class EventSubscriberEntity(BaseModel):
     date_create: datetime
     chat_id: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes = True)

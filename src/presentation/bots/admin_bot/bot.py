@@ -1,7 +1,6 @@
 import asyncio
 from asyncio import CancelledError
 from datetime import datetime
-from doctest import debug
 from html import escape
 
 from aiogram import Bot, Dispatcher
@@ -25,8 +24,8 @@ class AdminBot(BaseBot):
             await self.bot.delete_webhook(drop_pending_updates=True)
             logger.info(f"Admin bot is started.")
             await asyncio.gather(
-                self.dp.start_polling(self.bot),
                 self.__new_review_polling(),
+                self.dp.start_polling(self.bot),
             )
         except CancelledError:
             logger.info(f"Admin bot is finished.")

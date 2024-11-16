@@ -79,8 +79,8 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
 
-    op.execute(insert(AdminAccountOrm).values(key=config.DEFAULT_ADMIN_TOKEN_FOR_LOGIN))
-    op.execute(insert(EmployeeAccountOrm).values(key=config.DEFAULT_EMPLOYEE_TOKEN_FOR_LOGIN))
+    op.execute(insert(AdminAccountOrm).values(key=config.DEFAULT_ADMIN_KEY_FOR_LOGIN))
+    op.execute(insert(EmployeeAccountOrm).values(key=config.DEFAULT_EMPLOYEE_KEY_FOR_LOGIN))
     # ### end Alembic commands ###
 
 
