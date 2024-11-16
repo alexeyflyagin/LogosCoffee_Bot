@@ -1,8 +1,21 @@
 from datetime import datetime
+from decimal import Decimal
 
 from attr import dataclass
 from pydantic import BaseModel, ConfigDict
 
+
+@dataclass
+class ProductEntity(BaseModel):
+    id: int
+    date_create: datetime
+    is_available: bool
+    price: Decimal
+    product_name: str
+    description: str
+    preview_photo: str | None
+
+    model_config = ConfigDict(from_attributes = True)
 
 @dataclass
 class AdminAccountEntity(BaseModel):

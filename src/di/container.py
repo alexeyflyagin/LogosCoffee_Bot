@@ -17,11 +17,14 @@ from src.presentation.user_state_storage import UserStateStorage
 
 
 def client_handlers__inject():
-    from src.presentation.bots.client_bot.handlers import handler,authorization_handler, review_handler, end_handler
+    from src.presentation.bots.client_bot.handlers import handler, authorization_handler, review_handler, end_handler, \
+        menu_handler
     authorization_handler.client_service = di.client_service()
     handler.event_service = di.event_service()
     end_handler.client_service = di.client_service()
     review_handler.client_service = di.client_service()
+    menu_handler.client_service = di.client_service()
+
 
 def admin_handlers__inject():
     from src.presentation.bots.admin_bot.handlers import handler, end_handler, promotional_offer_handler
@@ -30,13 +33,13 @@ def admin_handlers__inject():
     promotional_offer_handler.admin_service = di.admin_service()
     end_handler.admin_service = di.admin_service()
 
+
 def employee_handlers__inject():
     from src.presentation.bots.employee_bot.handlers import handler
     handler.employee_service = di.employee_service()
 
 
 class Container(containers.DeclarativeContainer):
-
     config = providers.Configuration()
 
     # Database providers
@@ -71,7 +74,6 @@ class Container(containers.DeclarativeContainer):
         session_manager=session_manager,
     )
 
-
     # Presentation layer
     user_state_storage = providers.Factory(
         UserStateStorage,
@@ -86,19 +88,19 @@ class Container(containers.DeclarativeContainer):
     bot_for_admin = providers.Factory(
         Bot,
         token=config.ADMIN_BOT_TOKEN,
-        default = DefaultBotProperties(parse_mode=ParseMode.HTML),
+        default=DefaultBotProperties(parse_mode=ParseMode.HTML),
     )
 
     bot_for_client = providers.Factory(
         Bot,
         token=config.CLIENT_BOT_TOKEN,
-        default = DefaultBotProperties(parse_mode=ParseMode.HTML),
+        default=DefaultBotProperties(parse_mode=ParseMode.HTML),
     )
 
     bot_for_employee = providers.Factory(
         Bot,
         token=config.EMPLOYEE_BOT_TOKEN,
-        default = DefaultBotProperties(parse_mode=ParseMode.HTML),
+        default=DefaultBotProperties(parse_mode=ParseMode.HTML),
     )
 
     admin_bot = providers.Factory(
@@ -130,4 +132,3 @@ di.config.EMPLOYEE_BOT_TOKEN.from_value(config.EMPLOYEE_BOT_TOKEN)
 client_handlers__inject()
 admin_handlers__inject()
 employee_handlers__inject()
-

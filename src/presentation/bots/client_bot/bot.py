@@ -9,7 +9,8 @@ from loguru import logger
 
 from src.presentation.bots.bot import BaseBot
 from src.presentation.bots.client_bot import constants
-from src.presentation.bots.client_bot.handlers import handler, review_handler, authorization_handler, end_handler
+from src.presentation.bots.client_bot.handlers import handler, review_handler, authorization_handler, end_handler, \
+    menu_handler
 
 
 class ClientBot(BaseBot):
@@ -23,6 +24,7 @@ class ClientBot(BaseBot):
                 handler.router,
                 authorization_handler.router,
                 review_handler.router,
+                menu_handler.router,
                 end_handler.router
             )
             await self.bot.delete_webhook(drop_pending_updates=True)
@@ -55,4 +57,3 @@ class ClientBot(BaseBot):
             except Exception as e:
                 logger.error(e)
             await asyncio.sleep(1)
-

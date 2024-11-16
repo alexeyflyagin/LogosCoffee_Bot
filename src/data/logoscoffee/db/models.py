@@ -1,12 +1,15 @@
+from decimal import Decimal
 from datetime import datetime
+from typing import Any
 
-from sqlalchemy import BIGINT, JSON, DateTime, ForeignKey
-from sqlalchemy.dialects.mysql import VARCHAR
-from sqlalchemy.orm import declarative_base, Mapped, relationship
+from sqlalchemy import BIGINT, JSON, DECIMAL, ForeignKey, VARCHAR
+from sqlalchemy.orm import declarative_base, Mapped
 from sqlalchemy.orm import mapped_column
 
 
 Base = declarative_base()
+
+CASCADE = "CASCADE"
 
 
 class UserStateOrm(Base):
@@ -24,6 +27,7 @@ class EventSubscriberOrm(Base):
     event_name: Mapped[str] = mapped_column()
     date_create: Mapped[datetime] = mapped_column(default=datetime.now)
     chat_id: Mapped[int] = mapped_column(BIGINT)
+    data: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=True)
 
 
 class AdminAccountOrm(Base):
@@ -61,3 +65,37 @@ class PromotionalOfferOrm(Base):
     date_last_distribute: Mapped[datetime] = mapped_column(nullable=True)
     text_content: Mapped[str] = mapped_column(nullable=True)
     preview_photo: Mapped[str] = mapped_column(nullable=True)
+
+class ProductOrm(Base):
+    __tablename__ = "product"
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    date_create: Mapped[datetime] = mapped_column(default=datetime.now)
+    is_available: Mapped[bool] = mapped_column(default=False)
+    price: Mapped[Decimal] = mapped_column(DECIMAL)
+    product_name: Mapped[str] = mapped_column()
+    description: Mapped[str] = mapped_column()
+    preview_photo: Mapped[str] = mapped_column(nullable=True)
+
+class ProductAndOrderOrm(Base):
+    __tablename__ = "product_and_order"
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    date_create: Mapped[datetime] = mapped_column(default=datetime.now)
+    order_id: Mapped[int] = mapped_column(ForeignKey("order.id", ondelete=CASCADE))
+    product_id: Mapped[int] = mapped_column(ForeignKey("product.id", ondelete=CASCADE))
+
+class OrderOrm(Base):
+    __tablename__ = "order"
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    date_create: Mapped[datetime] = mapped_column(default=datetime.now)
+    client_id: Mapped[int] = mapped_column(BIGINT, ForeignKey(column="client_account.id", ondelete=CASCADE))
+    pickup_code: Mapped[str] = mapped_column(VARCHAR(4), nullable=True)
+    date_pending: Mapped[datetime] = mapped_column(default=datetime.now, nullable=True)
+    date_cooking: Mapped[datetime] = mapped_column(default=datetime.now, nullable=True)
+    date_ready: Mapped[datetime] = mapped_column(default=datetime.now, nullable=True)
+    date_completed: Mapped[datetime] = mapped_column(default=datetime.now, nullable=True)
+    date_canceled: Mapped[datetime] = mapped_column(default=datetime.now, nullable=True)
+    cancel_details: Mapped[str] = mapped_column(nullable=True)
+    details: Mapped[str] = mapped_column(nullable=True)
+
+
+

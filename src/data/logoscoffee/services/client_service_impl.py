@@ -5,10 +5,11 @@ from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 
 from src.data.logoscoffee.checks import check_text_is_not_empty
-from src.data.logoscoffee.entities.orm_entities import PromotionalOfferEntity, ClientAccountEntity
+from src.data.logoscoffee.entities.general_entities import MenuEntity
+from src.data.logoscoffee.entities.orm_entities import PromotionalOfferEntity, ClientAccountEntity, ProductEntity
 from src.data.logoscoffee.interfaces.client_service import ClientService
 from src.data.logoscoffee.exceptions import *
-from src.data.logoscoffee.db.models import ClientAccountOrm, ReviewOrm, PromotionalOfferOrm
+from src.data.logoscoffee.db.models import ClientAccountOrm, ReviewOrm, PromotionalOfferOrm, ProductOrm
 from src.data.logoscoffee.session_manager import SessionManager
 
 TOKEN_SYMBOLS = string.ascii_letters + string.digits + "-_"
@@ -98,6 +99,21 @@ class ClientServiceImpl(ClientService):
             raise DatabaseError(e)
         except Exception as e:
             await s.rollback()
+            logger.exception(e)
+            raise UnknownError(e)
+
+    async def get_menu(self) -> MenuEntity:
+        try:
+            async with self.__session_manager.get_session() as s:
+                res = await s.execute(select(ProductOrm).filter(ProductOrm.is_available == True))
+                products = res.scalars().all()
+                entities = [ProductEntity.model_validate(i) for i in products]
+                menu_entity = MenuEntity(all_products=entities)
+                return menu_entity
+        except SQLAlchemyError as e:
+            logger.error(e)
+            raise DatabaseError(e)
+        except Exception as e:
             logger.exception(e)
             raise UnknownError(e)
 

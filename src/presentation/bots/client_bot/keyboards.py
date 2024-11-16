@@ -7,6 +7,9 @@ AUTHORIZATION_KEYBOARD = ReplyKeyboardMarkup(
 )
 
 MAIN_KEYBOARD = ReplyKeyboardMarkup(
-    keyboard=[[KeyboardButton(text=strings.BTN.WRITE_REVIEW)]], resize_keyboard=True,
+    keyboard=[
+        [KeyboardButton(text=strings.BTN.MENU)],
+        [KeyboardButton(text=strings.BTN.WRITE_REVIEW)],
+    ], resize_keyboard=True,
     input_field_placeholder=strings.GENERAL.SELECT_ACTION,
 )

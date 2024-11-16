@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Any
 
 from loguru import logger
 from sqlalchemy import select
@@ -31,7 +32,7 @@ class EventServiceImpl(EventService):
             logger.exception(e)
             raise UnknownError(e)
 
-    async def subscribe(self, event_name: str, chat_id: int):
+    async def subscribe(self, event_name: str, chat_id: int, data: dict[str, Any] = None):
         try:
             async with self.__session_manager.get_session() as s:
                 res = await s.execute(select(EventSubscriberOrm).filter(EventSubscriberOrm.event_name == event_name,
@@ -39,8 +40,7 @@ class EventServiceImpl(EventService):
                 subscriber = res.scalars().first()
                 if subscriber:
                     raise AlreadySubscribedError(chat_id, event_name)
-                new_subscriber = EventSubscriberOrm(event_name=event_name, date_create=datetime.now(),
-                                                    chat_id=chat_id)
+                new_subscriber = EventSubscriberOrm(event_name=event_name, chat_id=chat_id, data=data)
                 s.add(new_subscriber)
                 await s.commit()
         except AlreadySubscribedError as e:
