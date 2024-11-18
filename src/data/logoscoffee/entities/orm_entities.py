@@ -6,6 +6,12 @@ from pydantic import BaseModel, ConfigDict
 
 
 @dataclass
+class OrderEntity(BaseModel):
+    pass # TODO
+
+    model_config = ConfigDict(from_attributes = True)
+
+@dataclass
 class ProductEntity(BaseModel):
     id: int
     date_create: datetime

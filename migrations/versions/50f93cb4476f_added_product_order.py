@@ -52,6 +52,7 @@ def upgrade() -> None:
                     sa.Column('date_create', sa.DateTime(), nullable=False),
                     sa.Column('order_id', sa.Integer(), nullable=False),
                     sa.Column('product_id', sa.Integer(), nullable=False),
+                    sa.Column('product_price', sa.DECIMAL(), nullable=True),
                     sa.ForeignKeyConstraint(['order_id'], ['order.id'], ondelete='CASCADE'),
                     sa.ForeignKeyConstraint(['product_id'], ['product.id'], ondelete='CASCADE'),
                     sa.PrimaryKeyConstraint('id')

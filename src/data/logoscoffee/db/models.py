@@ -82,6 +82,7 @@ class ProductAndOrderOrm(Base):
     date_create: Mapped[datetime] = mapped_column(default=datetime.now)
     order_id: Mapped[int] = mapped_column(ForeignKey("order.id", ondelete=CASCADE))
     product_id: Mapped[int] = mapped_column(ForeignKey("product.id", ondelete=CASCADE))
+    product_price: Mapped[Decimal] = mapped_column(DECIMAL, nullable=True)
 
 class OrderOrm(Base):
     __tablename__ = "order"

@@ -26,4 +26,11 @@ class ClientService(ABC):
     async def get_menu(self) -> MenuEntity:
         pass
 
+    @abstractmethod
+    async def get_product_by_id(self, product_id: int) -> ProductEntity:
+        pass
+
+
+
+
 
