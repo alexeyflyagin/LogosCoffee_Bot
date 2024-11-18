@@ -1,5 +1,6 @@
 from datetime import datetime
 from decimal import Decimal
+from typing import Optional, List
 
 from attr import dataclass
 from pydantic import BaseModel, ConfigDict
@@ -7,9 +8,30 @@ from pydantic import BaseModel, ConfigDict
 
 @dataclass
 class OrderEntity(BaseModel):
-    pass # TODO
+    id: int
+    date_create: datetime
+    is_available: bool
+    price: Decimal
+    product_name: str
+    description: str
+    preview_photo: str | None
 
-    model_config = ConfigDict(from_attributes = True)
+    product_and_orders: Optional[List["ProductAndOrderEntity"]]
+
+    model_config = ConfigDict(from_attributes=True)
+
+@dataclass
+class ProductAndOrderEntity:
+    id: int
+    date_create: datetime
+    order_id: int
+    product_id: int
+    product_price: Decimal
+
+    product: Optional["ProductEntity"]
+    order: Optional["OrderEntity"]
+
+    model_config = ConfigDict(from_attributes=True)
 
 @dataclass
 class ProductEntity(BaseModel):
@@ -21,7 +43,9 @@ class ProductEntity(BaseModel):
     description: str
     preview_photo: str | None
 
-    model_config = ConfigDict(from_attributes = True)
+    product_and_order: Optional["ProductAndOrderEntity"]
+
+    model_config = ConfigDict(from_attributes=True)
 
 @dataclass
 class AdminAccountEntity(BaseModel):
@@ -30,7 +54,7 @@ class AdminAccountEntity(BaseModel):
     date_authorized: datetime | None
     date_last_offer_distributing: datetime | None
 
-    model_config = ConfigDict(from_attributes = True)
+    model_config = ConfigDict(from_attributes=True)
 
 @dataclass
 class EmployeeAccountEntity(BaseModel):
@@ -38,7 +62,7 @@ class EmployeeAccountEntity(BaseModel):
     key: str
     date_authorized: datetime | None
 
-    model_config = ConfigDict(from_attributes = True)
+    model_config = ConfigDict(from_attributes=True)
 
 @dataclass
 class ClientAccountEntity(BaseModel):
@@ -49,7 +73,7 @@ class ClientAccountEntity(BaseModel):
     loyalty_points: int
     date_last_review: datetime | None
 
-    model_config = ConfigDict(from_attributes = True)
+    model_config = ConfigDict(from_attributes=True)
 
 @dataclass
 class ReviewEntity(BaseModel):
@@ -57,7 +81,7 @@ class ReviewEntity(BaseModel):
     date_create: datetime
     text_content: str
 
-    model_config = ConfigDict(from_attributes = True)
+    model_config = ConfigDict(from_attributes=True)
 
 @dataclass
 class PromotionalOfferEntity(BaseModel):
@@ -67,7 +91,7 @@ class PromotionalOfferEntity(BaseModel):
     text_content: str | None
     preview_photo: str | None
 
-    model_config = ConfigDict(from_attributes = True)
+    model_config = ConfigDict(from_attributes=True)
 
 @dataclass
 class UserStateEntity(BaseModel):
@@ -78,7 +102,7 @@ class UserStateEntity(BaseModel):
     state: str
     data: dict
 
-    model_config = ConfigDict(from_attributes = True)
+    model_config = ConfigDict(from_attributes=True)
 
 
 @dataclass
@@ -88,4 +112,4 @@ class EventSubscriberEntity(BaseModel):
     date_create: datetime
     chat_id: int
 
-    model_config = ConfigDict(from_attributes = True)
+    model_config = ConfigDict(from_attributes=True)

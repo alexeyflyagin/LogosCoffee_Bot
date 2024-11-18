@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import Any
 
 from sqlalchemy import BIGINT, JSON, DECIMAL, ForeignKey, VARCHAR
-from sqlalchemy.orm import declarative_base, Mapped
+from sqlalchemy.orm import declarative_base, Mapped, relationship
 from sqlalchemy.orm import mapped_column
 
 
@@ -76,6 +76,8 @@ class ProductOrm(Base):
     description: Mapped[str] = mapped_column()
     preview_photo: Mapped[str] = mapped_column(nullable=True)
 
+    product_and_orders = relationship("ProductAndOrderOrm", back_populates="product")
+
 class ProductAndOrderOrm(Base):
     __tablename__ = "product_and_order"
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
@@ -83,6 +85,9 @@ class ProductAndOrderOrm(Base):
     order_id: Mapped[int] = mapped_column(ForeignKey("order.id", ondelete=CASCADE))
     product_id: Mapped[int] = mapped_column(ForeignKey("product.id", ondelete=CASCADE))
     product_price: Mapped[Decimal] = mapped_column(DECIMAL, nullable=True)
+
+    product = relationship("ProductOrm", back_populates="orders")
+    order = relationship("OrderOrm", back_populates="product_and_orders")
 
 class OrderOrm(Base):
     __tablename__ = "order"
@@ -98,5 +103,6 @@ class OrderOrm(Base):
     cancel_details: Mapped[str] = mapped_column(nullable=True)
     details: Mapped[str] = mapped_column(nullable=True)
 
+    product_and_orders = relationship("ProductAndOrderOrm", back_populates="order")
 
 
