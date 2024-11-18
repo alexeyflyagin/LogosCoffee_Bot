@@ -43,7 +43,7 @@ class ProductEntity(BaseModel):
     description: str
     preview_photo: str | None
 
-    product_and_order: Optional["ProductAndOrderEntity"]
+    product_and_orders: Optional[List["ProductAndOrderEntity"]]
 
     model_config = ConfigDict(from_attributes=True)
 
