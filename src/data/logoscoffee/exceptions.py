@@ -44,3 +44,7 @@ class AlreadyUnsubscribedError(LCException):
 class OfferDoesNotExist(LCException):
     def __init__(self, **kwargs):
         super().__init__(f"Promotional offer ({kwargs}) does not exist")
+
+class PlacedOrderIsEmpty(LCException):
+    def __init__(self, **kwargs):
+        super().__init__(f"Order ({kwargs}), which was tried to place, is empty")

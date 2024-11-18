@@ -10,6 +10,7 @@ from src.data.logoscoffee.entities.orm_entities import PromotionalOfferEntity, C
 from src.data.logoscoffee.interfaces.client_service import ClientService
 from src.data.logoscoffee.exceptions import *
 from src.data.logoscoffee.db.models import ClientAccountOrm, ReviewOrm, PromotionalOfferOrm, ProductOrm
+from src.data.logoscoffee.services.units import create_draft_orm
 from src.data.logoscoffee.session_manager import SessionManager
 
 TOKEN_SYMBOLS = string.ascii_letters + string.digits + "-_"
@@ -50,6 +51,7 @@ class ClientServiceImpl(ClientService):
                 new_client = ClientAccountOrm(phone_number=phone_number)
                 s.add(new_client)
                 await s.flush()
+                await create_draft_orm(s, client_id=new_client.id)
                 entity = ClientAccountEntity.model_validate(new_client)
                 await s.commit()
                 return entity
