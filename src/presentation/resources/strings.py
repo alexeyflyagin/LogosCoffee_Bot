@@ -44,6 +44,9 @@ class BTN(StrGroup):
     CANCEL = "❌ Отменить"
     MENU = "📋 Меню"
     ADD = "+ Добавить"
+    PAGE_PREVIOUS = "«"
+    PAGE_NEXT = "»"
+    PAGE_COUNTER = "{current} / {all}"
 
 
 
