@@ -68,6 +68,7 @@ def list_keyboard(tag: str, pg_index: int, pg_count: int, pg_items: list[ListIte
                            action=ListCD.Action.BACK).pack()
         kbb.add(InlineKeyboardButton(text=add_btn_text, callback_data=back_data))
         adjust.append(1)
+    kbb.adjust(*adjust)
     return kbb.as_markup()
 
 

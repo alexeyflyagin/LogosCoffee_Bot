@@ -17,6 +17,8 @@ TOKEN_SYMBOLS = string.ascii_letters + string.digits + "-_"
 
 class ClientServiceImpl(ClientService):
 
+
+
     def __init__(self, session_manager: SessionManager):
         self.__session_manager = session_manager
 
@@ -116,5 +118,8 @@ class ClientServiceImpl(ClientService):
         except Exception as e:
             logger.exception(e)
             raise UnknownError(e)
+
+    async def get_product_by_id(self, product_id: int) -> ProductEntity:
+        pass
 
 

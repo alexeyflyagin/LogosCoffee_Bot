@@ -3,7 +3,7 @@ from abc import abstractmethod, ABC
 from src.data.logoscoffee.entities.orm_entities import OrderEntity
 
 
-class ClientService(ABC):
+class ClientOrderService(ABC):
 
     @abstractmethod
     async def get_draft_order(self, client_id: int) -> OrderEntity:
