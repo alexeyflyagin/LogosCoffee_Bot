@@ -86,7 +86,7 @@ class ProductAndOrderOrm(Base):
     product_id: Mapped[int] = mapped_column(ForeignKey("product.id", ondelete=CASCADE))
     product_price: Mapped[Decimal] = mapped_column(DECIMAL, nullable=True)
 
-    product = relationship("ProductOrm", back_populates="orders")
+    product = relationship("ProductOrm", back_populates="product_and_orders")
     order = relationship("OrderOrm", back_populates="product_and_orders")
 
 class OrderOrm(Base):

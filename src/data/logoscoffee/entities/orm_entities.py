@@ -6,7 +6,6 @@ from attr import dataclass
 from pydantic import BaseModel, ConfigDict
 
 
-@dataclass
 class OrderEntity(BaseModel):
     id: int
     date_create: datetime
@@ -18,9 +17,8 @@ class OrderEntity(BaseModel):
 
     product_and_orders: Optional[List["ProductAndOrderEntity"]]
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True, arbitrary_types_allowed=True)
 
-@dataclass
 class ProductAndOrderEntity:
     id: int
     date_create: datetime
@@ -31,9 +29,8 @@ class ProductAndOrderEntity:
     product: Optional["ProductEntity"]
     order: Optional["OrderEntity"]
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True, arbitrary_types_allowed=True)
 
-@dataclass
 class ProductEntity(BaseModel):
     id: int
     date_create: datetime
@@ -45,9 +42,8 @@ class ProductEntity(BaseModel):
 
     product_and_orders: Optional[List["ProductAndOrderEntity"]]
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True, arbitrary_types_allowed=True)
 
-@dataclass
 class AdminAccountEntity(BaseModel):
     id: int
     key: str
@@ -56,7 +52,6 @@ class AdminAccountEntity(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-@dataclass
 class EmployeeAccountEntity(BaseModel):
     id: int
     key: str
@@ -64,7 +59,6 @@ class EmployeeAccountEntity(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-@dataclass
 class ClientAccountEntity(BaseModel):
     id: int
     client_name: str | None
@@ -75,7 +69,6 @@ class ClientAccountEntity(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-@dataclass
 class ReviewEntity(BaseModel):
     id: int
     date_create: datetime
@@ -83,7 +76,6 @@ class ReviewEntity(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-@dataclass
 class PromotionalOfferEntity(BaseModel):
     id: int
     date_create: datetime
@@ -93,7 +85,6 @@ class PromotionalOfferEntity(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-@dataclass
 class UserStateEntity(BaseModel):
     id: int
     bot_id: int
@@ -104,8 +95,6 @@ class UserStateEntity(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-
-@dataclass
 class EventSubscriberEntity(BaseModel):
     id: int
     event_name: str
