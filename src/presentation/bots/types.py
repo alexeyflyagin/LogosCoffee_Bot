@@ -1,17 +1,27 @@
+from enum import Enum
+
+from src import config
+
+
 class FileAddress:
     SEPARATOR = ":::"
 
-    def __init__(self, bot_token: str, file_id: str):
-        self.bot_token = bot_token
+    class BotType(Enum):
+        ADMIN_BOT = config.ADMIN_BOT_TOKEN
+        EMPLOYEE_BOT = config.EMPLOYEE_BOT_TOKEN
+        CLIENT_BOT = config.CLIENT_BOT_TOKEN
+
+    def __init__(self, bot_type: BotType, file_id: str):
+        self.bot_type = bot_type
         self.file_id = file_id
 
     @property
     def address(self) -> str:
-        return self.bot_token + FileAddress.SEPARATOR + self.file_id
+        return self.bot_type.name + FileAddress.SEPARATOR + self.file_id
 
     @staticmethod
     def from_address(address: str) -> "FileAddress":
         res = address.split(FileAddress.SEPARATOR)
         if len(res) != 2:
             raise ValueError(f"The address ({address}) is incorrect.")
-        return FileAddress(bot_token=res[0], file_id=res[1])
+        return FileAddress(FileAddress.BotType.__getitem__(res[0]), file_id=res[1])

@@ -36,7 +36,7 @@ async def create_announcement__content__handler(msg: Message, state: FSMContext)
         preview_photo = None
         if msg.content_type == ContentType.PHOTO:
             text = msg.caption
-            preview_photo = FileAddress(msg.bot.token, msg.photo[-1].file_id).address
+            preview_photo = FileAddress(FileAddress.BotType.ADMIN_BOT, msg.photo[-1].file_id).address
         res = await admin_service.create_announcement(text, preview_photo)
         await show_announcement_management(msg, res.id)
         await reset_state(msg, state, strings.GENERAL.SELECT_ACTION)

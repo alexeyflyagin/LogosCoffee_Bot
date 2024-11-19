@@ -11,6 +11,7 @@ from src.presentation.bots.bot import BaseBot
 from src.presentation.bots.client_bot import constants
 from src.presentation.bots.client_bot.handlers import handler, review_handler, authorization_handler, end_handler, \
     menu_handler
+from src.presentation.bots.utils import send_announcement
 
 
 class ClientBot(BaseBot):
@@ -46,14 +47,7 @@ class ClientBot(BaseBot):
                     subscribers = await handler.event_service.get_subscribers(constants.EVENT__NEW_ANNOUNCEMENT)
                     for announcement in announcements:
                         for subscriber in subscribers:
-                            if announcement.preview_photo:
-                                bot_token, file_id = announcement.preview_photo.split(':::')
-                                bot = Bot(bot_token, self.bot.session)
-                                file = await bot.get_file(file_id)
-                                photo = URLInputFile(f"http://api.telegram.org/file/bot{bot_token}/{file.file_path}")
-                                await self.bot.send_photo(subscriber.chat_id, photo, caption=escape(announcement.text_content))
-                            else:
-                                await self.bot.send_message(subscriber.chat_id, escape(announcement.text_content))
+                            await send_announcement(self.bot, chat_id=subscriber.chat_id, announcement=announcement)
             except Exception as e:
                 logger.error(e)
             await asyncio.sleep(1)
