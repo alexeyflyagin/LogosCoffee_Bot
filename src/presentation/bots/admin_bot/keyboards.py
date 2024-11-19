@@ -7,14 +7,14 @@ from src.presentation.resources import strings
 
 MAIN_KEYBOARD = ReplyKeyboardMarkup(
     keyboard=[
-        [KeyboardButton(text=strings.BTN.WRITE_PROMOTIONAL_OFFER)],
-        [KeyboardButton(text=strings.BTN.REVIEWS)]
+        [KeyboardButton(text=strings.BTN.WRITE_ANNOUNCEMENT), KeyboardButton(text=strings.BTN.MY_ANNOUNCEMENTS)],
+        [KeyboardButton(text=strings.BTN.REVIEWS)],
     ], resize_keyboard=True, input_field_placeholder=strings.GENERAL.SELECT_ACTION,
 )
 
 
-class OfferCD(CallbackData, prefix=constants.CD_PREFIX__PROMOTIONAL_OFFER):
-    offer_id: int
+class AnnouncementCD(CallbackData, prefix=constants.CD_PREFIX__Announcement):
+    announcement_id: int
     action: int
 
     class Action:
@@ -23,11 +23,11 @@ class OfferCD(CallbackData, prefix=constants.CD_PREFIX__PROMOTIONAL_OFFER):
         SHOW = 2
 
 
-def offer_markup(offer_id: int) -> InlineKeyboardMarkup:
+def announcement_markup(announcement_id: int) -> InlineKeyboardMarkup:
     ikb = InlineKeyboardBuilder()
-    publish_data = OfferCD(offer_id=offer_id, action=OfferCD.Action.PUBLISH).pack()
-    delete_data = OfferCD(offer_id=offer_id, action=OfferCD.Action.DELETE).pack()
-    show_data = OfferCD(offer_id=offer_id, action=OfferCD.Action.SHOW).pack()
+    publish_data = AnnouncementCD(announcement_id=announcement_id, action=AnnouncementCD.Action.PUBLISH).pack()
+    delete_data = AnnouncementCD(announcement_id=announcement_id, action=AnnouncementCD.Action.DELETE).pack()
+    show_data = AnnouncementCD(announcement_id=announcement_id, action=AnnouncementCD.Action.SHOW).pack()
     ikb.add(InlineKeyboardButton(text=strings.BTN.DISTRIBUTE, callback_data=publish_data))
     ikb.add(InlineKeyboardButton(text=strings.BTN.SHOW, callback_data=show_data))
     ikb.add(InlineKeyboardButton(text=strings.BTN.DELETE, callback_data=delete_data))

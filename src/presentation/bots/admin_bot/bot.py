@@ -8,8 +8,9 @@ from loguru import logger
 
 from src.data.logoscoffee.exceptions import UnknownError, DatabaseError
 from src.presentation.bots.admin_bot import constants
-from src.presentation.bots.admin_bot.handlers import handler, promotional_offer_handler, end_handler
+from src.presentation.bots.admin_bot.handlers import handler, announcement_handler, end_handler
 from src.presentation.bots.bot import BaseBot
+from src.presentation.resources import strings
 
 
 class AdminBot(BaseBot):
@@ -20,7 +21,7 @@ class AdminBot(BaseBot):
 
     async def run(self):
         try:
-            self.dp.include_routers(handler.router, promotional_offer_handler.router, end_handler.router)
+            self.dp.include_routers(handler.router, announcement_handler.router, end_handler.router)
             await self.bot.delete_webhook(drop_pending_updates=True)
             logger.info(f"Admin bot is started.")
             await asyncio.gather(
@@ -40,8 +41,8 @@ class AdminBot(BaseBot):
                     subscribers = await handler.event_service.get_subscribers(constants.EVENT__NEW_REVIEW)
                     for review in reviews:
                         for subscriber in subscribers:
-                            await self.bot.send_message(subscriber.chat_id, escape(review.text_content))
-                    logger.debug(f'{reviews}')
+                            text = strings.ADMIN.NEW_REVIEW_NOTIFICATION.format(review_content=escape(review.text_content))
+                            await self.bot.send_message(chat_id=subscriber.chat_id, text=text)
             except (DatabaseError, UnknownError, Exception):
                 pass
             await asyncio.sleep(1)

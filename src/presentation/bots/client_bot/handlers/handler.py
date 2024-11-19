@@ -21,7 +21,7 @@ async def start_handler(msg: Message, state: FSMContext):
     await msg.answer(strings.CLIENT.AUTHORIZATION.PRESS_BTN, reply_markup=keyboards.AUTHORIZATION_KEYBOARD)
     await state.set_state(LoginStates.PressButton)
     try:
-        await event_service.subscribe(constants.EVENT__NEW_OFFER, msg.chat.id)
+        await event_service.subscribe(constants.EVENT__NEW_ANNOUNCEMENT, msg.chat.id)
     except AlreadySubscribedError:
         pass
     except (DatabaseError, UnknownError):

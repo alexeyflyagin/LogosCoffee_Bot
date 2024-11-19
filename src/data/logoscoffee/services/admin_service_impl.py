@@ -4,7 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.data.logoscoffee.entities.orm_entities import PromotionalOfferEntity, AdminAccountEntity
+from src.data.logoscoffee.entities.orm_entities import AnnouncementEntity, AdminAccountEntity
 from src.data.logoscoffee.exceptions import *
 from src.data.logoscoffee.interfaces.admin_service import AdminService, ReviewEntity
 from src.data.logoscoffee.db.models import *
@@ -16,16 +16,16 @@ class AdminServiceImpl(AdminService):
     def __init__(self, session_manager: SessionManager):
         self.__session_manager = session_manager
 
-    async def __get_promotional_offer(self, s: AsyncSession, offer_id) -> PromotionalOfferOrm:
-        res = await s.execute(select(PromotionalOfferOrm).filter(PromotionalOfferOrm.id == offer_id))
-        offer = res.scalars().first()
-        if offer is None:
-            raise OfferDoesNotExist(id=offer_id)
-        return offer
+    async def __get_announcement(self, s: AsyncSession, announcement_id) -> AnnouncementOrm:
+        res = await s.execute(select(AnnouncementOrm).filter(AnnouncementOrm.id == announcement_id))
+        announcement = res.scalars().first()
+        if announcement is None:
+            raise AnnouncementDoesNotExist(id=announcement_id)
+        return announcement
 
-    def __can_publish_promotional_offer(self, account: AdminAccountOrm):
-        if account.date_last_offer_distributing:
-            delta_time = datetime.now() - account.date_last_offer_distributing
+    def __can_publish_announcement(self, account: AdminAccountOrm):
+        if account.date_last_announcement_distributing:
+            delta_time = datetime.now() - account.date_last_announcement_distributing
             if delta_time < timedelta(minutes=10):
                 raise CooldownError(delta_time)
 
@@ -69,13 +69,13 @@ class AdminServiceImpl(AdminService):
             logger.exception(e)
             raise UnknownError(e)
 
-    async def create_promotional_offer(self, text_content: str | None, preview_photo: str | None) -> PromotionalOfferEntity:
+    async def create_announcement(self, text_content: str | None, preview_photo: str | None) -> AnnouncementEntity:
         try:
             async with self.__session_manager.get_session() as s:
-                offer = PromotionalOfferOrm(text_content=text_content, preview_photo=preview_photo)
-                s.add(offer)
+                announcement = AnnouncementOrm(text_content=text_content, preview_photo=preview_photo)
+                s.add(announcement)
                 await s.flush()
-                res = PromotionalOfferEntity.model_validate(offer)
+                res = AnnouncementEntity.model_validate(announcement)
                 await s.commit()
                 return res
         except SQLAlchemyError as e:
@@ -87,13 +87,13 @@ class AdminServiceImpl(AdminService):
             logger.exception(e)
             raise UnknownError(e)
 
-    async def get_promotional_offer(self, offer_id: int) -> PromotionalOfferEntity:
+    async def get_announcement(self, announcement_id: int) -> AnnouncementEntity:
         try:
             async with self.__session_manager.get_session() as s:
-                offer = await self.__get_promotional_offer(s, offer_id)
-                offer_entity = PromotionalOfferEntity.model_validate(offer)
-                return offer_entity
-        except OfferDoesNotExist as e:
+                announcement = await self.__get_announcement(s, announcement_id)
+                announcement_entity = AnnouncementEntity.model_validate(announcement)
+                return announcement_entity
+        except AnnouncementDoesNotExist as e:
             logger.warning(e)
             raise
         except SQLAlchemyError as e:
@@ -103,13 +103,13 @@ class AdminServiceImpl(AdminService):
             logger.exception(e)
             raise UnknownError(e)
 
-    async def delete_promotional_offer(self, offer_id: int):
+    async def delete_announcement(self, announcement_id: int):
         try:
             async with self.__session_manager.get_session() as s:
-                offer = await self.__get_promotional_offer(s, offer_id)
-                await s.delete(offer)
+                announcement = await self.__get_announcement(s, announcement_id)
+                await s.delete(announcement)
                 await s.commit()
-        except OfferDoesNotExist as e:
+        except AnnouncementDoesNotExist as e:
             logger.warning(e)
             raise
         except SQLAlchemyError as e:
@@ -120,17 +120,17 @@ class AdminServiceImpl(AdminService):
             raise UnknownError(e)
 
 
-    async def distribute_promotional_offer(self, account_id: int, offer_id: int):
+    async def distribute_announcement(self, account_id: int, announcement_id: int):
         try:
             async with self.__session_manager.get_session() as s:
                 res = await s.execute(select(AdminAccountOrm).filter(AdminAccountOrm.id == account_id).with_for_update())
                 account = res.scalars().first()
-                self.__can_publish_promotional_offer(account)
-                account.date_last_offer_distributing = datetime.now()
-                offer = await self.__get_promotional_offer(s, offer_id)
-                offer.date_last_distribute = datetime.now()
+                self.__can_publish_announcement(account)
+                account.date_last_announcement_distributing = datetime.now()
+                announcement = await self.__get_announcement(s, announcement_id)
+                announcement.date_last_distribute = datetime.now()
                 await s.commit()
-        except (OfferDoesNotExist, CooldownError) as e:
+        except (AnnouncementDoesNotExist, CooldownError) as e:
             await s.rollback()
             logger.warning(e)
             raise

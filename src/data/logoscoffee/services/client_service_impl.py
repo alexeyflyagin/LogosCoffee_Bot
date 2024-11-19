@@ -7,10 +7,10 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from src.data.logoscoffee.checks import check_text_is_not_empty
 from src.data.logoscoffee.entities.general_entities import MenuEntity
-from src.data.logoscoffee.entities.orm_entities import PromotionalOfferEntity, ClientAccountEntity, ProductEntity
+from src.data.logoscoffee.entities.orm_entities import AnnouncementEntity, ClientAccountEntity, ProductEntity
 from src.data.logoscoffee.interfaces.client_service import ClientService
 from src.data.logoscoffee.exceptions import *
-from src.data.logoscoffee.db.models import ClientAccountOrm, ReviewOrm, PromotionalOfferOrm, ProductOrm
+from src.data.logoscoffee.db.models import ClientAccountOrm, ReviewOrm, AnnouncementOrm, ProductOrm
 from src.data.logoscoffee.services.units import create_draft_orm
 from src.data.logoscoffee.session_manager import SessionManager
 
@@ -31,12 +31,12 @@ class ClientServiceImpl(ClientService):
         #     if delta_time < timedelta(hours=1):
         #         raise CooldownError(delta_time)
 
-    async def get_new_offers(self, last_update_time) -> list[PromotionalOfferEntity]:
+    async def get_new_announcements(self, last_update_time) -> list[AnnouncementEntity]:
         try:
             async with self.__session_manager.get_session() as s:
-                res = await s.execute(select(PromotionalOfferOrm).filter(PromotionalOfferOrm.date_last_distribute >= last_update_time))
-                offers = res.scalars().all()
-                entities = [PromotionalOfferEntity.model_validate(i) for i in offers]
+                res = await s.execute(select(AnnouncementOrm).filter(AnnouncementOrm.date_last_distribute >= last_update_time))
+                announcements = res.scalars().all()
+                entities = [AnnouncementEntity.model_validate(i) for i in announcements]
                 return entities
         except SQLAlchemyError as e:
             logger.error(e)

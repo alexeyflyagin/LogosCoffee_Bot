@@ -27,10 +27,10 @@ def client_handlers__inject():
 
 
 def admin_handlers__inject():
-    from src.presentation.bots.admin_bot.handlers import handler, end_handler, promotional_offer_handler
+    from src.presentation.bots.admin_bot.handlers import handler, end_handler, announcement_handler
     handler.admin_service = di.admin_service()
     handler.event_service = di.event_service()
-    promotional_offer_handler.admin_service = di.admin_service()
+    announcement_handler.admin_service = di.admin_service()
     end_handler.admin_service = di.admin_service()
 
 

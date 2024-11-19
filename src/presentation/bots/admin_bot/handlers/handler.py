@@ -39,6 +39,6 @@ async def start_handler(msg: Message, state: FSMContext, command: CommandObject)
     except (DatabaseError, UnknownError):
         await unknown_error(msg, state)
 
-@router.message(MakePromotionalOffer(), Command(commands.CANCEL_COMMAND))
+@router.message(MakeAnnouncement(), Command(commands.CANCEL_COMMAND))
 async def cancel_handler(msg: Message, state: FSMContext):
     await reset_state(msg, state, strings.GENERAL.ACTION_CANCELED)

@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 from src.data.logoscoffee.entities.general_entities import MenuEntity
-from src.data.logoscoffee.entities.orm_entities import PromotionalOfferEntity, ClientAccountEntity, ProductEntity
+from src.data.logoscoffee.entities.orm_entities import AnnouncementEntity, ClientAccountEntity, ProductEntity
 
 
 class ClientService(ABC):
@@ -15,7 +15,7 @@ class ClientService(ABC):
         pass
 
     @abstractmethod
-    async def get_new_offers(self, last_update_time) -> list[PromotionalOfferEntity]:
+    async def get_new_announcements(self, last_update_time) -> list[AnnouncementEntity]:
         pass
 
     @abstractmethod

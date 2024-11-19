@@ -11,6 +11,9 @@ def code(it: str) -> str:
 def i(it: str) -> str:
     return f"<i>{it}</i>"
 
+def quote(it: str) -> str:
+    return f"<blockquote>{it}</blockquote>"
+
 class StrGroup:
     pass
 

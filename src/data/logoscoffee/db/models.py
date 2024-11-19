@@ -35,7 +35,7 @@ class AdminAccountOrm(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     key: Mapped[str] = mapped_column(unique=True)
     date_authorized: Mapped[datetime] = mapped_column(nullable=True)
-    date_last_offer_distributing: Mapped[datetime] = mapped_column(nullable=True)
+    date_last_announcement_distributing: Mapped[datetime] = mapped_column(nullable=True)
 
 class EmployeeAccountOrm(Base):
     __tablename__ = "employee_account"
@@ -58,8 +58,8 @@ class ReviewOrm(Base):
     date_create: Mapped[datetime] = mapped_column(default=datetime.now)
     text_content: Mapped[str] = mapped_column()
 
-class PromotionalOfferOrm(Base):
-    __tablename__ = "promotional_offer"
+class AnnouncementOrm(Base):
+    __tablename__ = "announcement"
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     date_create: Mapped[datetime] = mapped_column(default=datetime.now)
     date_last_distribute: Mapped[datetime] = mapped_column(nullable=True)

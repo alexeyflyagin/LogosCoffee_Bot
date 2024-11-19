@@ -7,7 +7,7 @@ from loguru import logger
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message, URLInputFile
 
-from src.data.logoscoffee.entities.orm_entities import PromotionalOfferEntity
+from src.data.logoscoffee.entities.orm_entities import AnnouncementEntity
 from src.presentation.bots.types import FileAddress
 from src.presentation.resources import strings
 from src.presentation.resources.strings_builder import strings_builder
@@ -17,9 +17,9 @@ def get_datetime_str(date: datetime) -> str:
     return date.strftime("%d.%m.%Y %H:%M")
 
 
-def get_date_last_offer_distributing_str(offer: PromotionalOfferEntity):
-    if offer.date_last_distribute:
-        return strings_builder.b(get_datetime_str(offer.date_last_distribute))
+def get_date_last_announcement_distributing_str(announcement: AnnouncementEntity):
+    if announcement.date_last_distribute:
+        return strings_builder.b(get_datetime_str(announcement.date_last_distribute))
     return strings_builder.i(strings.GENERAL.NO_DATA)
 
 async def send_or_update_msg(msg: Message, text: str, is_update: bool = False, replay_markup = None) -> Message:
@@ -34,7 +34,7 @@ async def send_or_update_msg(msg: Message, text: str, is_update: bool = False, r
 
 
 
-async def send_offer(bot: Bot, chat_id: int, offer: PromotionalOfferEntity):
+async def send_announcement(bot: Bot, chat_id: int, offer: AnnouncementEntity):
     text = offer.text_content
     if offer.preview_photo:
         address = FileAddress.from_address(offer.preview_photo)

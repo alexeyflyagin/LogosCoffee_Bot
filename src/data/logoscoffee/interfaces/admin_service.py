@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
 
-from src.data.logoscoffee.entities.orm_entities import ReviewEntity, PromotionalOfferEntity, AdminAccountEntity
+from src.data.logoscoffee.entities.orm_entities import ReviewEntity, AnnouncementEntity, AdminAccountEntity
 
 
 class AdminService(ABC):
@@ -15,17 +15,17 @@ class AdminService(ABC):
         pass
 
     @abstractmethod
-    async def create_promotional_offer(self, text_content: str | None, preview_photo: str | None) -> PromotionalOfferEntity:
+    async def create_announcement(self, text_content: str | None, preview_photo: str | None) -> AnnouncementEntity:
         pass
 
     @abstractmethod
-    async def get_promotional_offer(self, offer_id: int) -> PromotionalOfferEntity:
+    async def get_announcement(self, announcement_id: int) -> AnnouncementEntity:
         pass
 
     @abstractmethod
-    async def delete_promotional_offer(self, offer_id: int):
+    async def delete_announcement(self, announcement_id: int):
         pass
 
     @abstractmethod
-    async def distribute_promotional_offer(self, account_id: int, promotional_offer_id: int):
+    async def distribute_announcement(self, account_id: int, announcement_id: int):
         pass

@@ -46,7 +46,7 @@ class AdminAccountEntity(BaseModel):
     id: int
     key: str
     date_authorized: datetime | None
-    date_last_offer_distributing: datetime | None
+    date_last_announcement_distributing: datetime | None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -74,7 +74,7 @@ class ReviewEntity(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-class PromotionalOfferEntity(BaseModel):
+class AnnouncementEntity(BaseModel):
     id: int
     date_create: datetime
     date_last_distribute: datetime | None
