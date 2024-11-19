@@ -26,7 +26,6 @@ async def menu_handler(msg: Message, state: FSMContext):
 
 async def show_menu(msg: Message, page_index: int = 0, is_update: bool = False):
     products = await client_service.get_menu()
-    products.all_products += products.all_products + products.all_products
     all_products_s = []
     items = []
     for i in range(len(products.all_products)):

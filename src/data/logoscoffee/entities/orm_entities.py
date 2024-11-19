@@ -1,8 +1,6 @@
 from datetime import datetime
 from decimal import Decimal
-from typing import Optional, List
 
-from attr import dataclass
 from pydantic import BaseModel, ConfigDict
 
 
@@ -15,21 +13,21 @@ class OrderEntity(BaseModel):
     description: str
     preview_photo: str | None
 
-    product_and_orders: Optional[List["ProductAndOrderEntity"]]
+    product_and_orders_rs: 'ProductAndOrderEntity' = None
 
-    model_config = ConfigDict(from_attributes=True, arbitrary_types_allowed=True)
+    model_config = ConfigDict(from_attributes=True)
 
-class ProductAndOrderEntity:
+class ProductAndOrderEntity(BaseModel):
     id: int
     date_create: datetime
     order_id: int
     product_id: int
     product_price: Decimal
 
-    product: Optional["ProductEntity"]
-    order: Optional["OrderEntity"]
+    product_rs: 'ProductEntity' = None
+    order_rs: 'OrderEntity' = None
 
-    model_config = ConfigDict(from_attributes=True, arbitrary_types_allowed=True)
+    model_config = ConfigDict(from_attributes=True)
 
 class ProductEntity(BaseModel):
     id: int
@@ -40,9 +38,9 @@ class ProductEntity(BaseModel):
     description: str
     preview_photo: str | None
 
-    product_and_orders: Optional[List["ProductAndOrderEntity"]]
+    product_and_orders_rs: 'ProductAndOrderEntity' = None
 
-    model_config = ConfigDict(from_attributes=True, arbitrary_types_allowed=True)
+    model_config = ConfigDict(from_attributes=True)
 
 class AdminAccountEntity(BaseModel):
     id: int

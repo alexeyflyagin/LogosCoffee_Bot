@@ -1,6 +1,7 @@
 import string
 
 from loguru import logger
+from pydantic import TypeAdapter
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -110,8 +111,9 @@ class ClientServiceImpl(ClientService):
         try:
             async with self.__session_manager.get_session() as s:
                 res = await s.execute(select(ProductOrm).filter(ProductOrm.is_available == True))
-                products = res.scalars().all()
-                entities = [ProductEntity.model_validate(i) for i in products]
+                products = res.unique().scalars().all()
+                type_adapter = TypeAdapter(list[ProductEntity])
+                entities = type_adapter.validate_python(products)
                 menu_entity = MenuEntity(all_products=entities)
                 return menu_entity
         except SQLAlchemyError as e:
