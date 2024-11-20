@@ -6,6 +6,7 @@ CAFE_NAME = "LOGOSCOFFEE"
 
 
 class ERRORS(StrGroup):
+
     class UNKNOWN(StrGroup):
         V1 = "😧 Упс! Что-то пошло не по плану. Пожалуйста, повторите попытку."
 
@@ -45,6 +46,7 @@ class BTN(StrGroup):
     CANCEL = "❌ Отменить"
     MENU = "📋 Меню"
     ADD = "+ Добавить"
+    BUTTON = "Кнопка"
     PAGE_PREVIOUS = "«"
     PAGE_NEXT = "»"
     PAGE_COUNTER = "{current} / {all}"
@@ -161,6 +163,8 @@ class ADMIN(StrGroup):
         """)
 
         DOES_NOT_EXIST = "Объявление не найдена."
+
+        BUTTON_MENU_FOR_CLIENT = f"У клиента откроется '{BTN.MENU}' по нажатию на эту кнопку."
 
         class PUBLISH(StrGroup):
             SUCCESSFUL = "Объявление успешно опубликовано!"

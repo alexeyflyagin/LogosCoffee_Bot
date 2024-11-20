@@ -2,14 +2,13 @@ from datetime import datetime
 from html import escape
 
 from aiogram import Bot
-from aiogram.utils.keyboard import InlineKeyboardBuilder
 from loguru import logger
-from bs4 import BeautifulSoup
 
 from aiogram.exceptions import TelegramBadRequest
-from aiogram.types import Message, URLInputFile, InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import Message, URLInputFile
 
 from src.data.logoscoffee.entities.orm_entities import AnnouncementEntity
+from src.presentation.bots.html_parser import MagicHTMLParser
 from src.presentation.bots.types import FileAddress
 from src.presentation.resources import strings
 from src.presentation.resources.strings_builder import strings_builder
@@ -38,46 +37,26 @@ async def send_or_update_msg(msg: Message, text: str, is_update: bool = False, r
 def get_link_to_file_by_path(bot_token: str, file_path: str) -> str:
     return f"https://api.telegram.org/file/bot{bot_token}/{file_path}"
 
-def get_announcement_markup(announcement: AnnouncementEntity) -> InlineKeyboardMarkup | None:
-    if not announcement.text_content:
-        return None
-    soup = BeautifulSoup(announcement.text_content, 'html.parser')
-    url_arg = 'url'
-    url_button_tags = soup.find_all('button', {url_arg: True})
-    if not url_button_tags:
-        return None
-    ikb = InlineKeyboardBuilder()
-    adjust = []
-    for tag in url_button_tags:
-        button_url = tag.get(url_arg)
-        button_text = tag.text or "Link"
-        ikb.add(InlineKeyboardButton(text=button_text, url=button_url))
-        adjust.append(1)
-    ikb.adjust(*adjust)
-    return ikb.as_markup()
-
-def decompose_custom_tags(text: str | None) -> str | None:
-    if not text:
-        return text
-    soup = BeautifulSoup(text, 'html.parser')
-    url_arg = 'url'
-    url_button_tags = soup.find_all('button', {url_arg: True})
-    if not url_button_tags:
-        return text
-    for tag in url_button_tags:
-        tag.decompose()
-    return soup.text
-
 
 async def send_announcement(bot: Bot, chat_id: int, announcement: AnnouncementEntity):
-    markup = get_announcement_markup(announcement)
-    text = decompose_custom_tags(announcement.text_content)
+    html_parser = MagicHTMLParser(announcement.text_content)
+    markup = html_parser.markup
+    text = announcement.text_content
+    clean_text = html_parser.clean_text
     if announcement.preview_photo:
         address = FileAddress.from_address(announcement.preview_photo)
         file = await Bot(address.bot_type.value, session=bot.session).get_file(address.file_id)
         photo = URLInputFile(get_link_to_file_by_path(bot_token=address.bot_type.value, file_path=file.file_path))
-        await bot.send_photo(chat_id=chat_id, photo=photo, caption=escape(text), reply_markup=markup)
+        try:
+            await bot.send_photo(chat_id=chat_id, photo=photo, caption=escape(clean_text), reply_markup=markup)
+        except TelegramBadRequest as e:
+            logger.warning(e)
+            await bot.send_photo(chat_id=chat_id, photo=photo, caption=escape(text))
     else:
-        if text.strip() == "":
-            text = "ㅤ"
-        await bot.send_message(chat_id=chat_id, text=escape(text), reply_markup=markup)
+        try:
+            if clean_text.strip() == "":
+                clean_text = "ㅤ"
+            await bot.send_message(chat_id=chat_id, text=escape(clean_text), reply_markup=markup)
+        except TelegramBadRequest as e:
+            logger.warning(e)
+            await bot.send_message(chat_id=chat_id, text=escape(text))

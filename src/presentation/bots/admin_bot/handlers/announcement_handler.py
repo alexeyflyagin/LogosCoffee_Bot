@@ -11,6 +11,7 @@ from src.presentation.bots.admin_bot.handlers.utils import unknown_error, reset_
 from src.presentation.bots.admin_bot.keyboards import AnnouncementCD, announcement_markup
 from src.presentation.bots.admin_bot.states import MainStates, MakeAnnouncement
 from src.presentation.bots.confirmation_markup import ConfirmationCD, confirmation_markup
+from src.presentation.bots.constants import CALLBACK_DATA__LIST_MENU
 from src.presentation.bots.types import FileAddress
 from src.presentation.bots.utils import send_or_update_msg, get_datetime_str, get_date_last_announcement_distributing_str, \
     send_announcement
@@ -105,6 +106,14 @@ async def delete_announcement_callback(callback: CallbackQuery, state: FSMContex
         await callback.answer(strings.ADMIN.ANNOUNCEMENT.DOES_NOT_EXIST)
     except (DatabaseError, UnknownError):
         await unknown_error_for_callback(callback, state)
+
+
+@router.callback_query(MainStates.Main, F.data == CALLBACK_DATA__LIST_MENU)
+async def menu_callback(callback: CallbackQuery, state: FSMContext):
+    try:
+        await callback.answer(strings.ADMIN.ANNOUNCEMENT.BUTTON_MENU_FOR_CLIENT)
+    except (DatabaseError, UnknownError):
+        await unknown_error(callback.message, state)
 
 
 async def show_announcement_management(msg: Message, announcement_id: int, is_update: bool = False):
