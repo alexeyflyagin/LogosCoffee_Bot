@@ -48,3 +48,11 @@ class AnnouncementDoesNotExist(LCException):
 class PlacedOrderIsEmpty(LCException):
     def __init__(self, **kwargs):
         super().__init__(f"Order ({kwargs}), which was tried to place, is empty")
+
+class ProductIsNotAvailable(LCException):
+    def __init__(self, **kwargs):
+        super().__init__(f"Product ({kwargs}) is not available")
+
+class OrderStateError(LCException):
+    def __init__(self, **kwargs):
+        super().__init__(f"Order state ({kwargs}) was unexpected")

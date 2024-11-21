@@ -26,7 +26,7 @@ class ClientOrderService(ABC):
         pass
 
     @abstractmethod
-    async def get_current_orders(self, client_id: int) -> list[OrderEntity]:
+    async def get_in_progress_orders(self, client_id: int) -> list[OrderEntity]:
         pass
 
     @abstractmethod

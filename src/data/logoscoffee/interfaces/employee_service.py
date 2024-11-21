@@ -23,10 +23,6 @@ class EmployeeService(ABC):
         pass
 
     @abstractmethod
-    async def start_cook_order(self, order_id: int):
-        pass
-
-    @abstractmethod
     async def ready_order(self, order_id: int):
         pass
 
