@@ -32,3 +32,7 @@ class ClientOrderService(ABC):
     @abstractmethod
     async def get_archived_orders(self, client_id: int) -> list[OrderEntity]:
         pass
+
+    @abstractmethod
+    async def get_products_in_client_order_count(self, client_id: int, product_id: int) -> int:
+        pass
