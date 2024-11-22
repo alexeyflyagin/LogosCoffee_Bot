@@ -127,7 +127,11 @@ class ClientOrderServiceImpl(ClientOrderService):
                 products_and_order = res_products_and_order.unique().scalars().all()
                 if len(products_and_order) == 0:
                     raise PlacedOrderIsEmpty
-                deleted_items = [i for i in products_and_order if not i.product.is_available]
+                deleted_items = []
+                for i in products_and_order:
+                    if not i.product.is_available:
+                        deleted_items.append(i)
+                    else: i.product_price = i.product.price
                 [await s.delete(i) for i in deleted_items]
                 order.date_pending = datetime.now()
                 await s.flush()
