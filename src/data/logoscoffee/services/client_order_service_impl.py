@@ -9,7 +9,7 @@ from sqlalchemy.orm import joinedload
 
 from src.data.logoscoffee.db.models import OrderOrm, ProductAndOrderOrm, ProductOrm
 from src.data.logoscoffee.entities.general_entities import OrderPlaceAttemptEntity
-from src.data.logoscoffee.entities.orm_entities import OrderEntity
+from src.data.logoscoffee.entities.orm_entities import OrderEntity, ProductAndOrderEntity
 from src.data.logoscoffee.exceptions import UnknownError, DatabaseError, PlacedOrderIsEmpty, ProductIsNotAvailable, \
     RemovingProductIsNotFound
 from src.data.logoscoffee.interfaces.client_order_service import ClientOrderService
@@ -38,9 +38,16 @@ class ClientOrderServiceImpl(ClientOrderService):
     async def get_draft_order(self, client_id: int) -> OrderEntity:
         try:
             async with self.__session_manager.get_session() as s:
-                order = await self.__get_draft_order(s, client_id)
+                res = await s.execute(select(OrderOrm)
+                                      .options(joinedload(OrderOrm.product_and_orders).joinedload(ProductAndOrderOrm.product))
+                                      .filter(OrderOrm.client_id == client_id, OrderOrm.date_pending == None))
+                order = res.unique().scalars().first()
                 entity = OrderEntity.model_validate(order)
-
+                entity.product_and_orders_rs = []
+                for i in order.product_and_orders:
+                    product_and_order_entity = ProductAndOrderEntity.model_validate(i)
+                    product_and_order_entity.product_rs = i.product
+                    entity.product_and_orders_rs.append(product_and_order_entity)
                 return entity
         except SQLAlchemyError as e:
             logger.error(e)
