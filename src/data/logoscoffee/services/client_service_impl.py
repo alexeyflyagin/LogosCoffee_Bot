@@ -57,11 +57,9 @@ class ClientServiceImpl(ClientService):
                 await s.commit()
                 return entity
         except SQLAlchemyError as e:
-            await s.rollback()
             logger.error(e)
             raise DatabaseError(e)
         except Exception as e:
-            await s.rollback()
             logger.exception(e)
             raise UnknownError(e)
 
@@ -95,15 +93,12 @@ class ClientServiceImpl(ClientService):
                 s.add(new_comment)
                 await s.commit()
         except (EmptyTextError, CooldownError) as e:
-            await s.rollback()
             logger.warning(e)
             raise
         except SQLAlchemyError as e:
-            await s.rollback()
             logger.error(e)
             raise DatabaseError(e)
         except Exception as e:
-            await s.rollback()
             logger.exception(e)
             raise UnknownError(e)
 
@@ -124,6 +119,17 @@ class ClientServiceImpl(ClientService):
             raise UnknownError(e)
 
     async def get_product_by_id(self, product_id: int) -> ProductEntity:
-        pass
+        try:
+            async with self.__session_manager.get_session() as s:
+                res = await s.execute(select(ProductOrm).filter(ProductOrm.id == product_id))
+                product = res.scalars().first()
+                entity = ProductEntity.model_validate(product)
+                return entity
+        except SQLAlchemyError as e:
+            logger.error(e)
+            raise DatabaseError(e)
+        except Exception as e:
+            logger.exception(e)
+            raise UnknownError(e)
 
 
