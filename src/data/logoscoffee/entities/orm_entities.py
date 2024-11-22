@@ -1,3 +1,4 @@
+from collections import defaultdict
 from datetime import datetime
 from decimal import Decimal
 from enum import Enum
@@ -18,8 +19,7 @@ class OrderEntity(BaseModel):
     cancel_details: str | None
     details: str | None
 
-
-    product_and_orders_rs: 'ProductAndOrderEntity' = None
+    product_and_orders_rs: list['ProductAndOrderEntity'] = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -46,12 +46,31 @@ class OrderEntity(BaseModel):
         else:
             return self.OrderState.DRAFT
 
+    @property
+    def product_and_order_groups(self) -> list[list['ProductAndOrderEntity']] | None:
+        if self.product_and_orders_rs is None:
+            return None
+        groups = defaultdict(list)
+        for item in self.product_and_orders_rs:
+            groups[item.product_rs.id].append(item)
+        res = list(groups.values())
+        return res
+
+    @property
+    def total_price(self) -> Decimal | None:
+        if self.product_and_orders_rs is None:
+            return None
+        if self.state == self.OrderState.DRAFT:
+            return sum([i.product_rs.price for i in self.product_and_orders_rs], Decimal('0'))
+        else:
+            return sum([i.product_price for i in self.product_and_orders_rs], Decimal('0'))
+
 class ProductAndOrderEntity(BaseModel):
     id: int
     date_create: datetime
     order_id: int
     product_id: int
-    product_price: Decimal
+    product_price: Decimal | None
 
     product_rs: 'ProductEntity' = None
     order_rs: 'OrderEntity' = None

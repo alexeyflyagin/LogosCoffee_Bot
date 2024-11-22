@@ -157,6 +157,18 @@ class CLIENT(StrGroup):
         class REMOVE(StrGroup):
             IS_NOT_FOUND = "😣 Продукта нет уже нет в корзине."
 
+    class DRAFT_ORDER(StrGroup):
+        MAIN = dedent(f"""\
+            {b('🛒 Корзина')}:
+            —
+            {{items}}
+            —
+            {b('Итого: {total_price}')}
+        """)
+
+        ITEM = f"{b('{index}')}  {{product_name}} — {{price}} {{counter}}"
+        ITEM_COUNTER = "(x{counter})"
+
 class ADMIN(StrGroup):
 
     NEW_REVIEW_NOTIFICATION = dedent(f"""\

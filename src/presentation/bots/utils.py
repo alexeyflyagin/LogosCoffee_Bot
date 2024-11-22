@@ -32,7 +32,7 @@ async def send_or_update_msg(msg: Message, text: str, is_update: bool = False, r
             send_msg = await msg.answer(text=text, reply_markup=replay_markup)
         return send_msg
     except TelegramBadRequest as e:
-        logger.error(e)
+        logger.warning(e)
 
 
 def get_link_to_file_by_path(bot_token: str, file_path: str) -> str:
