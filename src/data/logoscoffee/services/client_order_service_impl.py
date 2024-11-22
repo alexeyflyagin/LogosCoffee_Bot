@@ -38,6 +38,7 @@ class ClientOrderServiceImpl(ClientOrderService):
             async with self.__session_manager.get_session() as s:
                 order = await self.__get_draft_order(s, client_id)
                 entity = OrderEntity.model_validate(order)
+
                 return entity
         except SQLAlchemyError as e:
             logger.error(e)
@@ -148,7 +149,6 @@ class ClientOrderServiceImpl(ClientOrderService):
                 adapter = TypeAdapter(list[OrderEntity])
                 order_entities = adapter.validate_python(orders)
 
-                await s.commit()
                 return order_entities
         except SQLAlchemyError as e:
             logger.error(e)
@@ -168,8 +168,24 @@ class ClientOrderServiceImpl(ClientOrderService):
                 adapter = TypeAdapter(list[OrderEntity])
                 order_entities = adapter.validate_python(orders)
 
-                await s.commit()
                 return order_entities
+        except SQLAlchemyError as e:
+            logger.error(e)
+            raise DatabaseError(e)
+        except Exception as e:
+            logger.exception(e)
+            raise UnknownError(e)
+
+    async def get_products_in_client_order_count(self, client_id: int, product_id: int) -> int:
+        try:
+            async with self.__session_manager.get_session() as s:
+                order = await self.__get_draft_order(s, client_id, True)
+                res_products = await s.execute(select(ProductAndOrderOrm).filter(
+                    ProductAndOrderOrm.product_id == product_id,
+                    ProductAndOrderOrm.order_id == order.id))
+                products = res_products.scalars().all()
+
+                return len(products)
         except SQLAlchemyError as e:
             logger.error(e)
             raise DatabaseError(e)
