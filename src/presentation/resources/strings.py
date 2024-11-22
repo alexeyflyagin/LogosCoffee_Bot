@@ -88,7 +88,7 @@ class CLIENT(StrGroup):
     LINKS = "Присоединяйся к нам в vk: https://vk.com/logoscoffee"
 
     class AUTHORIZATION(StrGroup):
-        PRESS_BTN = f"""Для авторизации потребуется твой номер телефона. Нажмите '{b(BTN.AUTHORIZE)}', чтобы продолжить."""
+        PRESS_BTN = f"""Нажмите '{b(BTN.AUTHORIZE)}', чтобы авторизоваться."""
 
         CONTACT_NOT_LINKED = "Этот контакт не связан с вашим Telegram аккаунтом. Попробуй ещё раз!"
 
