@@ -96,11 +96,9 @@ class ClientOrderServiceImpl(ClientOrderService):
                     await s.delete(i)
                 await s.commit()
         except SQLAlchemyError as e:
-            await s.rollback()
             logger.error(e)
             raise DatabaseError(e)
         except Exception as e:
-            await s.rollback()
             logger.exception(e)
             raise UnknownError(e)
 
@@ -129,11 +127,9 @@ class ClientOrderServiceImpl(ClientOrderService):
             logger.warning(e)
             raise
         except SQLAlchemyError as e:
-            await s.rollback()
             logger.error(e)
             raise DatabaseError(e)
         except Exception as e:
-            await s.rollback()
             logger.exception(e)
             raise UnknownError(e)
 

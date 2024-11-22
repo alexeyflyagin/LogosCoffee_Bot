@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import Any
 
 from loguru import logger
@@ -44,15 +43,12 @@ class EventServiceImpl(EventService):
                 s.add(new_subscriber)
                 await s.commit()
         except AlreadySubscribedError as e:
-            await s.rollback()
             logger.warning(e)
             raise
         except SQLAlchemyError as e:
-            await s.rollback()
             logger.error(e)
             raise DatabaseError(e)
         except Exception as e:
-            await s.rollback()
             logger.exception(e)
             raise UnknownError(e)
 
@@ -67,14 +63,11 @@ class EventServiceImpl(EventService):
                 await s.delete(subscriber)
                 await s.commit()
         except AlreadyUnsubscribedError as e:
-            await s.rollback()
             logger.warning(e)
             raise
         except SQLAlchemyError as e:
-            await s.rollback()
             logger.error(e)
             raise DatabaseError(e)
         except Exception as e:
-            await s.rollback()
             logger.exception(e)
             raise UnknownError(e)

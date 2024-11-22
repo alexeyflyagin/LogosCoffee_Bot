@@ -57,11 +57,9 @@ class ClientServiceImpl(ClientService):
                 await s.commit()
                 return entity
         except SQLAlchemyError as e:
-            await s.rollback()
             logger.error(e)
             raise DatabaseError(e)
         except Exception as e:
-            await s.rollback()
             logger.exception(e)
             raise UnknownError(e)
 
@@ -95,15 +93,12 @@ class ClientServiceImpl(ClientService):
                 s.add(new_comment)
                 await s.commit()
         except (EmptyTextError, CooldownError) as e:
-            await s.rollback()
             logger.warning(e)
             raise
         except SQLAlchemyError as e:
-            await s.rollback()
             logger.error(e)
             raise DatabaseError(e)
         except Exception as e:
-            await s.rollback()
             logger.exception(e)
             raise UnknownError(e)
 

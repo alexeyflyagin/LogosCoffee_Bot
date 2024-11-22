@@ -57,15 +57,12 @@ class AdminServiceImpl(AdminService):
                 await s.commit()
                 return entity
         except InvalidKey as e:
-            await s.rollback()
             logger.warning(e)
             raise
         except SQLAlchemyError as e:
-            await s.rollback()
             logger.error(e)
             raise DatabaseError(e)
         except Exception as e:
-            await s.rollback()
             logger.exception(e)
             raise UnknownError(e)
 
@@ -79,11 +76,9 @@ class AdminServiceImpl(AdminService):
                 await s.commit()
                 return res
         except SQLAlchemyError as e:
-            await s.rollback()
             logger.error(e)
             raise DatabaseError(e)
         except Exception as e:
-            await s.rollback()
             logger.exception(e)
             raise UnknownError(e)
 
@@ -131,15 +126,12 @@ class AdminServiceImpl(AdminService):
                 announcement.date_last_distribute = datetime.now()
                 await s.commit()
         except (AnnouncementDoesNotExist, CooldownError) as e:
-            await s.rollback()
             logger.warning(e)
             raise
         except SQLAlchemyError as e:
-            await s.rollback()
             logger.error(e)
             raise DatabaseError(e)
         except Exception as e:
-            await s.rollback()
             logger.exception(e)
             raise UnknownError(e)
 
