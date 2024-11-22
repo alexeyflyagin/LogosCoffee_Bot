@@ -39,6 +39,7 @@ def admin_handlers__inject():
 def employee_handlers__inject():
     from src.presentation.bots.employee_bot.handlers import handler
     handler.employee_service = di.employee_service()
+    handler.event_service = di.event_service()
 
 
 class Container(containers.DeclarativeContainer):
