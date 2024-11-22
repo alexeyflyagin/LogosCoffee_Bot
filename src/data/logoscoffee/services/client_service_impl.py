@@ -119,6 +119,17 @@ class ClientServiceImpl(ClientService):
             raise UnknownError(e)
 
     async def get_product_by_id(self, product_id: int) -> ProductEntity:
-        pass
+        try:
+            async with self.__session_manager.get_session() as s:
+                res = await s.execute(select(ProductOrm).filter(ProductOrm.id == product_id))
+                product = res.scalars().first()
+                entity = ProductEntity.model_validate(product)
+                return entity
+        except SQLAlchemyError as e:
+            logger.error(e)
+            raise DatabaseError(e)
+        except Exception as e:
+            logger.exception(e)
+            raise UnknownError(e)
 
 
