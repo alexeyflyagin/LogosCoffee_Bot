@@ -56,3 +56,7 @@ class ProductIsNotAvailable(LCException):
 class OrderStateError(LCException):
     def __init__(self, **kwargs):
         super().__init__(f"Order state ({kwargs}) was unexpected")
+
+class RemovingProductIsNotFound(LCException):
+    def __init__(self, **kwargs):
+        super().__init__(f"Product ({kwargs}) you tried to remove doesn't exist in the draft order")

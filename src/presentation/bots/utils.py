@@ -1,4 +1,5 @@
 from datetime import datetime
+from decimal import Decimal
 from html import escape
 
 from aiogram import Bot
@@ -37,6 +38,8 @@ async def send_or_update_msg(msg: Message, text: str, is_update: bool = False, r
 def get_link_to_file_by_path(bot_token: str, file_path: str) -> str:
     return f"https://api.telegram.org/file/bot{bot_token}/{file_path}"
 
+def to_rubles(money: Decimal) -> str:
+    return f"{money:.2f} ₽"
 
 async def send_announcement(bot: Bot, chat_id: int, announcement: AnnouncementEntity):
     html_parser = MagicHTMLParser(announcement.text_content)

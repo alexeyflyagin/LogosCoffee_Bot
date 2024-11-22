@@ -19,3 +19,8 @@ class OrderUpdateEntity:
         STATE__READY = 2
         STATE__COMPLETED = 3
         STATE__CANCELED = 4
+
+@dataclass
+class OrderPlaceAttemptEntity:
+    order: OrderEntity
+    is_successful: bool

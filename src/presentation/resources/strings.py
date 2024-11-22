@@ -45,7 +45,13 @@ class BTN(StrGroup):
     CONFIRM = "✅ Да, всё верно!"
     CANCEL = "❌ Отменить"
     MENU = "📋 Меню"
+    DRAFT_ORDER = "🛒 Корзина"
     ADD = "+ Добавить"
+    ADD_TO_DRAFT_ORDER = "Добавить в корзину"
+    PRODUCT_TEMPORARY_UNAVAILABLE = "Продукт временно недоступен!"
+    ADD_SYMBOL = "+"
+    REMOVE_SYMBOL = "-"
+    ADDED_TO_DRAFT_ORDER = "🛒: {counter}"
     BUTTON = "Кнопка"
     PAGE_PREVIOUS = "«"
     PAGE_NEXT = "»"
@@ -136,6 +142,20 @@ class CLIENT(StrGroup):
         """)
 
         ITEM = f"{b('{index}')}  {{product_name}} — {{price}}"
+
+    class PRODUCT(StrGroup):
+        MAIN = dedent(f"""\
+            {b('{product_name}')}
+            Цена: {{price}}
+            —
+            {{description}}
+        """)
+
+        class ADD(StrGroup):
+            IS_NOT_AVAILABLE = "😣 Извините, но данный продукт недоступен для заказа!"
+
+        class REMOVE(StrGroup):
+            IS_NOT_FOUND = "😣 Продукта нет уже нет в корзине."
 
 class ADMIN(StrGroup):
 

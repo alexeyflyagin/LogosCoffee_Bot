@@ -6,6 +6,7 @@ from src import config
 
 from src.data.logoscoffee.db.session_manager_impl import SessionManagerImpl
 from src.data.logoscoffee.services.admin_service_impl import AdminServiceImpl
+from src.data.logoscoffee.services.client_order_service_impl import ClientOrderServiceImpl
 from src.data.logoscoffee.services.client_service_impl import ClientServiceImpl
 from src.data.logoscoffee.services.employee_service_impl import EmployeeServiceImpl
 from src.data.logoscoffee.services.event_service_impl import EventServiceImpl
@@ -24,6 +25,7 @@ def client_handlers__inject():
     end_handler.client_service = di.client_service()
     review_handler.client_service = di.client_service()
     menu_handler.client_service = di.client_service()
+    menu_handler.order_service = di.client_order_service()
 
 
 def admin_handlers__inject():
@@ -71,6 +73,11 @@ class Container(containers.DeclarativeContainer):
 
     event_service = providers.Factory(
         EventServiceImpl,
+        session_manager=session_manager,
+    )
+
+    client_order_service = providers.Factory(
+        ClientOrderServiceImpl,
         session_manager=session_manager,
     )
 

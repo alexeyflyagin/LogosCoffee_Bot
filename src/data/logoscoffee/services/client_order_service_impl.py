@@ -8,8 +8,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
 from src.data.logoscoffee.db.models import OrderOrm, ProductAndOrderOrm, ProductOrm
+from src.data.logoscoffee.entities.general_entities import OrderPlaceAttemptEntity
 from src.data.logoscoffee.entities.orm_entities import OrderEntity
-from src.data.logoscoffee.exceptions import UnknownError, DatabaseError, PlacedOrderIsEmpty, ProductIsNotAvailable
+from src.data.logoscoffee.exceptions import UnknownError, DatabaseError, PlacedOrderIsEmpty, ProductIsNotAvailable, \
+    RemovingProductIsNotFound
 from src.data.logoscoffee.interfaces.client_order_service import ClientOrderService
 from src.data.logoscoffee.session_manager import SessionManager
 
@@ -22,9 +24,9 @@ class ClientOrderServiceImpl(ClientOrderService):
     async def __get_draft_order(self, s: AsyncSession, client_id: int, block_row: bool = False) -> OrderOrm:
         if block_row:
             res = await s.execute(select(OrderOrm).filter(
-            OrderOrm.client_id == client_id, OrderOrm.date_pending is None).with_for_update())
+            OrderOrm.client_id == client_id, OrderOrm.date_pending == None).with_for_update())
         else: res = await s.execute(select(OrderOrm).filter(
-            OrderOrm.client_id == client_id, OrderOrm.date_pending is None))
+            OrderOrm.client_id == client_id, OrderOrm.date_pending == None))
         order = res.scalars().first()
         return order
 
@@ -52,14 +54,17 @@ class ClientOrderServiceImpl(ClientOrderService):
             async with self.__session_manager.get_session() as s:
                 order = await self.__get_draft_order(s, client_id, True)
                 product = await self.__get_product(s, product_id)
-                if not product.is_available:
-                    raise ProductIsNotAvailable(id=product.id)
-                product_and_order = ProductAndOrderOrm(order_id=order.id, product_id=product.id)
-                s.add(product_and_order)
+                if product.is_available:
+                    product_and_order = ProductAndOrderOrm(order_id=order.id, product_id=product.id)
+                    s.add(product_and_order)
+                else:
+                    res_products_and_order = await s.execute(select(ProductAndOrderOrm)
+                                                             .filter(ProductAndOrderOrm.order_id == order.id,
+                                                                     ProductAndOrderOrm.product_id == product.id))
+                    products_and_order = res_products_and_order.scalars().all()
+                    for i in products_and_order:
+                        await s.delete(i)
                 await s.commit()
-        except ProductIsNotAvailable as e:
-            logger.warning(e)
-            raise
         except SQLAlchemyError as e:
             logger.error(e)
             raise DatabaseError(e)
@@ -72,12 +77,21 @@ class ClientOrderServiceImpl(ClientOrderService):
             async with self.__session_manager.get_session() as s:
                 order = await self.__get_draft_order(s, client_id, True)
                 product = await self.__get_product(s, product_id)
-                res_product_and_order = await s.execute(select(ProductAndOrderOrm).filter(
+                res = await s.execute(select(ProductAndOrderOrm).filter(
                     ProductAndOrderOrm.order_id == order.id, ProductAndOrderOrm.product_id == product.id))
-                product_and_order = res_product_and_order.scalars().first()
-
-                await s.delete(product_and_order)
+                if product.is_available:
+                    product_and_order = res.scalars().first()
+                    if not product_and_order:
+                        raise RemovingProductIsNotFound(order_id=order.id, product_id=product.id)
+                    await s.delete(product_and_order)
+                else:
+                    products_and_order = res.scalars().all()
+                    for i in products_and_order:
+                        await s.delete(i)
                 await s.commit()
+        except RemovingProductIsNotFound as e:
+            logger.warning(e)
+            raise
         except SQLAlchemyError as e:
             logger.error(e)
             raise DatabaseError(e)
@@ -104,7 +118,7 @@ class ClientOrderServiceImpl(ClientOrderService):
             raise UnknownError(e)
 
 
-    async def place_order(self, client_id: int, order_id: int) -> OrderEntity:
+    async def place_order(self, client_id: int, order_id: int) -> OrderPlaceAttemptEntity:
         try:
             async with self.__session_manager.get_session() as s:
                 order = await self.__get_draft_order(s, client_id, True)
@@ -113,14 +127,14 @@ class ClientOrderServiceImpl(ClientOrderService):
                 products_and_order = res_products_and_order.unique().scalars().all()
                 if len(products_and_order) == 0:
                     raise PlacedOrderIsEmpty
-                for i in products_and_order:
-                    if not i.product.is_available:
-                        raise ProductIsNotAvailable
+                deleted_items = [i for i in products_and_order if not i.product.is_available]
+                [await s.delete(i) for i in deleted_items]
                 order.date_pending = datetime.now()
                 await s.flush()
                 order_entity = OrderEntity.model_validate(order)
                 await s.commit()
-                return order_entity
+                is_successful = len(deleted_items) == 0
+                return OrderPlaceAttemptEntity(order=order_entity, is_successful=is_successful)
         except ProductIsNotAvailable as e:
             logger.warning(e)
             raise
@@ -172,7 +186,7 @@ class ClientOrderServiceImpl(ClientOrderService):
             logger.exception(e)
             raise UnknownError(e)
 
-    async def get_products_in_client_order_count(self, client_id: int, product_id: int) -> int:
+    async def get_count_of_product_from_draft_order(self, client_id: int, product_id: int) -> int:
         try:
             async with self.__session_manager.get_session() as s:
                 order = await self.__get_draft_order(s, client_id, True)

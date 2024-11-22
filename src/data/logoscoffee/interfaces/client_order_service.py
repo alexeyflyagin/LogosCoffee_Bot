@@ -34,5 +34,5 @@ class ClientOrderService(ABC):
         pass
 
     @abstractmethod
-    async def get_products_in_client_order_count(self, client_id: int, product_id: int) -> int:
+    async def get_count_of_product_from_draft_order(self, client_id: int, product_id: int) -> int:
         pass
