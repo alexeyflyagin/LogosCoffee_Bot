@@ -6,7 +6,6 @@ from aiogram.types import Message
 from src.data.logoscoffee.exceptions import *
 from src.data.logoscoffee.interfaces.employee_service import EmployeeService
 from src.data.logoscoffee.interfaces.event_service import EventService
-from src.presentation.bots.client_bot.handlers.handler import event_service
 from src.presentation.resources import strings
 from src.presentation.bots.employee_bot.constants import *
 from src.presentation.bots.employee_bot.states import *

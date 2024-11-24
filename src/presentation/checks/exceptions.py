@@ -17,3 +17,10 @@ class ContentTypeException(CheckException):
             log_msg=f"Wrong content type - {msg_type}. excepted: {available_types}",
             msg=random_str(strings.ERRORS.CONTENT_TYPE)
         )
+
+class MessageContentCountException(CheckException):
+    def __init__(self, msg_count_expected: int, received_count: int):
+        super().__init__(
+            log_msg=f"{msg_count_expected} message was expected, but received: {received_count}",
+            msg=random_str(strings.ERRORS.CONTENT_TYPE)
+        )

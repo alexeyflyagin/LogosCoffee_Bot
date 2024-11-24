@@ -12,14 +12,19 @@ from src.presentation.bots.admin_bot.keyboards import AnnouncementCD, announceme
 from src.presentation.bots.admin_bot.states import MainStates, MakeAnnouncement
 from src.presentation.bots.confirmation_markup import ConfirmationCD, confirmation_markup
 from src.presentation.bots.constants import CALLBACK_DATA__LIST_MENU
+from src.presentation.bots.middlewares.one_message_middleware import OneMessageMiddleware
 from src.presentation.bots.types import FileAddress
 from src.presentation.bots.utils import send_or_update_msg, get_datetime_str, get_date_last_announcement_distributing_str, \
     send_announcement
 from src.presentation.checks import checks
-from src.presentation.checks.exceptions import ContentTypeException
+from src.presentation.checks.exceptions import ContentTypeException, MessageContentCountException
 from src.presentation.resources import strings
 
 router = Router()
+OneMessageMiddleware(
+    router,
+    one_message_states=[MakeAnnouncement.Content],
+)
 admin_service: AdminService
 
 
@@ -30,8 +35,9 @@ async def create_announcement_handler(msg: Message, state: FSMContext):
 
 
 @router.message(MakeAnnouncement.Content)
-async def create_announcement__content__handler(msg: Message, state: FSMContext):
+async def create_announcement__content__handler(msg: Message, state: FSMContext, msg_count: int):
     try:
+        checks.check_one_msg(msg_count)
         checks.check_content_type(msg, ContentType.TEXT, ContentType.PHOTO)
         text = msg.text
         preview_photo = None
@@ -41,7 +47,7 @@ async def create_announcement__content__handler(msg: Message, state: FSMContext)
         res = await admin_service.create_announcement(text, preview_photo)
         await show_announcement_management(msg, res.id)
         await reset_state(msg, state, strings.GENERAL.SELECT_ACTION)
-    except ContentTypeException as e:
+    except (ContentTypeException, MessageContentCountException) as e:
         await msg.answer(e.msg)
     except (DatabaseError, UnknownError):
         await unknown_error(msg, state)

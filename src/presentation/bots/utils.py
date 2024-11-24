@@ -9,7 +9,6 @@ from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message, URLInputFile
 
 from src.data.logoscoffee.entities.orm_entities import AnnouncementEntity
-from src.presentation.bots.html_parser import MagicHTMLParser
 from src.presentation.bots.types import FileAddress
 from src.presentation.resources import strings
 from src.presentation.resources.strings_builder import strings_builder
@@ -42,24 +41,11 @@ def to_rubles(money: Decimal) -> str:
     return f"{money:.2f} ₽"
 
 async def send_announcement(bot: Bot, chat_id: int, announcement: AnnouncementEntity):
-    html_parser = MagicHTMLParser(announcement.text_content)
-    markup = html_parser.markup
     text = announcement.text_content
-    clean_text = html_parser.clean_text
     if announcement.preview_photo:
         address = FileAddress.from_address(announcement.preview_photo)
         file = await Bot(address.bot_type.value, session=bot.session).get_file(address.file_id)
         photo = URLInputFile(get_link_to_file_by_path(bot_token=address.bot_type.value, file_path=file.file_path))
-        try:
-            await bot.send_photo(chat_id=chat_id, photo=photo, caption=escape(clean_text), reply_markup=markup)
-        except TelegramBadRequest as e:
-            logger.warning(e)
-            await bot.send_photo(chat_id=chat_id, photo=photo, caption=escape(text))
+        await bot.send_photo(chat_id=chat_id, photo=photo, caption=text, parse_mode=None)
     else:
-        try:
-            if clean_text.strip() == "":
-                clean_text = "ㅤ"
-            await bot.send_message(chat_id=chat_id, text=escape(clean_text), reply_markup=markup)
-        except TelegramBadRequest as e:
-            logger.warning(e)
-            await bot.send_message(chat_id=chat_id, text=escape(text))
+        await bot.send_message(chat_id=chat_id, text=text, parse_mode=None)
