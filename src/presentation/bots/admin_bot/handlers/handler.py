@@ -5,7 +5,7 @@ from aiogram.filters import Command, CommandObject, CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, ReplyKeyboardRemove
 
-from src.data.logoscoffee.exceptions import DatabaseError, UnknownError, AlreadySubscribedError, InvalidKey
+from src.data.logoscoffee.exceptions import DatabaseError, UnknownError, AlreadySubscribedError, InvalidKeyError
 from src.data.logoscoffee.interfaces.admin_service import AdminService
 from src.data.logoscoffee.interfaces.event_service import EventService
 from src.presentation.bots.admin_bot import constants, keyboards, commands
@@ -34,7 +34,7 @@ async def start_handler(msg: Message, state: FSMContext, command: CommandObject)
         await msg.delete()
     except AlreadySubscribedError:
         pass
-    except InvalidKey:
+    except InvalidKeyError:
         await msg.answer(text=strings.GENERAL.LOGIN.INVALID_KEY, reply_markup=ReplyKeyboardRemove())
     except (DatabaseError, UnknownError):
         await unknown_error(msg, state)

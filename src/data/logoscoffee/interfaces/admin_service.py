@@ -9,10 +9,10 @@ class AdminService(ABC):
     @abstractmethod
     async def get_new_reviews(self, last_update: datetime) -> list[ReviewEntity]:
         """
-        Used for polling.
+        Used for a poll.
 
         :param last_update: The last time you received updates
-        :return: The list of reviews corresponding to the time interval from `last_update` to current_time
+        :return: The list of reviews corresponding to the time interval between `last_update` and current_time
         :raises DatabaseError:
         :raises UnknownError:
         """
@@ -24,8 +24,8 @@ class AdminService(ABC):
         You can use this method to login for the first time. The second authorization will be incorrect.
 
         :param key: The secret key
-        :return: The authorization data
-        :raises InvalidKey: The `key` is incorrect or the account has already been registered
+        :return: The admin account entity
+        :raises InvalidKeyError: The `key` is incorrect or the account has already been registered
         :raises DatabaseError:
         :raises UnknownError:
         """
@@ -34,8 +34,8 @@ class AdminService(ABC):
     @abstractmethod
     async def create_announcement(self, text_content: str | None, preview_photo: str | None) -> AnnouncementEntity:
         """
-        :param text_content: Raw text
-        :param preview_photo: Photo address
+        :param text_content: The text for an announcement
+        :param preview_photo: The address of the photo for an announcement
         :return: The created announcement entity
         :raises DatabaseError:
         :raises UnknownError:
@@ -47,7 +47,7 @@ class AdminService(ABC):
         """
         :param announcement_id:
         :return: The announcement entity
-        :raises AnnouncementNotFound:
+        :raises AnnouncementNotFoundError:
         :raises DatabaseError:
         :raises UnknownError:
         """
@@ -57,7 +57,7 @@ class AdminService(ABC):
     async def delete_announcement(self, announcement_id: int):
         """
         :param announcement_id:
-        :raises AnnouncementNotFound:
+        :raises AnnouncementNotFoundError:
         :raises DatabaseError:
         :raises UnknownError:
         """
@@ -69,7 +69,7 @@ class AdminService(ABC):
         :param account_id: The admin account ID to check for limits
         :param announcement_id:
         :raises CooldownError: The administrator with `account_id` has already distributed an announcement recently
-        :raises AnnouncementNotFound:
+        :raises AnnouncementNotFoundError:
         :raises DatabaseError:
         :raises UnknownError:
         """

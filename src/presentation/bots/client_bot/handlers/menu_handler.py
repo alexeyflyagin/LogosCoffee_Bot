@@ -7,8 +7,8 @@ from aiogram.types import Message, CallbackQuery, InlineKeyboardButton, \
     InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from src.data.logoscoffee.exceptions import DatabaseError, UnknownError, ProductIsNotAvailable, \
-    RemovingProductIsNotFound
+from src.data.logoscoffee.exceptions import DatabaseError, UnknownError, ProductIsNotAvailableError, \
+    ProductMissingError
 from src.data.logoscoffee.interfaces.client_order_service import ClientOrderService
 from src.data.logoscoffee.interfaces.client_service import ClientService
 from src.presentation.bots.admin_bot.handlers.utils import unknown_error_for_callback
@@ -104,9 +104,9 @@ async def product_callback(callback: CallbackQuery, state: FSMContext):
             await callback.answer()
         elif data.action == data.Action.UNAVAILABLE:
             await callback.answer(text=strings.CLIENT.PRODUCT.ADD.IS_NOT_AVAILABLE)
-    except RemovingProductIsNotFound:
+    except ProductMissingError:
         await callback.answer(text=strings.CLIENT.PRODUCT.REMOVE.IS_NOT_FOUND)
-    except ProductIsNotAvailable:
+    except ProductIsNotAvailableError:
         await callback.answer(text=strings.CLIENT.PRODUCT.ADD.IS_NOT_AVAILABLE)
     except (DatabaseError, UnknownError):
         await unknown_error_for_callback(callback, state)
@@ -134,7 +134,7 @@ async def show_product(msg: Message, product_id: int, is_update: bool = False, c
     product = await client_service.get_product_by_id(product_id)
     added_counter = 0
     if client_id:
-        added_counter = await order_service.get_count_of_product_from_draft_order(client_id, product_id)
+        added_counter = await order_service.get_product_quantity_in_draft_order(client_id, product_id)
     markup = get_product_markup(product_id, product.is_available, added_counter)
     text = strings.CLIENT.PRODUCT.MAIN.format(
         product_name=escape(product.product_name),

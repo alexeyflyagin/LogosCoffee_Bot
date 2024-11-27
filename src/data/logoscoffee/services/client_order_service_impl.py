@@ -10,8 +10,8 @@ from sqlalchemy.orm import joinedload
 from src.data.logoscoffee.db.models import OrderOrm, ProductAndOrderOrm, ProductOrm
 from src.data.logoscoffee.entities.general_entities import OrderPlaceAttemptEntity
 from src.data.logoscoffee.entities.orm_entities import OrderEntity, ProductAndOrderEntity
-from src.data.logoscoffee.exceptions import UnknownError, DatabaseError, PlacedOrderIsEmpty, ProductIsNotAvailable, \
-    RemovingProductIsNotFound
+from src.data.logoscoffee.exceptions import UnknownError, DatabaseError, PlacedOrderIsEmptyError, ProductIsNotAvailableError, \
+    ProductMissingError
 from src.data.logoscoffee.interfaces.client_order_service import ClientOrderService
 from src.data.logoscoffee.session_manager import SessionManager
 
@@ -49,6 +49,7 @@ class ClientOrderServiceImpl(ClientOrderService):
                     product_and_order_entity.product_rs = i.product
                     entity.product_and_orders_rs.append(product_and_order_entity)
                 return entity
+        # TODO ClientAccountNotFoundError handler
         except SQLAlchemyError as e:
             logger.error(e)
             raise DatabaseError(e)
@@ -72,6 +73,7 @@ class ClientOrderServiceImpl(ClientOrderService):
                     for i in products_and_order:
                         await s.delete(i)
                 await s.commit()
+        # TODO add ClientAccountNotFoundError handler
         except SQLAlchemyError as e:
             logger.error(e)
             raise DatabaseError(e)
@@ -89,14 +91,15 @@ class ClientOrderServiceImpl(ClientOrderService):
                 if product.is_available:
                     product_and_order = res.scalars().first()
                     if not product_and_order:
-                        raise RemovingProductIsNotFound(order_id=order.id, product_id=product.id)
+                        raise ProductMissingError(order_id=order.id, product_id=product.id)
                     await s.delete(product_and_order)
                 else:
                     products_and_order = res.scalars().all()
                     for i in products_and_order:
                         await s.delete(i)
                 await s.commit()
-        except RemovingProductIsNotFound as e:
+        # TODO add ClientAccountNotFoundError handler
+        except ProductMissingError as e:
             logger.warning(e)
             raise
         except SQLAlchemyError as e:
@@ -117,6 +120,7 @@ class ClientOrderServiceImpl(ClientOrderService):
                 for i in products_and_order:
                     await s.delete(i)
                 await s.commit()
+        # TODO add ClientAccountNotFoundError handler
         except SQLAlchemyError as e:
             logger.error(e)
             raise DatabaseError(e)
@@ -124,16 +128,17 @@ class ClientOrderServiceImpl(ClientOrderService):
             logger.exception(e)
             raise UnknownError(e)
 
-
-    async def place_order(self, client_id: int, order_id: int) -> OrderPlaceAttemptEntity:
+    async def place_order(self, client_id: int, order_id: int | None = None) -> OrderPlaceAttemptEntity:
         try:
             async with self.__session_manager.get_session() as s:
+                # TODO This method must use an order by `order_id` but uses only the draft order. See a documentation for this method.
+                # TODO If `order_id` is None it's means we will use the draft order by `client_id`. 'client_id' is a required argument.
                 order = await self.__get_draft_order(s, client_id, True)
                 res_products_and_order = await s.execute(select(ProductAndOrderOrm).filter(ProductAndOrderOrm.order_id == order.id)
                                                          .options(joinedload(ProductAndOrderOrm.product)))
                 products_and_order = res_products_and_order.unique().scalars().all()
                 if len(products_and_order) == 0:
-                    raise PlacedOrderIsEmpty
+                    raise PlacedOrderIsEmptyError
                 deleted_items = []
                 for i in products_and_order:
                     if not i.product.is_available:
@@ -146,10 +151,12 @@ class ClientOrderServiceImpl(ClientOrderService):
                 await s.commit()
                 is_successful = len(deleted_items) == 0
                 return OrderPlaceAttemptEntity(order=order_entity, is_successful=is_successful)
-        except ProductIsNotAvailable as e:
+        # TODO add OrderNotFoundError handler
+        # TODO add ClientAccountNotFoundError handler
+        except ProductIsNotAvailableError as e:
             logger.warning(e)
             raise
-        except PlacedOrderIsEmpty as e:
+        except PlacedOrderIsEmptyError as e:
             logger.warning(e)
             raise
         except SQLAlchemyError as e:
@@ -171,6 +178,7 @@ class ClientOrderServiceImpl(ClientOrderService):
                 order_entities = adapter.validate_python(orders)
 
                 return order_entities
+        # TODO add ClientAccountNotFoundError handler
         except SQLAlchemyError as e:
             logger.error(e)
             raise DatabaseError(e)
@@ -197,7 +205,7 @@ class ClientOrderServiceImpl(ClientOrderService):
             logger.exception(e)
             raise UnknownError(e)
 
-    async def get_count_of_product_from_draft_order(self, client_id: int, product_id: int) -> int:
+    async def get_product_quantity_in_draft_order(self, client_id: int, product_id: int) -> int:
         try:
             async with self.__session_manager.get_session() as s:
                 order = await self.__get_draft_order(s, client_id, True)

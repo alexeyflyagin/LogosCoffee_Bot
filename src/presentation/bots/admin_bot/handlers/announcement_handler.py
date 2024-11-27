@@ -3,7 +3,7 @@ from aiogram.enums import ContentType
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, ReplyKeyboardRemove, CallbackQuery
 
-from src.data.logoscoffee.exceptions import DatabaseError, UnknownError, AnnouncementNotFound, CooldownError
+from src.data.logoscoffee.exceptions import DatabaseError, UnknownError, AnnouncementNotFoundError, CooldownError
 from src.data.logoscoffee.interfaces.admin_service import AdminService
 from src.presentation.bots.admin_bot import constants
 from src.presentation.bots.admin_bot.handlers.utils import unknown_error, reset_state, unknown_error_for_callback, \
@@ -71,7 +71,7 @@ async def announcement_callback(callback: CallbackQuery, state: FSMContext):
         elif data.action == data.Action.SHOW:
             await send_announcement(callback.bot, callback.message.chat.id, announcement)
             await callback.answer()
-    except AnnouncementNotFound:
+    except AnnouncementNotFoundError:
         await callback.answer(strings.ADMIN.ANNOUNCEMENT.DOES_NOT_EXIST)
     except (DatabaseError, UnknownError):
         await unknown_error_for_callback(callback, state)
@@ -91,7 +91,7 @@ async def distribute_announcement_callback(callback: CallbackQuery, state: FSMCo
             await show_announcement_management(callback.message, announcement_id, is_update=True)
     except CooldownError:
         await callback.answer(strings.ADMIN.ANNOUNCEMENT.PUBLISH.COOLDOWN_ERROR)
-    except AnnouncementNotFound:
+    except AnnouncementNotFoundError:
         await callback.answer(strings.ADMIN.ANNOUNCEMENT.DOES_NOT_EXIST)
     except (DatabaseError, UnknownError):
         await unknown_error_for_callback(callback, state)
@@ -108,7 +108,7 @@ async def delete_announcement_callback(callback: CallbackQuery, state: FSMContex
             await callback.message.delete()
         elif data.action == data.Action.CANCEL:
             await show_announcement_management(callback.message, announcement_id, is_update=True)
-    except AnnouncementNotFound:
+    except AnnouncementNotFoundError:
         await callback.answer(strings.ADMIN.ANNOUNCEMENT.DOES_NOT_EXIST)
     except (DatabaseError, UnknownError):
         await unknown_error_for_callback(callback, state)
@@ -132,5 +132,5 @@ async def show_announcement_management(msg: Message, announcement_id: int, is_up
             date_create=get_datetime_str(announcement.date_create)
         )
         await send_or_update_msg(msg, text=text, is_update=is_update, replay_markup=markup)
-    except AnnouncementNotFound:
+    except AnnouncementNotFoundError:
         await send_or_update_msg(msg, text=text, is_update=is_update, replay_markup=None)

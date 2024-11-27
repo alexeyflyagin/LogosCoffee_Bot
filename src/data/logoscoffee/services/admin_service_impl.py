@@ -20,7 +20,7 @@ class AdminServiceImpl(AdminService):
         res = await s.execute(select(AnnouncementOrm).filter(AnnouncementOrm.id == announcement_id))
         announcement = res.scalars().first()
         if announcement is None:
-            raise AnnouncementNotFound(id=announcement_id)
+            raise AnnouncementNotFoundError(id=announcement_id)
         return announcement
 
     def __can_publish_announcement(self, account: AdminAccountOrm):
@@ -49,13 +49,13 @@ class AdminServiceImpl(AdminService):
                 res = await s.execute(select(AdminAccountOrm).filter(AdminAccountOrm.key == key))
                 account = res.scalars().first()
                 if account is None or account.date_authorized:
-                    raise InvalidKey(key)
+                    raise InvalidKeyError(key)
                 account.date_authorized = datetime.now()
                 await s.flush()
                 entity = AdminAccountEntity.model_validate(account)
                 await s.commit()
                 return entity
-        except InvalidKey as e:
+        except InvalidKeyError as e:
             logger.warning(e)
             raise
         except SQLAlchemyError as e:
@@ -87,7 +87,7 @@ class AdminServiceImpl(AdminService):
                 announcement = await self.__get_announcement(s, announcement_id)
                 announcement_entity = AnnouncementEntity.model_validate(announcement)
                 return announcement_entity
-        except AnnouncementNotFound as e:
+        except AnnouncementNotFoundError as e:
             logger.warning(e)
             raise
         except SQLAlchemyError as e:
@@ -103,7 +103,7 @@ class AdminServiceImpl(AdminService):
                 announcement = await self.__get_announcement(s, announcement_id)
                 await s.delete(announcement)
                 await s.commit()
-        except AnnouncementNotFound as e:
+        except AnnouncementNotFoundError as e:
             logger.warning(e)
             raise
         except SQLAlchemyError as e:
@@ -124,7 +124,7 @@ class AdminServiceImpl(AdminService):
                 announcement = await self.__get_announcement(s, announcement_id)
                 announcement.date_last_distribute = datetime.now()
                 await s.commit()
-        except (AnnouncementNotFound, CooldownError) as e:
+        except (AnnouncementNotFoundError, CooldownError) as e:
             logger.warning(e)
             raise
         except SQLAlchemyError as e:

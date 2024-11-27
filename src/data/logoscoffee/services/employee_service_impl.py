@@ -23,41 +23,6 @@ class EmployeeServiceImpl(EmployeeService):
         order = res.scalars().first()
         return order
 
-    async def login(self, key: str | None) -> EmployeeAccountEntity:
-        try:
-            async with self.__session_manager.get_session() as s:
-                query = await s.execute(select(EmployeeAccountOrm).filter(EmployeeAccountOrm.key == key))
-                account = query.scalars().first()
-                if account is None:
-                    raise InvalidKey(key)
-                return EmployeeAccountEntity.model_validate(account)
-        except InvalidKey as e:
-            logger.warning(e)
-            raise
-        except SQLAlchemyError as e:
-            logger.error(e)
-            raise DatabaseError(e)
-        except Exception as e:
-            logger.exception(e)
-            raise UnknownError(e)
-
-    async def get_new_orders(self, last_update_time: datetime) -> list[OrderEntity]:
-        try:
-            async with self.__session_manager.get_session() as s:
-                res = await s.execute(select(OrderOrm).filter(OrderOrm.date_pending >= last_update_time))
-                orders = res.scalars().all()
-
-                adapter = TypeAdapter(list[OrderEntity])
-                entities = adapter.validate_python(orders)
-
-                return entities
-        except SQLAlchemyError as e:
-            logger.error(e)
-            raise DatabaseError(e)
-        except Exception as e:
-            logger.exception(e)
-            raise UnknownError(e)
-
     def __check_state(self, order: OrderOrm, expected_state: OrderEntity.OrderState):
         order_entity = OrderEntity.model_validate(order)
         if order_entity.state != expected_state:
@@ -73,6 +38,41 @@ class EmployeeServiceImpl(EmployeeService):
                 raise OrderStateError(state=state, expected_state=expected_state)
             if state == OrderEntity.OrderState.READY and not order_entity.date_ready:
                 raise OrderStateError(state=state, expected_state=expected_state)
+
+    async def get_new_orders(self, last_update: datetime) -> list[OrderEntity]:
+        try:
+            async with self.__session_manager.get_session() as s:
+                res = await s.execute(select(OrderOrm).filter(OrderOrm.date_pending >= last_update))
+                orders = res.scalars().all()
+
+                adapter = TypeAdapter(list[OrderEntity])
+                entities = adapter.validate_python(orders)
+
+                return entities
+        except SQLAlchemyError as e:
+            logger.error(e)
+            raise DatabaseError(e)
+        except Exception as e:
+            logger.exception(e)
+            raise UnknownError(e)
+
+    async def login(self, key: str | None) -> EmployeeAccountEntity:
+        try:
+            async with self.__session_manager.get_session() as s:
+                query = await s.execute(select(EmployeeAccountOrm).filter(EmployeeAccountOrm.key == key))
+                account = query.scalars().first()
+                if account is None:
+                    raise InvalidKeyError(key)
+                return EmployeeAccountEntity.model_validate(account)
+        except InvalidKeyError as e:
+            logger.warning(e)
+            raise
+        except SQLAlchemyError as e:
+            logger.error(e)
+            raise DatabaseError(e)
+        except Exception as e:
+            logger.exception(e)
+            raise UnknownError(e)
 
     async def accept_order(self, order_id: int):
         try:
@@ -101,6 +101,7 @@ class EmployeeServiceImpl(EmployeeService):
                 order.date_canceled = datetime.now()
                 order.cancel_details = cancel_details
                 await s.commit()
+        # TODO add OrderStateError handler
         except SQLAlchemyError as e:
             logger.error(e)
             raise DatabaseError(e)

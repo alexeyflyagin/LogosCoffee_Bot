@@ -19,8 +19,6 @@ TOKEN_SYMBOLS = string.ascii_letters + string.digits + "-_"
 
 class ClientServiceImpl(ClientService):
 
-
-
     def __init__(self, session_manager: SessionManager):
         self.__session_manager = session_manager
 
@@ -31,10 +29,10 @@ class ClientServiceImpl(ClientService):
         #     if delta_time < timedelta(hours=1):
         #         raise CooldownError(delta_time)
 
-    async def get_new_announcements(self, last_update_time) -> list[AnnouncementEntity]:
+    async def get_new_announcements(self, last_update) -> list[AnnouncementEntity]:
         try:
             async with self.__session_manager.get_session() as s:
-                res = await s.execute(select(AnnouncementOrm).filter(AnnouncementOrm.date_last_distribute >= last_update_time))
+                res = await s.execute(select(AnnouncementOrm).filter(AnnouncementOrm.date_last_distribute >= last_update))
                 announcements = res.scalars().all()
                 entities = [AnnouncementEntity.model_validate(i) for i in announcements]
                 return entities
@@ -63,15 +61,15 @@ class ClientServiceImpl(ClientService):
             logger.exception(e)
             raise UnknownError(e)
 
-    async def can_create_review(self, account_id: int):
+    async def can_submit_review(self, account_id: int) -> bool:
         try:
             async with self.__session_manager.get_session() as s:
                 res = await s.execute(select(ClientAccountOrm).filter(ClientAccountOrm.id == account_id))
                 account = res.scalars().first()
                 await self.__can_make_review(account)
-        except CooldownError as e:
-            logger.warning(e)
-            raise
+                return True
+        except CooldownError:
+            return False
         except SQLAlchemyError as e:
             logger.error(e)
             raise DatabaseError(e)
@@ -80,7 +78,7 @@ class ClientServiceImpl(ClientService):
             raise UnknownError(e)
 
 
-    async def create_review(self, account_id: int, text: str):
+    async def submit_review(self, account_id: int, text: str):
         try:
             async with self.__session_manager.get_session() as s:
                 res = await s.execute(select(ClientAccountOrm).filter(ClientAccountOrm.id == account_id).with_for_update())
@@ -125,6 +123,7 @@ class ClientServiceImpl(ClientService):
                 product = res.scalars().first()
                 entity = ProductEntity.model_validate(product)
                 return entity
+        # TODO add ProductNotFound handler
         except SQLAlchemyError as e:
             logger.error(e)
             raise DatabaseError(e)

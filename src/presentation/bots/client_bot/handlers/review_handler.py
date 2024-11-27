@@ -24,7 +24,7 @@ client_service: ClientService
 async def start_make_review_handler(msg: Message, state: FSMContext):
     account_id = await get_account_id(state)
     try:
-        await client_service.can_create_review(account_id)
+        await client_service.can_submit_review(account_id)
         await msg.answer(strings.CLIENT.REVIEW.ENTER_CONTENT, reply_markup=ReplyKeyboardRemove())
         await state.set_state(EnterReviewStates.EnterText)
     except CooldownError:
@@ -37,7 +37,7 @@ async def content_review_handler(msg: Message, state: FSMContext):
     account_id = await get_account_id(state)
     try:
         check_content_type(msg, ContentType.TEXT)
-        await client_service.create_review(account_id, msg.text)
+        await client_service.submit_review(account_id, msg.text)
         await reset_state(msg, state, random_str(strings.CLIENT.REVIEW.SUCCESSFUL))
     except CooldownError:
         await msg.answer(random_str(strings.CLIENT.REVIEW.COOLDOWN_ERROR))
