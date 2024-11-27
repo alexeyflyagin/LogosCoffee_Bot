@@ -20,7 +20,7 @@ class AdminServiceImpl(AdminService):
         res = await s.execute(select(AnnouncementOrm).filter(AnnouncementOrm.id == announcement_id))
         announcement = res.scalars().first()
         if announcement is None:
-            raise AnnouncementDoesNotExist(id=announcement_id)
+            raise AnnouncementNotFound(id=announcement_id)
         return announcement
 
     def __can_publish_announcement(self, account: AdminAccountOrm):
@@ -42,7 +42,6 @@ class AdminServiceImpl(AdminService):
         except Exception as e:
             logger.exception(e)
             raise UnknownError(e)
-
 
     async def login(self, key: str) -> AdminAccountEntity:
         try:
@@ -82,13 +81,13 @@ class AdminServiceImpl(AdminService):
             logger.exception(e)
             raise UnknownError(e)
 
-    async def get_announcement(self, announcement_id: int) -> AnnouncementEntity:
+    async def get_announcement_by_id(self, announcement_id: int) -> AnnouncementEntity:
         try:
             async with self.__session_manager.get_session() as s:
                 announcement = await self.__get_announcement(s, announcement_id)
                 announcement_entity = AnnouncementEntity.model_validate(announcement)
                 return announcement_entity
-        except AnnouncementDoesNotExist as e:
+        except AnnouncementNotFound as e:
             logger.warning(e)
             raise
         except SQLAlchemyError as e:
@@ -104,7 +103,7 @@ class AdminServiceImpl(AdminService):
                 announcement = await self.__get_announcement(s, announcement_id)
                 await s.delete(announcement)
                 await s.commit()
-        except AnnouncementDoesNotExist as e:
+        except AnnouncementNotFound as e:
             logger.warning(e)
             raise
         except SQLAlchemyError as e:
@@ -114,18 +113,18 @@ class AdminServiceImpl(AdminService):
             logger.exception(e)
             raise UnknownError(e)
 
-
     async def distribute_announcement(self, account_id: int, announcement_id: int):
         try:
             async with self.__session_manager.get_session() as s:
-                res = await s.execute(select(AdminAccountOrm).filter(AdminAccountOrm.id == account_id).with_for_update())
+                res = await s.execute(
+                    select(AdminAccountOrm).filter(AdminAccountOrm.id == account_id).with_for_update())
                 account = res.scalars().first()
                 self.__can_publish_announcement(account)
                 account.date_last_announcement_distributing = datetime.now()
                 announcement = await self.__get_announcement(s, announcement_id)
                 announcement.date_last_distribute = datetime.now()
                 await s.commit()
-        except (AnnouncementDoesNotExist, CooldownError) as e:
+        except (AnnouncementNotFound, CooldownError) as e:
             logger.warning(e)
             raise
         except SQLAlchemyError as e:
@@ -134,7 +133,3 @@ class AdminServiceImpl(AdminService):
         except Exception as e:
             logger.exception(e)
             raise UnknownError(e)
-
-
-
-

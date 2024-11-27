@@ -3,7 +3,7 @@ from aiogram.enums import ContentType
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, ReplyKeyboardRemove, CallbackQuery
 
-from src.data.logoscoffee.exceptions import DatabaseError, UnknownError, AnnouncementDoesNotExist, CooldownError
+from src.data.logoscoffee.exceptions import DatabaseError, UnknownError, AnnouncementNotFound, CooldownError
 from src.data.logoscoffee.interfaces.admin_service import AdminService
 from src.presentation.bots.admin_bot import constants
 from src.presentation.bots.admin_bot.handlers.utils import unknown_error, reset_state, unknown_error_for_callback, \
@@ -57,7 +57,7 @@ async def create_announcement__content__handler(msg: Message, state: FSMContext,
 async def announcement_callback(callback: CallbackQuery, state: FSMContext):
     data = AnnouncementCD.unpack(callback.data)
     try:
-        announcement = await admin_service.get_announcement(data.announcement_id)
+        announcement = await admin_service.get_announcement_by_id(data.announcement_id)
         if data.action == data.Action.PUBLISH:
             await callback.message.edit_text(
                 text=strings.ADMIN.ANNOUNCEMENT.PUBLISH.WARNING.format(announcement_id=data.announcement_id),
@@ -71,7 +71,7 @@ async def announcement_callback(callback: CallbackQuery, state: FSMContext):
         elif data.action == data.Action.SHOW:
             await send_announcement(callback.bot, callback.message.chat.id, announcement)
             await callback.answer()
-    except AnnouncementDoesNotExist:
+    except AnnouncementNotFound:
         await callback.answer(strings.ADMIN.ANNOUNCEMENT.DOES_NOT_EXIST)
     except (DatabaseError, UnknownError):
         await unknown_error_for_callback(callback, state)
@@ -91,7 +91,7 @@ async def distribute_announcement_callback(callback: CallbackQuery, state: FSMCo
             await show_announcement_management(callback.message, announcement_id, is_update=True)
     except CooldownError:
         await callback.answer(strings.ADMIN.ANNOUNCEMENT.PUBLISH.COOLDOWN_ERROR)
-    except AnnouncementDoesNotExist:
+    except AnnouncementNotFound:
         await callback.answer(strings.ADMIN.ANNOUNCEMENT.DOES_NOT_EXIST)
     except (DatabaseError, UnknownError):
         await unknown_error_for_callback(callback, state)
@@ -108,7 +108,7 @@ async def delete_announcement_callback(callback: CallbackQuery, state: FSMContex
             await callback.message.delete()
         elif data.action == data.Action.CANCEL:
             await show_announcement_management(callback.message, announcement_id, is_update=True)
-    except AnnouncementDoesNotExist:
+    except AnnouncementNotFound:
         await callback.answer(strings.ADMIN.ANNOUNCEMENT.DOES_NOT_EXIST)
     except (DatabaseError, UnknownError):
         await unknown_error_for_callback(callback, state)
@@ -125,12 +125,12 @@ async def menu_callback(callback: CallbackQuery, state: FSMContext):
 async def show_announcement_management(msg: Message, announcement_id: int, is_update: bool = False):
     text = strings.ADMIN.ANNOUNCEMENT.DOES_NOT_EXIST
     try:
-        announcement = await admin_service.get_announcement(announcement_id)
+        announcement = await admin_service.get_announcement_by_id(announcement_id)
         markup = announcement_markup(announcement_id)
         text = strings.ADMIN.ANNOUNCEMENT.MAIN.format(
             announcement_id=announcement.id, date_last_distribute=get_date_last_announcement_distributing_str(announcement),
             date_create=get_datetime_str(announcement.date_create)
         )
         await send_or_update_msg(msg, text=text, is_update=is_update, replay_markup=markup)
-    except AnnouncementDoesNotExist:
+    except AnnouncementNotFound:
         await send_or_update_msg(msg, text=text, is_update=is_update, replay_markup=None)
