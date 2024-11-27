@@ -9,7 +9,7 @@ from aiogram import Router
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, ReplyKeyboardRemove
 
-from src.presentation.checks.checks import check_content_type, ContentTypeException
+from src.presentation.checks.checks import check_content_type, ContentTypeError
 from src.presentation.bots.client_bot.handlers.utils import reset_state, unknown_error, \
     get_account_id
 from src.presentation.bots.client_bot.states import *
@@ -41,7 +41,7 @@ async def content_review_handler(msg: Message, state: FSMContext):
         await reset_state(msg, state, random_str(strings.CLIENT.REVIEW.SUCCESSFUL))
     except CooldownError:
         await msg.answer(random_str(strings.CLIENT.REVIEW.COOLDOWN_ERROR))
-    except ContentTypeException as e:
+    except ContentTypeError as e:
         await msg.answer(e.msg)
     except (DatabaseError, UnknownError, EmptyTextError):
         await unknown_error(msg, state)

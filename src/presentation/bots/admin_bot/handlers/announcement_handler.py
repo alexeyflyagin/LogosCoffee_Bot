@@ -17,7 +17,7 @@ from src.presentation.bots.types import FileAddress
 from src.presentation.bots.utils import send_or_update_msg, get_datetime_str, get_date_last_announcement_distributing_str, \
     send_announcement
 from src.presentation.checks import checks
-from src.presentation.checks.exceptions import ContentTypeException, MessageContentCountException
+from src.presentation.checks.exceptions import ContentTypeError, MessageContentCountError
 from src.presentation.resources import strings
 
 router = Router()
@@ -47,7 +47,7 @@ async def create_announcement__content__handler(msg: Message, state: FSMContext,
         res = await admin_service.create_announcement(text, preview_photo)
         await show_announcement_management(msg, res.id)
         await reset_state(msg, state, strings.GENERAL.SELECT_ACTION)
-    except (ContentTypeException, MessageContentCountException) as e:
+    except (ContentTypeError, MessageContentCountError) as e:
         await msg.answer(e.msg)
     except (DatabaseError, UnknownError):
         await unknown_error(msg, state)
