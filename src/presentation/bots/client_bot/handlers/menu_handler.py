@@ -3,7 +3,7 @@ from html import escape
 from aiogram import Router, F
 from aiogram.filters.callback_data import CallbackData
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, CallbackQuery, ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardButton, \
+from aiogram.types import Message, CallbackQuery, InlineKeyboardButton, \
     InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
@@ -17,8 +17,9 @@ from src.presentation.bots.client_bot.constants import TAG__LIST_MENU
 from src.presentation.bots.client_bot.handlers.utils import unknown_error, get_account_id
 from src.presentation.bots.client_bot.states import MainStates
 from src.presentation.bots.constants import CALLBACK_DATA__LIST_MENU
+from src.presentation.bots.currency_formatter import to_rub
 from src.presentation.bots.list_markup import list_keyboard, get_pages, ListItem, ListCD
-from src.presentation.bots.utils import send_or_update_msg, to_rubles
+from src.presentation.bots.utils import send_or_update_msg
 from src.presentation.resources import strings
 
 router = Router()
@@ -124,7 +125,7 @@ async def show_menu(msg: Message, page_index: int = 0, is_update: bool = False):
         all_products_s.append(strings.CLIENT.MENU.ITEM.format(
             index=i + 1,
             product_name=products.all_products[i].product_name,
-            price=to_rubles(products.all_products[i].price),
+            price=to_rub(products.all_products[i].price),
         ))
     text = strings.CLIENT.MENU.PAGE.format(items='\n'.join(all_products_s))
     await send_or_update_msg(msg, text=text, is_update=is_update, replay_markup=markup)
@@ -137,7 +138,7 @@ async def show_product(msg: Message, product_id: int, is_update: bool = False, c
     markup = get_product_markup(product_id, product.is_available, added_counter)
     text = strings.CLIENT.PRODUCT.MAIN.format(
         product_name=escape(product.product_name),
-        price=to_rubles(product.price),
+        price=to_rub(product.price),
         description=escape(product.description),
     )
     await send_or_update_msg(msg, text=text, is_update=is_update, replay_markup=markup)
