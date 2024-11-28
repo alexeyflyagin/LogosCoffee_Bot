@@ -15,7 +15,6 @@ async def main():
             di.client_bot().run(),
             di.employee_bot().run(),
         )
-    # TODO Привет
     finally:
         await di.session_manager().disconnect()
 
@@ -25,6 +24,3 @@ if __name__ == '__main__':
         asyncio.run(main())
     except KeyboardInterrupt:
         pass
-
-def new_func():
-    pass
