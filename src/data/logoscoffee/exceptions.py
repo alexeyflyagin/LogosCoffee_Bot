@@ -61,6 +61,10 @@ class ProductMissingError(LCError):
     def __init__(self, **kwargs):
         super().__init__(f"The product ({kwargs}) you tried to remove doesn't exist in the draft order")
 
-class ProductNotFound(LCError):
+class ProductNotFoundError(LCError):
     def __init__(self, **kwargs):
         super().__init__(f"The product ({kwargs}) you tried to find doesn't exist")
+
+class OrderNotFoundError(LCError):
+    def __init__(self, **kwargs):
+        super().__init__(f"The order ({kwargs}) doesn't exist")
