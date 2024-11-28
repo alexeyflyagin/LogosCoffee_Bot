@@ -39,6 +39,11 @@ class EmployeeServiceImpl(EmployeeService):
             if state == OrderEntity.OrderState.READY and not order_entity.date_ready:
                 raise OrderStateError(state=state, expected_state=expected_state)
 
+    def __check_order_is_not_finished(self, order: OrderOrm):
+        order_entity = OrderEntity.model_validate(order)
+        if order_entity.state == OrderEntity.OrderState.CANCELED or order_entity.state == OrderEntity.OrderState.COMPLETED:
+            raise OrderStateError(state=order_entity.state, expected_state="Is not Canceled or Completed")
+
     async def get_new_orders(self, last_update: datetime) -> list[OrderEntity]:
         try:
             async with self.__session_manager.get_session() as s:
@@ -97,11 +102,14 @@ class EmployeeServiceImpl(EmployeeService):
         try:
             async with self.__session_manager.get_session() as s:
                 order = await self.__get_order_by_id(s, order_id)
+                self.__check_order_is_not_finished(order)
 
                 order.date_canceled = datetime.now()
                 order.cancel_details = cancel_details
                 await s.commit()
-        # TODO add OrderStateError handler
+        except OrderStateError as e:
+            logger.warning(e)
+            raise
         except SQLAlchemyError as e:
             logger.error(e)
             raise DatabaseError(e)
