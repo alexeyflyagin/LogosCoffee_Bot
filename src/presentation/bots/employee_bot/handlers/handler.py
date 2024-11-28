@@ -26,5 +26,7 @@ async def start_handler(msg: Message, state: FSMContext, command: CommandObject)
         await state.set_data({ACCOUNT_ID: account.id})
         await state.set_state(MainStates.Main)
         await msg.answer(random_str(strings.GENERAL.LOGIN.SUCCESSFUL))
+    except InvalidKeyError:
+        await  msg.answer(strings.GENERAL.LOGIN.INVALID_KEY)
     except (DatabaseError, UnknownError):
         await msg.answer(random_str(strings.ERRORS.UNKNOWN))

@@ -121,9 +121,13 @@ class ClientServiceImpl(ClientService):
             async with self.__session_manager.get_session() as s:
                 res = await s.execute(select(ProductOrm).filter(ProductOrm.id == product_id))
                 product = res.scalars().first()
+                if product is None:
+                    raise ProductNotFound(id=product_id)
                 entity = ProductEntity.model_validate(product)
                 return entity
-        # TODO add ProductNotFound handler
+        except ProductNotFound as e:
+            logger.warning(e)
+            raise UnknownError(e)
         except SQLAlchemyError as e:
             logger.error(e)
             raise DatabaseError(e)
