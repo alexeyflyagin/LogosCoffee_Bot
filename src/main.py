@@ -15,6 +15,7 @@ async def main():
             di.client_bot().run(),
             di.employee_bot().run(),
         )
+    # Новый код для теста
     finally:
         await di.session_manager().disconnect()
 
