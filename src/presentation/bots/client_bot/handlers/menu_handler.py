@@ -113,19 +113,20 @@ async def product_callback(callback: CallbackQuery, state: FSMContext):
 
 
 async def show_menu(msg: Message, page_index: int = 0, is_update: bool = False):
-    products = await client_service.get_menu()
+    menu = await client_service.get_menu()
+    menu.all_products += menu.all_products + menu.all_products
     all_products_s = []
     items = []
-    for i in range(len(products.all_products)):
-        items.append(ListItem(str(i + 1), item_id=products.all_products[i].id, obj=products.all_products[i]))
+    for i in range(len(menu.all_products)):
+        items.append(ListItem(str(i + 1), item_id=menu.all_products[i].id, obj=menu.all_products[i]))
     pages = get_pages(items)
     markup = list_keyboard(tag=TAG__LIST_MENU, pg_index=page_index, pg_count=len(pages), pg_items=pages[page_index],
                            add_btn_text=None)
     for i in range(len(pages[page_index])):
         all_products_s.append(strings.CLIENT.MENU.ITEM.format(
             index=i + 1,
-            product_name=products.all_products[i].product_name,
-            price=to_rub(products.all_products[i].price),
+            product_name=menu.all_products[i].product_name,
+            price=to_rub(menu.all_products[i].price),
         ))
     text = strings.CLIENT.MENU.PAGE.format(items='\n'.join(all_products_s))
     await send_or_update_msg(msg, text=text, is_update=is_update, replay_markup=markup)

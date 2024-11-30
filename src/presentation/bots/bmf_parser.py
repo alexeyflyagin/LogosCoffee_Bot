@@ -1,4 +1,4 @@
-# BMF - Breakers Markup Formatter
+# BFM - Bracket Formatting Markup
 
 import re
 from enum import Enum
@@ -10,7 +10,7 @@ from src.presentation.bots import constants
 
 REGEX_PATTERN__BREAKERS = r"\{([^{}]+(?:,[^{}]+)*)\}"
 REGEX_PATTERN__CONTENT = r"(\w+):\s*([^\s,]+(?:\s+[^\s,]+)*)\s*,?\s*([^,]*)"
-REGEX_PATTERN__URL = r"^(https?://)?[\w.-]+\.[a-zA-Z]{2,}$"
+REGEX_PATTERN__URL = r"^(https?://)?[\w.-]+\.[a-zA-Z]{2,}([/?#][^\s]*)?$"
 MAX_BUTTONS = 6
 
 
@@ -18,12 +18,12 @@ def is_url_valid(url: str) -> bool:
     return True if re.match(REGEX_PATTERN__URL, url) else False
 
 
-class BMFItemType(Enum):
+class BFMItemType(Enum):
     LINK = "link"
     MENU = "menu"
 
 
-class BMFItem:
+class BFMItem:
     def __init__(self, item_type: str, label: str, value: str | None, raw: str, raw_content: str, start: int,
                  end: int):
         self.item_type = item_type
@@ -41,7 +41,7 @@ class BMFItem:
         return self.__repr__()
 
     @staticmethod
-    def get_list_from_text(text: str) -> list['BMFItem']:
+    def get_list_from_text(text: str) -> list['BFMItem']:
         """
         :param text: text with bfm items
         :return: The list of instances of BFM items
@@ -53,13 +53,13 @@ class BMFItem:
             if not match2:
                 continue
             item_type, label, value = list(match2.groups(0))
-            if item_type not in [item.value for item in BMFItemType]:
+            if item_type not in [item.value for item in BFMItemType]:
                 continue
-            if item_type == BMFItemType.LINK.value and not is_url_valid(value):
+            if item_type == BFMItemType.LINK.value and not is_url_valid(value):
                 continue
             if value.strip() == '':
                 value = None
-            new_item = BMFItem(
+            new_item = BFMItem(
                 item_type=item_type,
                 label=label,
                 value=value,
@@ -77,16 +77,16 @@ def get_markup(text: str) -> InlineKeyboardMarkup | None:
     :param text: text with bfm items
     :return: The instance of InlineKeyboardMarkup or None if bfm items are not found
     """
-    items = BMFItem.get_list_from_text(text)
+    items = BFMItem.get_list_from_text(text)
     if not items:
         return None
     ikb = InlineKeyboardBuilder()
     ikb.max_width = 1
     for i in range(min(MAX_BUTTONS, len(items))):
         item = items[i]
-        if item.item_type == BMFItemType.MENU.value:
+        if item.item_type == BFMItemType.MENU.value:
             ikb.add(InlineKeyboardButton(text=item.label, callback_data=constants.CALLBACK_DATA__LIST_MENU))
-        elif item.item_type == BMFItemType.LINK.value:
+        elif item.item_type == BFMItemType.LINK.value:
             ikb.add(InlineKeyboardButton(text=item.label, url=item.value))
     return ikb.as_markup()
 
@@ -96,7 +96,7 @@ def clean_text(text: str) -> str:
     :param text: text with bfm items
     :return: The cleaned text: Welcome! {menu: Go to menu} -> Welcome!
     """
-    items = BMFItem.get_list_from_text(text)
+    items = BFMItem.get_list_from_text(text)
     cleaned_text = text
     for i in items:
         cleaned_text = cleaned_text.replace(i.raw, '', 1)
