@@ -122,10 +122,10 @@ class ClientServiceImpl(ClientService):
                 res = await s.execute(select(ProductOrm).filter(ProductOrm.id == product_id))
                 product = res.scalars().first()
                 if product is None:
-                    raise ProductNotFound(id=product_id)
+                    raise ProductNotFoundError(id=product_id)
                 entity = ProductEntity.model_validate(product)
                 return entity
-        except ProductNotFound as e:
+        except ProductNotFoundError as e:
             logger.warning(e)
             raise UnknownError(e)
         except SQLAlchemyError as e:
