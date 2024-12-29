@@ -6,11 +6,12 @@ from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 
 from src.data.logoscoffee.checks import check_text_is_not_empty
+from src.data.logoscoffee.dao import dao_announcement, dao_product
 from src.data.logoscoffee.entities.general_entities import MenuEntity
 from src.data.logoscoffee.entities.orm_entities import AnnouncementEntity, ClientAccountEntity, ProductEntity
 from src.data.logoscoffee.interfaces.client_service import ClientService
 from src.data.logoscoffee.exceptions import *
-from src.data.logoscoffee.db.models import ClientAccountOrm, ReviewOrm, AnnouncementOrm, ProductOrm
+from src.data.logoscoffee.db.models import ClientAccountOrm, ReviewOrm
 from src.data.logoscoffee.services.units import create_draft_orm
 from src.data.logoscoffee.session_manager import SessionManager
 
@@ -24,16 +25,15 @@ class ClientServiceImpl(ClientService):
 
     async def __can_make_review(self, account: ClientAccountOrm):
         pass
-        # if account.date_last_review is not None:
-        #     delta_time = datetime.now() - account.date_last_review
-        #     if delta_time < timedelta(hours=1):
-        #         raise CooldownError(delta_time)
+        if account.date_last_review is not None:
+            delta_time = datetime.now() - account.date_last_review
+            if delta_time < timedelta(hours=1):
+                raise CooldownError(delta_time)
 
     async def get_new_announcements(self, last_update) -> list[AnnouncementEntity]:
         try:
             async with self.__session_manager.get_session() as s:
-                res = await s.execute(select(AnnouncementOrm).filter(AnnouncementOrm.date_last_distribute >= last_update))
-                announcements = res.scalars().all()
+                announcements = await dao_announcement.get_since_by_last_distribute(s, last_update)
                 entities = [AnnouncementEntity.model_validate(i) for i in announcements]
                 return entities
         except SQLAlchemyError as e:
@@ -103,8 +103,7 @@ class ClientServiceImpl(ClientService):
     async def get_menu(self) -> MenuEntity:
         try:
             async with self.__session_manager.get_session() as s:
-                res = await s.execute(select(ProductOrm).filter(ProductOrm.is_available == True))
-                products = res.unique().scalars().all()
+                products = await dao_product.get_by_is_available(s, is_available=True)
                 type_adapter = TypeAdapter(list[ProductEntity])
                 entities = type_adapter.validate_python(products)
                 menu_entity = MenuEntity(all_products=entities)
@@ -119,8 +118,7 @@ class ClientServiceImpl(ClientService):
     async def get_product_by_id(self, product_id: int) -> ProductEntity:
         try:
             async with self.__session_manager.get_session() as s:
-                res = await s.execute(select(ProductOrm).filter(ProductOrm.id == product_id))
-                product = res.scalars().first()
+                product = await dao_product.get_by_id(s, product_id)
                 if product is None:
                     raise ProductNotFoundError(id=product_id)
                 entity = ProductEntity.model_validate(product)

@@ -7,6 +7,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
+from src.data.logoscoffee.dao import dao_product, dao_product_and_order
 from src.data.logoscoffee.db.models import OrderOrm, ProductAndOrderOrm, ProductOrm
 from src.data.logoscoffee.entities.general_entities import OrderPlaceAttemptEntity
 from src.data.logoscoffee.entities.orm_entities import OrderEntity, ProductAndOrderEntity
@@ -34,11 +35,6 @@ class ClientOrderServiceImpl(ClientOrderService):
             raise OrderNotFoundError(client_id=client_id)
         return order
 
-    async def __get_product(self, s: AsyncSession, product_id: int) -> ProductOrm:
-        res = await s.execute(select(ProductOrm).filter(ProductOrm.id == product_id))
-        product = res.scalars().first()
-        return product
-
     async def get_draft_order(self, client_id: int) -> OrderEntity:
         try:
             async with self.__session_manager.get_session() as s:
@@ -65,16 +61,13 @@ class ClientOrderServiceImpl(ClientOrderService):
         try:
             async with self.__session_manager.get_session() as s:
                 order = await self.__get_draft_order(s, client_id, True)
-                product = await self.__get_product(s, product_id)
+                product = await dao_product.get_by_id(s, product_id)
                 if product.is_available:
                     product_and_order = ProductAndOrderOrm(order_id=order.id, product_id=product.id)
                     s.add(product_and_order)
                 else:
-                    res_products_and_order = await s.execute(select(ProductAndOrderOrm)
-                                                             .filter(ProductAndOrderOrm.order_id == order.id,
-                                                                     ProductAndOrderOrm.product_id == product.id))
-                    products_and_order = res_products_and_order.scalars().all()
-                    for i in products_and_order:
+                    products_and_orders = await dao_product_and_order.get(s, product_id=product.id, order_id=order.id)
+                    for i in products_and_orders:
                         await s.delete(i)
                 await s.commit()
         # TODO add ClientAccountNotFoundError handler
@@ -89,17 +82,15 @@ class ClientOrderServiceImpl(ClientOrderService):
         try:
             async with self.__session_manager.get_session() as s:
                 order = await self.__get_draft_order(s, client_id, True)
-                product = await self.__get_product(s, product_id)
-                res = await s.execute(select(ProductAndOrderOrm).filter(
-                    ProductAndOrderOrm.order_id == order.id, ProductAndOrderOrm.product_id == product.id))
+                product = await dao_product.get_by_id(s, product_id)
+                product_and_orders = await dao_product_and_order.get(s, product_id=product.id, order_id=order.id)
                 if product.is_available:
-                    product_and_order = res.scalars().first()
+                    product_and_order = product_and_orders[0] if product_and_orders else None
                     if not product_and_order:
                         raise ProductMissingError(order_id=order.id, product_id=product.id)
                     await s.delete(product_and_order)
                 else:
-                    products_and_order = res.scalars().all()
-                    for i in products_and_order:
+                    for i in product_and_orders:
                         await s.delete(i)
                 await s.commit()
         # TODO add ClientAccountNotFoundError handler
@@ -117,10 +108,7 @@ class ClientOrderServiceImpl(ClientOrderService):
         try:
             async with self.__session_manager.get_session() as s:
                 order = await self.__get_draft_order(s, client_id, True)
-                res_product_and_order = await s.execute(select(ProductAndOrderOrm).filter(
-                    ProductAndOrderOrm.order_id == order.id))
-                products_and_order = res_product_and_order.scalars().all()
-
+                products_and_order = await dao_product_and_order.get_by_order_id(s, order_id=order.id)
                 for i in products_and_order:
                     await s.delete(i)
                 await s.commit()
@@ -135,7 +123,6 @@ class ClientOrderServiceImpl(ClientOrderService):
     async def place_order(self, client_id: int, order_id: int | None = None) -> OrderPlaceAttemptEntity:
         try:
             async with self.__session_manager.get_session() as s:
-                order = None
                 if order_id:
                     res_order = await s.execute(select(OrderOrm).filter(OrderOrm.id == order_id).with_for_update())
                     order = res_order.scalars().first()
@@ -143,9 +130,7 @@ class ClientOrderServiceImpl(ClientOrderService):
                         raise OrderNotFoundError(order_id=order_id)
                 else:
                     order = await self.__get_draft_order(s, client_id, True)
-                res_products_and_order = await s.execute(select(ProductAndOrderOrm).filter(ProductAndOrderOrm.order_id == order.id)
-                                                         .options(joinedload(ProductAndOrderOrm.product)))
-                products_and_order = res_products_and_order.unique().scalars().all()
+                products_and_order = await dao_product_and_order.get_by_order_id(s, order_id=order.id, join=True)
                 if len(products_and_order) == 0:
                     raise PlacedOrderIsEmptyError
                 deleted_items = []
@@ -217,11 +202,7 @@ class ClientOrderServiceImpl(ClientOrderService):
         try:
             async with self.__session_manager.get_session() as s:
                 order = await self.__get_draft_order(s, client_id, True)
-                res_products = await s.execute(select(ProductAndOrderOrm).filter(
-                    ProductAndOrderOrm.product_id == product_id,
-                    ProductAndOrderOrm.order_id == order.id))
-                products = res_products.scalars().all()
-
+                products = await dao_product_and_order.get(s, product_id=product_id, order_id=order.id)
                 return len(products)
         except SQLAlchemyError as e:
             logger.error(e)

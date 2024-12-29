@@ -114,7 +114,6 @@ async def product_callback(callback: CallbackQuery, state: FSMContext):
 
 async def show_menu(msg: Message, page_index: int = 0, is_update: bool = False):
     menu = await client_service.get_menu()
-    menu.all_products += menu.all_products + menu.all_products
     all_products_s = []
     items = []
     for i in range(len(menu.all_products)):

@@ -1,0 +1,30 @@
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload
+
+from src.data.logoscoffee.dao.units import set_wait_for_update_if
+from src.data.logoscoffee.db.models import ProductAndOrderOrm
+
+
+async def get(s: AsyncSession, product_id: int, order_id: int, join=False, wait_for_update=False) -> tuple[ProductAndOrderOrm, ...]:
+    query = (select(ProductAndOrderOrm)
+             .filter(ProductAndOrderOrm.order_id == order_id)
+             .filter(ProductAndOrderOrm.product_id == product_id))
+    if join:
+        query = (query
+                 .options(joinedload(ProductAndOrderOrm.product))
+                 .options(joinedload(ProductAndOrderOrm.order)))
+    set_wait_for_update_if(query, wait_for_update)
+    res = await s.execute(query)
+    return tuple(res.unique().scalars().all())
+
+async def get_by_order_id(s: AsyncSession, order_id: int, join=False, wait_for_update=False) -> tuple[ProductAndOrderOrm, ...]:
+    query = (select(ProductAndOrderOrm)
+             .filter(ProductAndOrderOrm.order_id == order_id))
+    if join:
+        query = (query
+                 .options(joinedload(ProductAndOrderOrm.product))
+                 .options(joinedload(ProductAndOrderOrm.order)))
+    set_wait_for_update_if(query, wait_for_update)
+    res = await s.execute(query)
+    return tuple(res.unique().scalars().all())
