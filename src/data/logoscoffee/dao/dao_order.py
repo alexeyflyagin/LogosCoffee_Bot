@@ -18,29 +18,31 @@ def __set_options_if(query: Select[tuple[OrderOrm]], is_true: bool) -> Select[tu
 
 def __get_criteria_by_state(state: OrderState) -> ColumnElement[bool]:
     match state:
-        case OrderState.READY:
-            return and_(OrderOrm.date_canceled.is_not(None),
-                        OrderOrm.date_ready.is_not(None),
-                        OrderOrm.date_completed.is_(None))
-        case OrderState.COOKING:
-            return and_(OrderOrm.date_canceled.is_not(None),
-                        OrderOrm.date_cooking.is_not(None),
-                        OrderOrm.date_ready.is_(None))
+        case OrderState.CREATED:
+            return and_(OrderOrm.date_pending.is_(None),
+                        OrderOrm.date_canceled.is_(None))
         case OrderState.PENDING:
-            return and_(OrderOrm.date_canceled.is_not(None),
-                        OrderOrm.date_pending.is_not(None),
+            return and_(OrderOrm.date_pending.is_not(None),
+                        OrderOrm.date_canceled.is_(None),
                         OrderOrm.date_cooking.is_(None))
+        case OrderState.COOKING:
+            return and_(OrderOrm.date_cooking.is_not(None),
+                        OrderOrm.date_canceled.is_(None),
+                        OrderOrm.date_ready.is_(None))
+        case OrderState.READY:
+            return and_(OrderOrm.date_ready.is_not(None),
+                        OrderOrm.date_canceled.is_(None),
+                        OrderOrm.date_completed.is_(None))
         case OrderState.CANCELED:
             return and_(OrderOrm.date_canceled.is_not(None))
         case OrderState.COMPLETED:
             return and_(OrderOrm.date_completed.is_not(None))
-        case OrderState.CREATED:
-            return and_(OrderOrm.date_pending.is_(None))
 
 
 def __set_state_filter(
         query: Select[tuple[OrderOrm]],
-        state: OrderState) -> Select[tuple[OrderOrm]]:
+        state: OrderState
+) -> Select[tuple[OrderOrm]]:
     return query.filter(__get_criteria_by_state(state))
 
 

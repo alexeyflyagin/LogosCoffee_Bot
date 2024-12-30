@@ -5,6 +5,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.data.logoscoffee.dao import dao_order, dao_employee_account
+from src.data.logoscoffee.dao.units import raise_exception_if_none
 from src.data.logoscoffee.entities.enums import OrderState
 from src.data.logoscoffee.entities.orm_entities import EmployeeAccountEntity, OrderEntity
 from src.data.logoscoffee.interfaces.employee_service import EmployeeService
@@ -89,7 +90,6 @@ class EmployeeServiceImpl(EmployeeService):
             async with self.__session_manager.get_session() as s:
                 order = await self.__get_order_by_id(s, order_id)
                 self.__check_state(order, OrderState.PENDING)
-
                 order.date_cooking = datetime.now()
                 await create_draft_orm(s, order.client_id)
                 await s.commit()
@@ -134,7 +134,6 @@ class EmployeeServiceImpl(EmployeeService):
             async with self.__session_manager.get_session() as s:
                 order = await self.__get_order_by_id(s, order_id)
                 self.__check_state(order, OrderState.COOKING)
-
                 order.date_ready = datetime.now()
                 await s.commit()
         except OrderStateError as e:
@@ -155,7 +154,6 @@ class EmployeeServiceImpl(EmployeeService):
             async with self.__session_manager.get_session() as s:
                 order = await self.__get_order_by_id(s, order_id)
                 self.__check_state(order, OrderState.READY)
-
                 order.date_completed = datetime.now()
                 await s.commit()
         except OrderStateError as e:

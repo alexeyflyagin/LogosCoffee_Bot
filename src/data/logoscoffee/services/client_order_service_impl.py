@@ -132,12 +132,11 @@ class ClientOrderServiceImpl(ClientOrderService):
         try:
             async with self.__session_manager.get_session() as s:
                 if order_id:
-                    order = await dao_order.get_by_id(s, _id=order_id, with_for_update=True)
-                    if order is None:
-                        raise OrderNotFoundError(order_id=order_id)
+                    order = await dao_order.get_by_id(s, order_id, with_for_update=True)
+                    raise_exception_if_none(order, OrderNotFoundError(order_id=order_id))
                 else:
                     order = await self.__safe_get_draft_order(s, client_id, True)
-                products_and_order = await dao_product_and_order.get_by_order_id(s, order_id=order.id, join=True)
+                products_and_order = await dao_product_and_order.get_by_order_id(s, order.id, join=True)
                 if len(products_and_order) == 0:
                     raise PlacedOrderIsEmptyError
                 deleted_items = []
