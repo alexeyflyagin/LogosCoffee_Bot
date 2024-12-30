@@ -2,11 +2,10 @@ import string
 
 from loguru import logger
 from pydantic import TypeAdapter
-from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 
 from src.data.logoscoffee.checks import check_text_is_not_empty
-from src.data.logoscoffee.dao import dao_announcement, dao_product
+from src.data.logoscoffee.dao import dao_announcement, dao_product, dao_client_account
 from src.data.logoscoffee.entities.general_entities import MenuEntity
 from src.data.logoscoffee.entities.orm_entities import AnnouncementEntity, ClientAccountEntity, ProductEntity
 from src.data.logoscoffee.interfaces.client_service import ClientService
@@ -64,8 +63,7 @@ class ClientServiceImpl(ClientService):
     async def can_submit_review(self, account_id: int) -> bool:
         try:
             async with self.__session_manager.get_session() as s:
-                res = await s.execute(select(ClientAccountOrm).filter(ClientAccountOrm.id == account_id))
-                account = res.scalars().first()
+                account = await dao_client_account.get_by_id(s, account_id)
                 await self.__can_make_review(account)
                 return True
         except CooldownError:
@@ -81,8 +79,7 @@ class ClientServiceImpl(ClientService):
     async def submit_review(self, account_id: int, text: str):
         try:
             async with self.__session_manager.get_session() as s:
-                res = await s.execute(select(ClientAccountOrm).filter(ClientAccountOrm.id == account_id).with_for_update())
-                account = res.scalars().first()
+                account = await dao_client_account.get_by_id(s, account_id, with_for_update=True)
                 await self.__can_make_review(account)
                 current_time = datetime.now()
                 account.date_last_review = current_time

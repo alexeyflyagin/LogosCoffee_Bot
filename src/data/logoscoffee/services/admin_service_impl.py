@@ -1,10 +1,9 @@
 from loguru import logger
 
-from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.data.logoscoffee.dao import dao_review, dao_announcement
+from src.data.logoscoffee.dao import dao_review, dao_announcement, dao_admin_account
 from src.data.logoscoffee.dao.units import raise_exception_if_none
 from src.data.logoscoffee.entities.orm_entities import AnnouncementEntity, AdminAccountEntity
 from src.data.logoscoffee.exceptions import *
@@ -45,8 +44,7 @@ class AdminServiceImpl(AdminService):
     async def login(self, key: str) -> AdminAccountEntity:
         try:
             async with self.__session_manager.get_session() as s:
-                res = await s.execute(select(AdminAccountOrm).filter(AdminAccountOrm.key == key))
-                account = res.scalars().first()
+                account = await dao_admin_account.get_by_key(s, key)
                 if account is None or account.date_authorized:
                     raise InvalidKeyError(key)
                 account.date_authorized = datetime.now()
@@ -115,9 +113,7 @@ class AdminServiceImpl(AdminService):
     async def distribute_announcement(self, account_id: int, announcement_id: int):
         try:
             async with self.__session_manager.get_session() as s:
-                res = await s.execute(
-                    select(AdminAccountOrm).filter(AdminAccountOrm.id == account_id).with_for_update())
-                account = res.scalars().first()
+                account = await dao_admin_account.get_by_id(s, account_id, with_for_update=True)
                 self.__can_publish_announcement(account)
                 account.date_last_announcement_distributing = datetime.now()
                 announcement = await self.__safe_get_announcement(s, announcement_id)

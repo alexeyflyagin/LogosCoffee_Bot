@@ -2,13 +2,13 @@ from datetime import datetime
 
 from pydantic import TypeAdapter
 from loguru import logger
-from sqlalchemy import select, or_
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload
 
-from src.data.logoscoffee.dao import dao_product, dao_product_and_order
+from src.data.logoscoffee.dao import dao_product, dao_product_and_order, dao_order
+from src.data.logoscoffee.dao.units import raise_exception_if_none
 from src.data.logoscoffee.db.models import OrderOrm, ProductAndOrderOrm, ProductOrm
+from src.data.logoscoffee.entities.enums import OrderState, OrderStateGroup
 from src.data.logoscoffee.entities.general_entities import OrderPlaceAttemptEntity
 from src.data.logoscoffee.entities.orm_entities import OrderEntity, ProductAndOrderEntity
 from src.data.logoscoffee.exceptions import UnknownError, DatabaseError, PlacedOrderIsEmptyError, \
@@ -23,25 +23,15 @@ class ClientOrderServiceImpl(ClientOrderService):
     def __init__(self, session_manager: SessionManager):
         self.__session_manager = session_manager
 
-    async def __get_draft_order(self, s: AsyncSession, client_id: int, block_row: bool = False) -> OrderOrm:
-        if block_row:
-            res = await s.execute(select(OrderOrm).filter(
-            OrderOrm.client_id == client_id, OrderOrm.date_pending == None).with_for_update())
-        else:
-            res = await s.execute(select(OrderOrm).filter(
-            OrderOrm.client_id == client_id, OrderOrm.date_pending == None))
-        order = res.scalars().first()
-        if order is None:
-            raise OrderNotFoundError(client_id=client_id)
+    async def __safe_get_draft_order(self, s: AsyncSession, client_id: int, block_row: bool = False) -> OrderOrm:
+        order = await dao_order.get_by_id(s, client_id, block_row)
+        raise_exception_if_none(order, e=OrderNotFoundError(client_id=client_id))
         return order
 
     async def get_draft_order(self, client_id: int) -> OrderEntity:
         try:
             async with self.__session_manager.get_session() as s:
-                res = await s.execute(select(OrderOrm)
-                                      .options(joinedload(OrderOrm.product_and_orders).joinedload(ProductAndOrderOrm.product))
-                                      .filter(OrderOrm.client_id == client_id, OrderOrm.date_pending == None))
-                order = res.unique().scalars().first()
+                order = await dao_order.get_one_by_client_id_and_state(s, client_id, OrderState.CREATED, join=True)
                 entity = OrderEntity.model_validate(order)
                 entity.product_and_orders_rs = []
                 for i in order.product_and_orders:
@@ -60,7 +50,7 @@ class ClientOrderServiceImpl(ClientOrderService):
     async def add_to_draft_order(self, client_id: int, product_id: int):
         try:
             async with self.__session_manager.get_session() as s:
-                order = await self.__get_draft_order(s, client_id, True)
+                order = await self.__safe_get_draft_order(s, client_id, True)
                 product = await dao_product.get_by_id(s, product_id)
                 if product.is_available:
                     product_and_order = ProductAndOrderOrm(order_id=order.id, product_id=product.id)
@@ -81,7 +71,7 @@ class ClientOrderServiceImpl(ClientOrderService):
     async def remove_from_draft_order(self, client_id: int, product_id: int):
         try:
             async with self.__session_manager.get_session() as s:
-                order = await self.__get_draft_order(s, client_id, True)
+                order = await self.__safe_get_draft_order(s, client_id, True)
                 product = await dao_product.get_by_id(s, product_id)
                 product_and_orders = await dao_product_and_order.get(s, product_id=product.id, order_id=order.id)
                 if product.is_available:
@@ -107,7 +97,7 @@ class ClientOrderServiceImpl(ClientOrderService):
     async def clear_draft_order(self, client_id: int):
         try:
             async with self.__session_manager.get_session() as s:
-                order = await self.__get_draft_order(s, client_id, True)
+                order = await self.__safe_get_draft_order(s, client_id, True)
                 products_and_order = await dao_product_and_order.get_by_order_id(s, order_id=order.id)
                 for i in products_and_order:
                     await s.delete(i)
@@ -124,12 +114,11 @@ class ClientOrderServiceImpl(ClientOrderService):
         try:
             async with self.__session_manager.get_session() as s:
                 if order_id:
-                    res_order = await s.execute(select(OrderOrm).filter(OrderOrm.id == order_id).with_for_update())
-                    order = res_order.scalars().first()
+                    order = await dao_order.get_by_id(s, _id=order_id, with_for_update=True)
                     if order is None:
                         raise OrderNotFoundError(order_id=order_id)
                 else:
-                    order = await self.__get_draft_order(s, client_id, True)
+                    order = await self.__safe_get_draft_order(s, client_id, True)
                 products_and_order = await dao_product_and_order.get_by_order_id(s, order_id=order.id, join=True)
                 if len(products_and_order) == 0:
                     raise PlacedOrderIsEmptyError
@@ -162,14 +151,9 @@ class ClientOrderServiceImpl(ClientOrderService):
     async def get_in_progress_orders(self, client_id: int) -> list[OrderEntity]:
         try:
             async with self.__session_manager.get_session() as s:
-                res_order = await s.execute(select(OrderOrm).filter(
-                    OrderOrm.client_id == client_id, OrderOrm.date_pending is not None,
-                    OrderOrm.date_canceled is None, OrderOrm.date_completed is None))
-                orders = res_order.scalars().all()
-
+                orders = await dao_order.get_by_client_id_and_state_group(s, client_id, OrderStateGroup.IN_PROGRESS)
                 adapter = TypeAdapter(list[OrderEntity])
                 order_entities = adapter.validate_python(orders)
-
                 return order_entities
         # TODO add ClientAccountNotFoundError handler
         except SQLAlchemyError as e:
@@ -182,14 +166,9 @@ class ClientOrderServiceImpl(ClientOrderService):
     async def get_archived_orders(self, client_id: int) -> list[OrderEntity]:
         try:
             async with self.__session_manager.get_session() as s:
-                res_orders = await s.execute(select(OrderOrm).filter(
-                    or_(OrderOrm.client_id == client_id, OrderOrm.date_canceled is not None,
-                        OrderOrm.client_id == client_id, OrderOrm.date_completed is not None)))
-                orders = res_orders.scalars().all()
-
+                orders = await dao_order.get_by_client_id_and_state_group(s, client_id, OrderStateGroup.CLOSED)
                 adapter = TypeAdapter(list[OrderEntity])
                 order_entities = adapter.validate_python(orders)
-
                 return order_entities
         except SQLAlchemyError as e:
             logger.error(e)
@@ -201,7 +180,7 @@ class ClientOrderServiceImpl(ClientOrderService):
     async def get_product_quantity_in_draft_order(self, client_id: int, product_id: int) -> int:
         try:
             async with self.__session_manager.get_session() as s:
-                order = await self.__get_draft_order(s, client_id, True)
+                order = await self.__safe_get_draft_order(s, client_id, True)
                 products = await dao_product_and_order.get(s, product_id=product_id, order_id=order.id)
                 return len(products)
         except SQLAlchemyError as e:

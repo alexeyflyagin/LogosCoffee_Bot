@@ -1,9 +1,10 @@
 from collections import defaultdict
 from datetime import datetime
 from decimal import Decimal
-from enum import Enum
 
 from pydantic import BaseModel, ConfigDict
+
+from src.data.logoscoffee.entities.enums import OrderState
 
 
 class OrderEntity(BaseModel):
@@ -23,28 +24,20 @@ class OrderEntity(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-    class OrderState(Enum):
-        DRAFT = 0
-        PENDING = 1
-        COOKING = 2
-        READY = 3
-        COMPLETED = 4
-        CANCELED = 5
-
     @property
     def state(self) -> OrderState:
         if self.date_canceled:
-            return self.OrderState.CANCELED
+            return OrderState.CANCELED
         if self.date_completed:
-            return self.OrderState.COMPLETED
+            return OrderState.COMPLETED
         if self.date_ready:
-            return self.OrderState.READY
+            return OrderState.READY
         if self.date_cooking:
-            return self.OrderState.COOKING
+            return OrderState.COOKING
         if self.date_pending:
-            return self.OrderState.PENDING
+            return OrderState.PENDING
         else:
-            return self.OrderState.DRAFT
+            return OrderState.CREATED
 
     @property
     def product_and_order_groups(self) -> list[list['ProductAndOrderEntity']] | None:
@@ -60,7 +53,7 @@ class OrderEntity(BaseModel):
     def total_price(self) -> Decimal | None:
         if self.product_and_orders_rs is None:
             return None
-        if self.state == self.OrderState.DRAFT:
+        if self.state == OrderState.CREATED:
             return sum([i.product_rs.price for i in self.product_and_orders_rs], Decimal('0'))
         else:
             return sum([i.product_price for i in self.product_and_orders_rs], Decimal('0'))

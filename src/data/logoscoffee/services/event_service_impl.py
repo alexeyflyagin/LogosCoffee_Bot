@@ -4,6 +4,7 @@ from loguru import logger
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 
+from src.data.logoscoffee.dao import dao_event_subscriber
 from src.data.logoscoffee.db.models import EventSubscriberOrm
 from src.data.logoscoffee.entities.orm_entities import EventSubscriberEntity
 from src.data.logoscoffee.exceptions import DatabaseError, UnknownError, AlreadySubscribedError, \
@@ -20,8 +21,7 @@ class EventServiceImpl(EventService):
     async def get_subscribers(self, event_name: str) -> list[EventSubscriberEntity]:
         try:
             async with self.__session_manager.get_session() as s:
-                res = await s.execute(select(EventSubscriberOrm).filter(EventSubscriberOrm.event_name == event_name))
-                subscribers = res.scalars().all()
+                subscribers = await dao_event_subscriber.get_by_event_name(s, event_name)
                 entities = [EventSubscriberEntity.model_validate(i) for i in subscribers]
                 return entities
         except SQLAlchemyError as e:
@@ -34,9 +34,7 @@ class EventServiceImpl(EventService):
     async def subscribe(self, event_name: str, chat_id: int, data: dict[str, Any] = None):
         try:
             async with self.__session_manager.get_session() as s:
-                res = await s.execute(select(EventSubscriberOrm).filter(EventSubscriberOrm.event_name == event_name,
-                                                                        EventSubscriberOrm.chat_id == chat_id))
-                subscriber = res.scalars().first()
+                subscriber = await dao_event_subscriber.get(s, event_name, chat_id)
                 if subscriber:
                     raise AlreadySubscribedError(chat_id, event_name)
                 new_subscriber = EventSubscriberOrm(event_name=event_name, chat_id=chat_id, data=data)
@@ -55,9 +53,7 @@ class EventServiceImpl(EventService):
     async def unsubscribe(self, event_name: str, chat_id: int):
         try:
             async with self.__session_manager.get_session() as s:
-                res = await s.execute(select(EventSubscriberOrm).filter(EventSubscriberOrm.event_name == event_name,
-                                                                        EventSubscriberOrm.chat_id == chat_id))
-                subscriber = res.scalars().first()
+                subscriber = await dao_event_subscriber.get(s, event_name, chat_id)
                 if not subscriber:
                     raise AlreadyUnsubscribedError(chat_id, event_name)
                 await s.delete(subscriber)

@@ -1,29 +1,30 @@
-from datetime import datetime
-
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.data.logoscoffee.dao.units import set_with_for_update_if
-from src.data.logoscoffee.db.models import ReviewOrm
+from src.data.logoscoffee.db.models import EventSubscriberOrm
 
 
-async def get_by_id(
+async def get(
         s: AsyncSession,
-        _id: int,
+        event_name: str,
+        chat_id: int,
         with_for_update: bool = False
-) -> ReviewOrm | None:
-    query = select(ReviewOrm).filter(ReviewOrm.id == _id)
+) -> EventSubscriberOrm | None:
+    query = (select(EventSubscriberOrm)
+             .filter(EventSubscriberOrm.event_name == event_name)
+             .filter(EventSubscriberOrm.chat_id == chat_id))
     query = set_with_for_update_if(query, with_for_update)
     res = await s.execute(query)
     return res.scalar_one_or_none()
 
 
-async def get_created_since(
+async def get_by_event_name(
         s: AsyncSession,
-        date: datetime,
+        event_name: str,
         with_for_update: bool = False
-) -> tuple[ReviewOrm, ...]:
-    query = select(ReviewOrm).filter(ReviewOrm.date_create >= date)
+) -> tuple[EventSubscriberOrm, ...]:
+    query = select(EventSubscriberOrm).filter(EventSubscriberOrm.event_name == event_name)
     query = set_with_for_update_if(query, with_for_update)
     res = await s.execute(query)
     return tuple(res.scalars().all())
