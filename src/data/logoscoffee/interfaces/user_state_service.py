@@ -5,7 +5,11 @@ from src.data.logoscoffee.entities.user_state_entities import UserData
 class UserStateService(ABC):
 
     @abstractmethod
-    async def set_state(self, user_data: UserData, state: str | None):
+    async def set_state(
+            self,
+            user_data: UserData,
+            state: str | None
+    ):
         """
         :param user_data:
         :param state:
@@ -15,7 +19,10 @@ class UserStateService(ABC):
         pass
 
     @abstractmethod
-    async def get_state(self, user_data: UserData) -> str | None:
+    async def get_state(
+            self,
+            user_data: UserData
+    ) -> str | None:
         """
         :param user_data:
         :return: The state of the user
@@ -25,7 +32,11 @@ class UserStateService(ABC):
         pass
 
     @abstractmethod
-    async def set_data(self, user_data: UserData, data: dict):
+    async def set_data(
+            self,
+            user_data: UserData,
+            data: dict
+    ):
         """
         :param user_data:
         :param data:
@@ -35,7 +46,10 @@ class UserStateService(ABC):
         pass
 
     @abstractmethod
-    async def get_data(self, user_data: UserData) -> dict:
+    async def get_data(
+            self,
+            user_data: UserData
+    ) -> dict:
         """
         :param user_data:
         :return: The dict with user state data

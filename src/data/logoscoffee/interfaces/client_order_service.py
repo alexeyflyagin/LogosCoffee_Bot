@@ -6,7 +6,10 @@ from src.data.logoscoffee.entities.orm_entities import OrderEntity
 class ClientOrderService(ABC):
 
     @abstractmethod
-    async def get_draft_order(self, client_id: int) -> OrderEntity:
+    async def get_draft_order(
+            self,
+            client_id: int
+    ) -> OrderEntity:
         """
         :param client_id:
         :return: The draft order entity (if an account with `client_id` exists it is guaranteed that the corresponding draft order also exists)
@@ -17,7 +20,11 @@ class ClientOrderService(ABC):
         pass
 
     @abstractmethod
-    async def add_to_draft_order(self, client_id: int, product_id: int):
+    async def add_to_draft_order(
+            self,
+            client_id: int,
+            product_id: int
+    ):
         """
         Adds a product to the draft order.
 
@@ -30,7 +37,11 @@ class ClientOrderService(ABC):
         pass
 
     @abstractmethod
-    async def remove_from_draft_order(self, client_id: int, product_id: int):
+    async def remove_from_draft_order(
+            self,
+            client_id: int,
+            product_id: int
+    ):
         """
         Removes a product from the draft order.
 
@@ -44,7 +55,10 @@ class ClientOrderService(ABC):
         pass
 
     @abstractmethod
-    async def clear_draft_order(self, client_id: int):
+    async def clear_draft_order(
+            self,
+            client_id: int
+    ):
         """
         Removes all products from the draft order.
 
@@ -56,7 +70,11 @@ class ClientOrderService(ABC):
         pass
 
     @abstractmethod
-    async def place_order(self, client_id: int, order_id: int | None = None) -> OrderEntity:
+    async def place_order(
+            self,
+            client_id: int,
+            order_id: int | None = None
+    ) -> OrderEntity:
         """
         Sends an order to an employee.
 
@@ -74,7 +92,10 @@ class ClientOrderService(ABC):
         pass
 
     @abstractmethod
-    async def get_in_progress_orders(self, client_id: int) -> list[OrderEntity]:
+    async def get_in_progress_orders(
+            self,
+            client_id: int
+    ) -> list[OrderEntity]:
         """
         :param client_id:
         :return: The list of client's orders entities that have a group of states 'In Progress'.
@@ -85,7 +106,10 @@ class ClientOrderService(ABC):
         pass
 
     @abstractmethod
-    async def get_archived_orders(self, client_id: int) -> list[OrderEntity]:
+    async def get_archived_orders(
+            self,
+            client_id: int
+    ) -> list[OrderEntity]:
         """
         :param client_id:
         :return: The list of client's orders entities that have a group of states 'Closed'.
@@ -96,7 +120,11 @@ class ClientOrderService(ABC):
         pass
 
     @abstractmethod
-    async def get_product_quantity_in_draft_order(self, client_id: int, product_id: int) -> int:
+    async def get_product_quantity_in_draft_order(
+            self,
+            client_id: int,
+            product_id: int
+    ) -> int:
         """
         :param client_id:
         :param product_id:

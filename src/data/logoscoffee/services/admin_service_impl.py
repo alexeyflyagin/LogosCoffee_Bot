@@ -28,7 +28,10 @@ class AdminServiceImpl(AdminService):
             if delta_time < timedelta(minutes=10):
                 raise CooldownError(delta_time)
 
-    async def get_new_reviews(self, last_update: datetime) -> list[ReviewEntity]:
+    async def get_new_reviews(
+            self,
+            last_update: datetime
+    ) -> list[ReviewEntity]:
         try:
             async with self.__session_manager.get_session() as s:
                 reviews = await dao_review.get_created_since(s, last_update)
@@ -41,7 +44,10 @@ class AdminServiceImpl(AdminService):
             logger.exception(e)
             raise UnknownError(e)
 
-    async def login(self, key: str) -> AdminAccountEntity:
+    async def login(
+            self,
+            key: str
+    ) -> AdminAccountEntity:
         try:
             async with self.__session_manager.get_session() as s:
                 account = await dao_admin_account.get_by_key(s, key)
@@ -62,7 +68,11 @@ class AdminServiceImpl(AdminService):
             logger.exception(e)
             raise UnknownError(e)
 
-    async def create_announcement(self, text_content: str | None, preview_photo: str | None) -> AnnouncementEntity:
+    async def create_announcement(
+            self,
+            text_content: str | None,
+            preview_photo: str | None
+    ) -> AnnouncementEntity:
         try:
             async with self.__session_manager.get_session() as s:
                 created_announcement = AnnouncementOrm(text_content=text_content, preview_photo=preview_photo)
@@ -78,7 +88,10 @@ class AdminServiceImpl(AdminService):
             logger.exception(e)
             raise UnknownError(e)
 
-    async def get_announcement_by_id(self, announcement_id: int) -> AnnouncementEntity:
+    async def get_announcement_by_id(
+            self,
+            announcement_id: int
+    ) -> AnnouncementEntity:
         try:
             async with self.__session_manager.get_session() as s:
                 announcement = await self.__safe_get_announcement(s, announcement_id)
@@ -94,7 +107,10 @@ class AdminServiceImpl(AdminService):
             logger.exception(e)
             raise UnknownError(e)
 
-    async def delete_announcement(self, announcement_id: int):
+    async def delete_announcement(
+            self,
+            announcement_id: int
+    ):
         try:
             async with self.__session_manager.get_session() as s:
                 announcement = await self.__safe_get_announcement(s, announcement_id)
@@ -110,7 +126,11 @@ class AdminServiceImpl(AdminService):
             logger.exception(e)
             raise UnknownError(e)
 
-    async def distribute_announcement(self, account_id: int, announcement_id: int):
+    async def distribute_announcement(
+            self,
+            account_id: int,
+            announcement_id: int
+    ):
         try:
             async with self.__session_manager.get_session() as s:
                 account = await dao_admin_account.get_by_id(s, account_id, with_for_update=True)

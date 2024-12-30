@@ -7,7 +7,10 @@ from src.data.logoscoffee.entities.orm_entities import AnnouncementEntity, Clien
 class ClientService(ABC):
 
     @abstractmethod
-    async def get_new_announcements(self, last_update) -> list[AnnouncementEntity]:
+    async def get_new_announcements(
+            self,
+            last_update
+    ) -> list[AnnouncementEntity]:
         """
         Used for a poll.
 
@@ -19,7 +22,10 @@ class ClientService(ABC):
         pass
 
     @abstractmethod
-    async def login(self, phone_number: str) -> ClientAccountEntity:
+    async def login(
+            self,
+            phone_number: str
+    ) -> ClientAccountEntity:
         """
         :param phone_number:
         :return: The client account entity
@@ -29,7 +35,10 @@ class ClientService(ABC):
         pass
 
     @abstractmethod
-    async def can_submit_review(self, account_id: int) -> bool:
+    async def can_submit_review(
+            self,
+            account_id: int
+    ) -> bool:
         """
         Used to check the limit: whether the client can submit a review.
 
@@ -43,7 +52,11 @@ class ClientService(ABC):
         pass
 
     @abstractmethod
-    async def submit_review(self, account_id: int, text: str):
+    async def submit_review(
+            self,
+            account_id: int,
+            text: str
+    ):
         """
         Anonymously submits a review.
 
@@ -66,7 +79,10 @@ class ClientService(ABC):
         pass
 
     @abstractmethod
-    async def get_product_by_id(self, product_id: int) -> ProductEntity:
+    async def get_product_by_id(
+            self,
+            product_id: int
+    ) -> ProductEntity:
         """
         :param product_id:
         :return: The product entity

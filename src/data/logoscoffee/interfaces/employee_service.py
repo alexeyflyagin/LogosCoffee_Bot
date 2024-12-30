@@ -7,7 +7,10 @@ from src.data.logoscoffee.entities.orm_entities import EmployeeAccountEntity, Or
 class EmployeeService(ABC):
 
     @abstractmethod
-    async def get_new_orders(self, last_update: datetime) -> list[OrderEntity]:
+    async def get_new_orders(
+            self,
+            last_update: datetime
+    ) -> list[OrderEntity]:
         """
         Used for a poll.
 
@@ -19,7 +22,10 @@ class EmployeeService(ABC):
         pass
 
     @abstractmethod
-    async def login(self, key: str) -> EmployeeAccountEntity:
+    async def login(
+            self,
+            key: str
+    ) -> EmployeeAccountEntity:
         """
         You can use this method to login for the first time. The second authorization will be incorrect.
 
@@ -32,7 +38,10 @@ class EmployeeService(ABC):
         pass
 
     @abstractmethod
-    async def accept_order(self, order_id: int):
+    async def accept_order(
+            self,
+            order_id: int
+    ):
         """
         Change the order status to 'Accepted'.
 
@@ -44,7 +53,11 @@ class EmployeeService(ABC):
         pass
 
     @abstractmethod
-    async def cancel_order(self, order_id: int, cancel_details: str):
+    async def cancel_order(
+            self,
+            order_id: int,
+            cancel_details: str
+    ):
         """
         Change the order status to 'Canceled'.
 
@@ -57,7 +70,10 @@ class EmployeeService(ABC):
         pass
 
     @abstractmethod
-    async def ready_order(self, order_id: int):
+    async def ready_order(
+            self,
+            order_id: int
+    ):
         """
         Change the order status to 'Ready'.
 
@@ -69,7 +85,10 @@ class EmployeeService(ABC):
         pass
 
     @abstractmethod
-    async def complete_order(self, order_id: int):
+    async def complete_order(
+            self,
+            order_id: int
+    ):
         """
         Change the order status to 'Completed'.
 

@@ -7,7 +7,10 @@ from src.data.logoscoffee.entities.orm_entities import EventSubscriberEntity
 class EventService(ABC):
 
     @abstractmethod
-    async def get_subscribers(self, event_name: str) -> list[EventSubscriberEntity]:
+    async def get_subscribers(
+            self,
+            event_name: str
+    ) -> list[EventSubscriberEntity]:
         """
         :param event_name: The tag that listeners will use to subscribe.
         :return: The list of subscribers to an event with the tag `event_name`
@@ -17,7 +20,12 @@ class EventService(ABC):
         pass
 
     @abstractmethod
-    async def subscribe(self, event_name: str, chat_id: int, data: dict[str, Any] = None):
+    async def subscribe(
+            self,
+            event_name: str,
+            chat_id: int,
+            data: dict[str, Any] = None
+    ):
         """
         :param event_name: The event tag that the subscriber will listen to
         :param chat_id: The ID of the subscriber chat
@@ -29,7 +37,11 @@ class EventService(ABC):
         pass
 
     @abstractmethod
-    async def unsubscribe(self, event_name: str, chat_id: int):
+    async def unsubscribe(
+            self,
+            event_name: str,
+            chat_id: int
+    ):
         """
         :param event_name: The event tag that the subscriber is listening to
         :param chat_id: The ID of the subscriber chat

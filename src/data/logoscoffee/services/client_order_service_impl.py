@@ -28,7 +28,10 @@ class ClientOrderServiceImpl(ClientOrderService):
         raise_exception_if_none(order, e=OrderNotFoundError(client_id=client_id))
         return order
 
-    async def get_draft_order(self, client_id: int) -> OrderEntity:
+    async def get_draft_order(
+            self,
+            client_id: int
+    ) -> OrderEntity:
         try:
             async with self.__session_manager.get_session() as s:
                 order = await dao_order.get_one_by_client_id_and_state(s, client_id, OrderState.CREATED, join=True)
@@ -47,7 +50,11 @@ class ClientOrderServiceImpl(ClientOrderService):
             logger.exception(e)
             raise UnknownError(e)
 
-    async def add_to_draft_order(self, client_id: int, product_id: int):
+    async def add_to_draft_order(
+            self,
+            client_id: int,
+            product_id: int
+    ):
         try:
             async with self.__session_manager.get_session() as s:
                 order = await self.__safe_get_draft_order(s, client_id, True)
@@ -68,7 +75,11 @@ class ClientOrderServiceImpl(ClientOrderService):
             logger.exception(e)
             raise UnknownError(e)
 
-    async def remove_from_draft_order(self, client_id: int, product_id: int):
+    async def remove_from_draft_order(
+            self,
+            client_id: int,
+            product_id: int
+    ):
         try:
             async with self.__session_manager.get_session() as s:
                 order = await self.__safe_get_draft_order(s, client_id, True)
@@ -94,7 +105,10 @@ class ClientOrderServiceImpl(ClientOrderService):
             logger.exception(e)
             raise UnknownError(e)
 
-    async def clear_draft_order(self, client_id: int):
+    async def clear_draft_order(
+            self,
+            client_id: int
+    ):
         try:
             async with self.__session_manager.get_session() as s:
                 order = await self.__safe_get_draft_order(s, client_id, True)
@@ -110,7 +124,11 @@ class ClientOrderServiceImpl(ClientOrderService):
             logger.exception(e)
             raise UnknownError(e)
 
-    async def place_order(self, client_id: int, order_id: int | None = None) -> OrderPlaceAttemptEntity:
+    async def place_order(
+            self,
+            client_id: int,
+            order_id: int | None = None
+    ) -> OrderPlaceAttemptEntity:
         try:
             async with self.__session_manager.get_session() as s:
                 if order_id:
@@ -148,7 +166,10 @@ class ClientOrderServiceImpl(ClientOrderService):
             logger.exception(e)
             raise UnknownError(e)
 
-    async def get_in_progress_orders(self, client_id: int) -> list[OrderEntity]:
+    async def get_in_progress_orders(
+            self,
+            client_id: int
+    ) -> list[OrderEntity]:
         try:
             async with self.__session_manager.get_session() as s:
                 orders = await dao_order.get_by_client_id_and_state_group(s, client_id, OrderStateGroup.IN_PROGRESS)
@@ -163,7 +184,10 @@ class ClientOrderServiceImpl(ClientOrderService):
             logger.exception(e)
             raise UnknownError(e)
 
-    async def get_archived_orders(self, client_id: int) -> list[OrderEntity]:
+    async def get_archived_orders(
+            self,
+            client_id: int
+    ) -> list[OrderEntity]:
         try:
             async with self.__session_manager.get_session() as s:
                 orders = await dao_order.get_by_client_id_and_state_group(s, client_id, OrderStateGroup.CLOSED)
@@ -177,7 +201,11 @@ class ClientOrderServiceImpl(ClientOrderService):
             logger.exception(e)
             raise UnknownError(e)
 
-    async def get_product_quantity_in_draft_order(self, client_id: int, product_id: int) -> int:
+    async def get_product_quantity_in_draft_order(
+            self,
+            client_id: int,
+            product_id: int
+    ) -> int:
         try:
             async with self.__session_manager.get_session() as s:
                 order = await self.__safe_get_draft_order(s, client_id, True)

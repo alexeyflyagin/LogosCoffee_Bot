@@ -29,7 +29,10 @@ class ClientServiceImpl(ClientService):
             if delta_time < timedelta(hours=1):
                 raise CooldownError(delta_time)
 
-    async def get_new_announcements(self, last_update) -> list[AnnouncementEntity]:
+    async def get_new_announcements(
+            self,
+            last_update
+    ) -> list[AnnouncementEntity]:
         try:
             async with self.__session_manager.get_session() as s:
                 announcements = await dao_announcement.get_since_by_last_distribute(s, last_update)
@@ -43,7 +46,10 @@ class ClientServiceImpl(ClientService):
             raise UnknownError(e)
 
 
-    async def login(self, phone_number: str) -> ClientAccountEntity:
+    async def login(
+            self,
+            phone_number: str
+    ) -> ClientAccountEntity:
         try:
             async with self.__session_manager.get_session() as s:
                 new_client = ClientAccountOrm(phone_number=phone_number)
@@ -60,7 +66,10 @@ class ClientServiceImpl(ClientService):
             logger.exception(e)
             raise UnknownError(e)
 
-    async def can_submit_review(self, account_id: int) -> bool:
+    async def can_submit_review(
+            self,
+            account_id: int
+    ) -> bool:
         try:
             async with self.__session_manager.get_session() as s:
                 account = await dao_client_account.get_by_id(s, account_id)
@@ -76,7 +85,11 @@ class ClientServiceImpl(ClientService):
             raise UnknownError(e)
 
 
-    async def submit_review(self, account_id: int, text: str):
+    async def submit_review(
+            self,
+            account_id: int,
+            text: str
+    ):
         try:
             async with self.__session_manager.get_session() as s:
                 account = await dao_client_account.get_by_id(s, account_id, with_for_update=True)
@@ -112,7 +125,10 @@ class ClientServiceImpl(ClientService):
             logger.exception(e)
             raise UnknownError(e)
 
-    async def get_product_by_id(self, product_id: int) -> ProductEntity:
+    async def get_product_by_id(
+            self,
+            product_id: int
+    ) -> ProductEntity:
         try:
             async with self.__session_manager.get_session() as s:
                 product = await dao_product.get_by_id(s, product_id)

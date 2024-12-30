@@ -31,24 +31,38 @@ class UserStateServiceImpl(UserStateService):
             user_state = res.scalar_one_or_none()
         return user_state
 
-    async def set_state(self, user_data: UserData, state: str | None):
+    async def set_state(
+            self,
+            user_data: UserData,
+            state: str | None
+    ):
         async with self.__session_manager.get_session() as s:
             user_state = await self.__get_user_state_or_create(s, user_data)
             user_state.state = state
             await s.commit()
 
-    async def get_state(self, user_data: UserData) -> str | None:
+    async def get_state(
+            self,
+            user_data: UserData
+    ) -> str | None:
         async with self.__session_manager.get_session() as s:
             user_state = await self.__get_user_state_or_create(s, user_data)
             return user_state.state
 
-    async def set_data(self, user_data: UserData, data: dict):
+    async def set_data(
+            self,
+            user_data: UserData,
+            data: dict
+    ):
         async with self.__session_manager.get_session() as s:
             user_state = await self.__get_user_state_or_create(s, user_data)
             user_state.data = data
             await s.commit()
 
-    async def get_data(self, user_data: UserData) -> dict:
+    async def get_data(
+            self,
+            user_data: UserData
+    ) -> dict:
         async with self.__session_manager.get_session() as s:
             user_state = await self.__get_user_state_or_create(s, user_data)
             return user_state.data

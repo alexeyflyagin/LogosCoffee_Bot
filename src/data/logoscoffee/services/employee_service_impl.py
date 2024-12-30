@@ -44,7 +44,10 @@ class EmployeeServiceImpl(EmployeeService):
         if order_entity.state == OrderState.CANCELED or order_entity.state == OrderState.COMPLETED:
             raise OrderStateError(state=order_entity.state, expected_state="Is not Canceled or Completed")
 
-    async def get_new_orders(self, last_update: datetime) -> list[OrderEntity]:
+    async def get_new_orders(
+            self,
+            last_update: datetime
+    ) -> list[OrderEntity]:
         try:
             async with self.__session_manager.get_session() as s:
                 orders = await dao_order.get_since_by_date_pending(s, last_update)
@@ -58,7 +61,10 @@ class EmployeeServiceImpl(EmployeeService):
             logger.exception(e)
             raise UnknownError(e)
 
-    async def login(self, key: str | None) -> EmployeeAccountEntity:
+    async def login(
+            self,
+            key: str | None
+    ) -> EmployeeAccountEntity:
         try:
             async with self.__session_manager.get_session() as s:
                 account = await dao_employee_account.get_by_key(s, key)
@@ -75,7 +81,10 @@ class EmployeeServiceImpl(EmployeeService):
             logger.exception(e)
             raise UnknownError(e)
 
-    async def accept_order(self, order_id: int):
+    async def accept_order(
+            self,
+            order_id: int
+    ):
         try:
             async with self.__session_manager.get_session() as s:
                 order = await self.__get_order_by_id(s, order_id)
@@ -94,7 +103,11 @@ class EmployeeServiceImpl(EmployeeService):
             logger.exception(e)
             raise UnknownError(e)
 
-    async def cancel_order(self, order_id: int, cancel_details: str):
+    async def cancel_order(
+            self,
+            order_id: int,
+            cancel_details: str
+    ):
         try:
             async with self.__session_manager.get_session() as s:
                 order = await self.__get_order_by_id(s, order_id)
@@ -113,7 +126,10 @@ class EmployeeServiceImpl(EmployeeService):
             logger.exception(e)
             raise UnknownError(e)
 
-    async def ready_order(self, order_id: int):
+    async def ready_order(
+            self,
+            order_id: int
+    ):
         try:
             async with self.__session_manager.get_session() as s:
                 order = await self.__get_order_by_id(s, order_id)
@@ -131,7 +147,10 @@ class EmployeeServiceImpl(EmployeeService):
             logger.exception(e)
             raise UnknownError(e)
 
-    async def complete_order(self, order_id: int):
+    async def complete_order(
+            self,
+            order_id: int
+    ):
         try:
             async with self.__session_manager.get_session() as s:
                 order = await self.__get_order_by_id(s, order_id)
