@@ -16,20 +16,19 @@ from src.presentation.resources import strings
 class AdminBot(BaseBot):
 
     def __init__(self, bot: Bot, dp: Dispatcher, admin_token: str):
-        super().__init__(bot, dp)
+        super().__init__(bot, dp, "Admin")
         self._admin_token = admin_token
 
     async def run(self):
         try:
             self.dp.include_routers(handler.router, announcement_handler.router, end_handler.router)
             await self.bot.delete_webhook(drop_pending_updates=True)
-            logger.info(f"Admin bot is started.")
             await asyncio.gather(
                 self.__new_review_polling(),
                 self.dp.start_polling(self.bot),
             )
         except CancelledError:
-            logger.info(f"Admin bot is finished.")
+            self.shutdown()
 
     async def __new_review_polling(self):
         last_update_time = datetime.now()

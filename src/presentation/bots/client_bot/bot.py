@@ -18,7 +18,7 @@ from src.presentation.bots.utils import send_announcement
 class ClientBot(BaseBot):
 
     def __init__(self, bot: Bot, dp: Dispatcher):
-        super().__init__(bot, dp)
+        super().__init__(bot, dp, "Client")
 
     async def run(self):
         try:
@@ -31,13 +31,12 @@ class ClientBot(BaseBot):
                 end_handler.router
             )
             await self.bot.delete_webhook(drop_pending_updates=True)
-            logger.info(f"Client bot is started.")
             await asyncio.gather(
                 self.__announcement_pooling(),
                 self.dp.start_polling(self.bot),
             )
         except CancelledError:
-            logger.info(f"Client bot is finished.")
+            self.shutdown()
 
     async def __announcement_pooling(self):
         last_update_time = datetime.now()
