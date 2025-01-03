@@ -4,7 +4,7 @@
 ![VERSION](https://img.shields.io/badge/status-in%20development-red)
 
 - 🍀 **Clear architecture** for maximum flexibility and readability.
-- 🦅 **Independent service**
+- 🦅 **Independent service.**
 - ⚡ **Asynchronous API** for fast request processing.
 - 🤖 **Telegram Bot** for user interaction.
 - 📝 **Logging** with multiple levels of detail. _(DEV)_
