@@ -3,21 +3,18 @@
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
 ![VERSION](https://img.shields.io/badge/status-in%20development-yellow)
 
->- 🍀 **Clear architecture** for maximum flexibility and readability.
->- 🦅 **Independent service**
->- ⚡ **Asynchronous API** for fast request processing.
->- 🤖 **Telegram Bot** for user interaction.
->- 📝 **Logging** with multiple levels of detail. _(DEV)_
->- 🔬 **Testing** service. _(DEV)_
+- 🍀 **Clear architecture** for maximum flexibility and readability.
+- 🦅 **Independent service**
+- ⚡ **Asynchronous API** for fast request processing.
+- 🤖 **Telegram Bot** for user interaction.
+- 📝 **Logging** with multiple levels of detail. _(DEV)_
+- 🔬 **Testing** service. _(DEV)_
 
----
 
 ## Table of Contents
 1. [Features](#features)
 2. [Usage](#usage)  
 3. [Configuration](#configuration)   
-
----
 
 ---
 
