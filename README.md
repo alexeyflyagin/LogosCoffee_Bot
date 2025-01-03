@@ -1,7 +1,7 @@
 # LogosCoffee_Bot
 
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![VERSION](https://img.shields.io/badge/status-in%20development-yellow)
+![VERSION](https://img.shields.io/badge/status-in%20development-red)
 
 - 🍀 **Clear architecture** for maximum flexibility and readability.
 - 🦅 **Independent service**
