@@ -16,12 +16,12 @@ async def get_by_id(
     return res.scalar_one_or_none()
 
 
-async def get_by_key(
+async def get_by_token(
         s: AsyncSession,
-        key: str,
+        token: str,
         with_for_update: bool = False
 ) -> AdminAccountOrm | None:
-    query = select(AdminAccountOrm).filter(AdminAccountOrm.key == key)
+    query = select(AdminAccountOrm).filter(AdminAccountOrm.token == token)
     query = set_with_for_update_if(query, with_for_update)
     res = await s.execute(query)
     return res.scalar_one_or_none()

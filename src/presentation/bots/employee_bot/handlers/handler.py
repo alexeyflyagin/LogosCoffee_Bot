@@ -19,14 +19,14 @@ event_service: EventService
 async def start_handler(msg: Message, state: FSMContext, command: CommandObject):
     key = command.args
     if key is None:
-        await msg.answer(strings.GENERAL.LOGIN.KEY_WAS_NOT_ENTERED)
+        await msg.answer(strings.GENERAL.LOGIN.TOKEN_WAS_NOT_ENTERED)
         return
     try:
         account = await employee_service.login(key)
-        await state.set_data({ACCOUNT_ID: account.id})
+        await state.set_data({TOKEN: account.id})
         await state.set_state(MainStates.Main)
         await msg.answer(random_str(strings.GENERAL.LOGIN.SUCCESSFUL))
-    except InvalidKeyError:
-        await  msg.answer(strings.GENERAL.LOGIN.INVALID_KEY)
+    except InvalidTokenError:
+        await  msg.answer(strings.GENERAL.LOGIN.INVALID_TOKEN)
     except (DatabaseError, UnknownError):
         await msg.answer(random_str(strings.ERRORS.UNKNOWN))

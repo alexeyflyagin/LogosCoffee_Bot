@@ -1,3 +1,3 @@
-ACCOUNT_ID = "account_id"
+TOKEN = "token"
 
 EVENT__NEW_ORDER = "new_order"

@@ -84,11 +84,11 @@ async def get_by_client_id_and_state(
         client_id: int,
         state: OrderState,
         join: bool = False,
-        wait_for_update: bool = False
+        with_for_update: bool = False
 ) -> tuple[OrderOrm, ...]:
     query = select(OrderOrm).filter(OrderOrm.client_id == client_id)
     query = __set_state_filter(query, state)
-    query = set_with_for_update_if(query, wait_for_update)
+    query = set_with_for_update_if(query, with_for_update)
     query = __set_options_if(query, join)
     res = await s.execute(query)
     return tuple(res.unique().scalars().all())
@@ -99,11 +99,11 @@ async def get_one_by_client_id_and_state(
         client_id: int,
         state: OrderState,
         join: bool = False,
-        wait_for_update: bool = False
+        with_for_update: bool = False
 ) -> OrderOrm | None:
     query = select(OrderOrm).filter(OrderOrm.client_id == client_id)
     query = __set_state_filter(query, state)
-    query = set_with_for_update_if(query, wait_for_update)
+    query = set_with_for_update_if(query, with_for_update)
     query = __set_options_if(query, join)
     res = await s.execute(query)
     return res.unique().scalar_one_or_none()
@@ -114,11 +114,11 @@ async def get_by_client_id_and_state_group(
         client_id: int,
         state_group: OrderStateGroup,
         join: bool = False,
-        wait_for_update: bool = False
+        with_for_update: bool = False
 ) -> tuple[OrderOrm, ...]:
     query = select(OrderOrm).filter(OrderOrm.client_id == client_id)
     query = __set_state_group_filter(query, state_group)
-    query = set_with_for_update_if(query, wait_for_update)
+    query = set_with_for_update_if(query, with_for_update)
     query = __set_options_if(query, join)
     res = await s.execute(query)
     return tuple(res.unique().scalars().all())
@@ -128,10 +128,10 @@ async def get_since_by_date_pending(
         s: AsyncSession,
         date: datetime,
         join: bool = False,
-        wait_for_update: bool = False
+        with_for_update: bool = False
 ) -> tuple[OrderOrm, ...]:
     query = select(OrderOrm).filter(OrderOrm.date_pending >= date)
-    query = set_with_for_update_if(query, wait_for_update)
+    query = set_with_for_update_if(query, with_for_update)
     query = __set_options_if(query, join)
     res = await s.execute(query)
     return tuple(res.unique().scalars().all())

@@ -9,6 +9,7 @@ class OrderState(Enum):
     COMPLETED = 4
     CANCELED = 5
 
+
 class OrderStateGroup(Enum):
     DRAFT = 0
     IN_PROGRESS = 1

@@ -1,4 +1,4 @@
-ACCOUNT_ID = "account_id"
+TOKEN = "token"
 
 PREFIX__PRODUCT = "pr"
 

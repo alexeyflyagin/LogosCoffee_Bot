@@ -27,3 +27,13 @@ async def get_since_by_last_distribute(
     query = set_with_for_update_if(query, with_for_update)
     res = await s.execute(query)
     return tuple(res.scalars().all())
+
+
+async def get_all(
+        s: AsyncSession,
+        with_for_update: bool = False
+) -> tuple[AnnouncementOrm, ...]:
+    query = select(AnnouncementOrm)
+    query = set_with_for_update_if(query, with_for_update)
+    res = await s.execute(query)
+    return tuple(res.scalars().all())

@@ -1,4 +1,4 @@
-ACCOUNT_ID = "accountId"
+TOKEN = "token"
 EVENT__NEW_REVIEW = "newReview"
 
 CD_PREFIX__Announcement = "prAnsmnt"

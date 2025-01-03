@@ -116,6 +116,7 @@ class Container(containers.DeclarativeContainer):
         AdminBot,
         bot=bot_for_admin,
         dp=dp,
+        admin_token=config.DEFAULT_ADMIN_TOKEN_FOR_LOGIN,
     )
 
     client_bot = providers.Factory(
@@ -137,6 +138,8 @@ di.config.DB_URL.from_value(config.DB_URL)
 di.config.ADMIN_BOT_TOKEN.from_value(config.ADMIN_BOT_TOKEN)
 di.config.CLIENT_BOT_TOKEN.from_value(config.CLIENT_BOT_TOKEN)
 di.config.EMPLOYEE_BOT_TOKEN.from_value(config.EMPLOYEE_BOT_TOKEN)
+
+di.config.DEFAULT_ADMIN_TOKEN_FOR_LOGIN.from_value(config.DEFAULT_ADMIN_TOKEN_FOR_LOGIN)
 
 client_handlers__inject()
 admin_handlers__inject()

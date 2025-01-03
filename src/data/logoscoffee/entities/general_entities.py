@@ -8,6 +8,7 @@ from src.data.logoscoffee.entities.orm_entities import ProductEntity, OrderEntit
 class MenuEntity:
     all_products: list[ProductEntity]
 
+
 @dataclass
 class OrderUpdateEntity:
     order: OrderEntity
@@ -19,8 +20,3 @@ class OrderUpdateEntity:
         STATE__READY = 2
         STATE__COMPLETED = 3
         STATE__CANCELED = 4
-
-@dataclass
-class OrderPlaceAttemptEntity:
-    order: OrderEntity
-    is_successful: bool

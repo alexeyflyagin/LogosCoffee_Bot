@@ -2,10 +2,9 @@ from decimal import Decimal
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import BIGINT, JSON, DECIMAL, ForeignKey, VARCHAR
-from sqlalchemy.orm import declarative_base, Mapped, relationship
+from sqlalchemy import BIGINT, JSON, DECIMAL, ForeignKey, VARCHAR, DateTime, INT, TEXT, BOOLEAN
+from sqlalchemy.orm import declarative_base, Mapped, relationship, validates
 from sqlalchemy.orm import mapped_column
-
 
 Base = declarative_base()
 
@@ -14,95 +13,108 @@ CASCADE = "CASCADE"
 
 class UserStateOrm(Base):
     __tablename__ = "user_state"
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    bot_id: Mapped[int] = mapped_column(BIGINT)
-    user_id: Mapped[int] = mapped_column(BIGINT)
-    chat_id: Mapped[int] = mapped_column(BIGINT)
-    state: Mapped[str] = mapped_column(nullable=True)
-    data: Mapped[dict] = mapped_column(JSON)
+    id: Mapped[int] = mapped_column(BIGINT, primary_key=True, autoincrement=True)
+    bot_id: Mapped[int] = mapped_column(BIGINT, nullable=False)
+    user_id: Mapped[int] = mapped_column(BIGINT, nullable=False)
+    chat_id: Mapped[int] = mapped_column(BIGINT, nullable=False)
+    state: Mapped[str | None] = mapped_column(VARCHAR, nullable=True)
+    data: Mapped[dict] = mapped_column(JSON, nullable=False)
+
 
 class EventSubscriberOrm(Base):
     __tablename__ = "event_subscriber"
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    event_name: Mapped[str] = mapped_column()
-    date_create: Mapped[datetime] = mapped_column(default=datetime.now)
-    chat_id: Mapped[int] = mapped_column(BIGINT)
-    data: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=True)
+    id: Mapped[int] = mapped_column(BIGINT, primary_key=True, autoincrement=True)
+    event_name: Mapped[str] = mapped_column(VARCHAR, nullable=False)
+    date_create: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, nullable=False)
+    chat_id: Mapped[int] = mapped_column(BIGINT, nullable=False)
+    data: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
 
 
 class AdminAccountOrm(Base):
     __tablename__ = "admin_account"
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    key: Mapped[str] = mapped_column(unique=True)
-    date_authorized: Mapped[datetime] = mapped_column(nullable=True)
-    date_last_announcement_distributing: Mapped[datetime] = mapped_column(nullable=True)
+    id: Mapped[int] = mapped_column(BIGINT, primary_key=True, autoincrement=True)
+    token: Mapped[str] = mapped_column(VARCHAR(16), unique=True, nullable=False)
+    date_last_announcement_distributing: Mapped[datetime | None] = mapped_column(nullable=True)
+
 
 class EmployeeAccountOrm(Base):
     __tablename__ = "employee_account"
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    key: Mapped[str] = mapped_column(unique=True)
-    date_authorized: Mapped[datetime] = mapped_column(nullable=True)
+    id: Mapped[int] = mapped_column(BIGINT, primary_key=True, autoincrement=True)
+    token: Mapped[str] = mapped_column(VARCHAR(16), unique=True, nullable=False)
+
 
 class ClientAccountOrm(Base):
     __tablename__ = "client_account"
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    client_name: Mapped[str] = mapped_column(nullable=True)
-    phone_number: Mapped[str] = mapped_column(unique=True)
-    date_create: Mapped[datetime] = mapped_column(default=datetime.now)
-    loyalty_points: Mapped[int] = mapped_column(default=0)
-    date_last_review: Mapped[datetime] = mapped_column(nullable=True)
+    token: Mapped[str] = mapped_column(VARCHAR(16), unique=True, nullable=False)
+    client_name: Mapped[str | None] = mapped_column(VARCHAR, nullable=True)
+    phone_number: Mapped[str] = mapped_column(VARCHAR, unique=True, nullable=False)
+    date_create: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, nullable=False)
+    loyalty_points: Mapped[int] = mapped_column(INT, default=0, nullable=False)
+    date_last_review: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+
 
 class ReviewOrm(Base):
     __tablename__ = "review"
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    date_create: Mapped[datetime] = mapped_column(default=datetime.now)
-    text_content: Mapped[str] = mapped_column()
+    id: Mapped[int] = mapped_column(BIGINT, primary_key=True, autoincrement=True)
+    date_create: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, nullable=False)
+    text_content: Mapped[str] = mapped_column(TEXT, nullable=False)
+
+    @validates('text_content')
+    def validate_text_content(self, key, value):
+        if not value or value.strip() == '':
+            raise ValueError("{key} cannot be empty or contain only spaces.")
+        return value
+
 
 class AnnouncementOrm(Base):
     __tablename__ = "announcement"
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    date_create: Mapped[datetime] = mapped_column(default=datetime.now)
-    date_last_distribute: Mapped[datetime] = mapped_column(nullable=True)
-    text_content: Mapped[str] = mapped_column(nullable=True)
-    preview_photo: Mapped[str] = mapped_column(nullable=True)
+    id: Mapped[int] = mapped_column(BIGINT, primary_key=True, autoincrement=True)
+    date_create: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, nullable=False)
+    date_last_distribute: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    text_content: Mapped[str | None] = mapped_column(TEXT, nullable=True)
+    preview_photo_data: Mapped[str | None] = mapped_column(VARCHAR, nullable=True)
+
 
 class ProductOrm(Base):
     __tablename__ = "product"
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    date_create: Mapped[datetime] = mapped_column(default=datetime.now)
-    is_available: Mapped[bool] = mapped_column(default=False)
-    price: Mapped[Decimal] = mapped_column(DECIMAL)
-    product_name: Mapped[str] = mapped_column()
-    description: Mapped[str] = mapped_column()
-    preview_photo: Mapped[str] = mapped_column(nullable=True)
+    id: Mapped[int] = mapped_column(BIGINT, primary_key=True, autoincrement=True)
+    date_create: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, nullable=False)
+    is_available: Mapped[bool] = mapped_column(BOOLEAN, default=False, nullable=False)
+    price: Mapped[Decimal] = mapped_column(DECIMAL, nullable=False)
+    product_name: Mapped[str] = mapped_column(VARCHAR, nullable=False)
+    description: Mapped[str] = mapped_column(TEXT, nullable=False)
+    preview_photo_data: Mapped[str | None] = mapped_column(VARCHAR, nullable=True)
 
-    product_and_orders: Mapped[list['ProductAndOrderOrm']] = relationship("ProductAndOrderOrm", back_populates="product")
+    product_and_orders: Mapped[list['ProductAndOrderOrm']] = relationship("ProductAndOrderOrm",
+                                                                          back_populates="product")
+
 
 class ProductAndOrderOrm(Base):
     __tablename__ = "product_and_order"
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    date_create: Mapped[datetime] = mapped_column(default=datetime.now)
-    order_id: Mapped[int] = mapped_column(ForeignKey("order.id", ondelete=CASCADE))
-    product_id: Mapped[int] = mapped_column(ForeignKey("product.id", ondelete=CASCADE))
-    product_price: Mapped[Decimal] = mapped_column(DECIMAL, nullable=True)
+    id: Mapped[int] = mapped_column(BIGINT, primary_key=True, autoincrement=True)
+    date_create: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, nullable=False)
+    order_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("order.id", ondelete=CASCADE), nullable=False)
+    product_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("product.id", ondelete=CASCADE), nullable=False)
+    product_price: Mapped[Decimal | None] = mapped_column(DECIMAL, nullable=True)
 
     product: Mapped[ProductOrm] = relationship("ProductOrm", back_populates="product_and_orders")
     order: Mapped['OrderOrm'] = relationship("OrderOrm", back_populates="product_and_orders")
 
+
 class OrderOrm(Base):
     __tablename__ = "order"
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    date_create: Mapped[datetime] = mapped_column(default=datetime.now)
-    client_id: Mapped[int] = mapped_column(BIGINT, ForeignKey(column="client_account.id", ondelete=CASCADE))
-    pickup_code: Mapped[str] = mapped_column(VARCHAR(4), nullable=True)
-    date_pending: Mapped[datetime] = mapped_column(nullable=True)
-    date_cooking: Mapped[datetime] = mapped_column(nullable=True)
-    date_ready: Mapped[datetime] = mapped_column(nullable=True)
-    date_completed: Mapped[datetime] = mapped_column(nullable=True)
-    date_canceled: Mapped[datetime] = mapped_column(nullable=True)
-    cancel_details: Mapped[str] = mapped_column(nullable=True)
-    details: Mapped[str] = mapped_column(nullable=True)
+    id: Mapped[int] = mapped_column(BIGINT, primary_key=True, autoincrement=True)
+    date_create: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, nullable=False)
+    client_id: Mapped[int] = mapped_column(BIGINT, ForeignKey(column="client_account.id", ondelete=CASCADE),
+                                           nullable=False)
+    pickup_code: Mapped[str | None] = mapped_column(VARCHAR(4), nullable=True)
+    date_pending: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    date_cooking: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    date_ready: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    date_completed: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    date_canceled: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    cancel_details: Mapped[str | None] = mapped_column(TEXT, nullable=True)
+    details: Mapped[str | None] = mapped_column(TEXT, nullable=True)
 
     product_and_orders: Mapped[list[ProductAndOrderOrm]] = relationship("ProductAndOrderOrm", back_populates="order")
-
-

@@ -8,12 +8,14 @@ class ClientOrderService(ABC):
     @abstractmethod
     async def get_draft_order(
             self,
-            client_id: int
+            token: str
     ) -> OrderEntity:
         """
-        :param client_id:
-        :return: The draft order entity (if an account with `client_id` exists it is guaranteed that the corresponding draft order also exists)
-        :raises ClientAccountNotFoundError:
+        :param token: A unique 16-digit line (A-Z|a-z|0-9) associated with the client account
+
+        :return: The draft order entity (if an account exists it is guaranteed that the corresponding draft order also exists)
+
+        :raises InvalidTokenError: If the `token` is specified incorrectly or is missing
         :raises DatabaseError:
         :raises UnknownError:
         """
@@ -22,15 +24,18 @@ class ClientOrderService(ABC):
     @abstractmethod
     async def add_to_draft_order(
             self,
-            client_id: int,
+            token: str,
             product_id: int
     ):
         """
         Adds a product to the draft order.
 
-        :param client_id:
+        :param token: A unique 16-digit line (A-Z|a-z|0-9) associated with the client account
         :param product_id:
-        :raises ClientAccountNotFoundError:
+
+        :raises ProductNotFoundError:
+        :raises ProductIsNotAvailableError:
+        :raises InvalidTokenError: If the `token` is specified incorrectly or is missing
         :raises DatabaseError:
         :raises UnknownError:
         """
@@ -39,16 +44,18 @@ class ClientOrderService(ABC):
     @abstractmethod
     async def remove_from_draft_order(
             self,
-            client_id: int,
+            token: str,
             product_id: int
     ):
         """
-        Removes a product from the draft order.
+        It removes a product from the draft order.
 
-        :param client_id:
+        :param token: A unique 16-digit line (A-Z|a-z|0-9) associated with the client account
         :param product_id:
-        :raises ProductMissingError:
-        :raises ClientAccountNotFoundError:
+
+        :raises ProductNotFoundError:
+        :raises ProductIsNotAvailableError:
+        :raises InvalidTokenError: If the `token` is specified incorrectly or is missing
         :raises DatabaseError:
         :raises UnknownError:
         """
@@ -57,13 +64,14 @@ class ClientOrderService(ABC):
     @abstractmethod
     async def clear_draft_order(
             self,
-            client_id: int
+            token: str
     ):
         """
         Removes all products from the draft order.
 
-        :param client_id:
-        :raises ClientAccountNotFoundError:
+        :param token: A unique 16-digit line (A-Z|a-z|0-9) associated with the client account
+
+        :raises InvalidTokenError: If the `token` is specified incorrectly or is missing
         :raises DatabaseError:
         :raises UnknownError:
         """
@@ -72,7 +80,7 @@ class ClientOrderService(ABC):
     @abstractmethod
     async def place_order(
             self,
-            client_id: int,
+            token: str,
             order_id: int | None = None
     ) -> OrderEntity:
         """
@@ -80,12 +88,15 @@ class ClientOrderService(ABC):
 
         You can send a specific order using `order_id` or draft order if the value of `order_id` is None
 
-        :param client_id: It's required arg. If `order_id` is None we will use a draft order by `client_id`
+        :param token: A unique 16-digit line (A-Z|a-z|0-9) associated with the client account
         :param order_id:
+
+        :return: The placed order entity
+
         :raises PlacedOrderIsEmptyError: If order doesn't have products.
         :raises ProductIsNotAvailableError: If order has unavailable products.
         :raises OrderNotFoundError:
-        :raises ClientAccountNotFoundError:
+        :raises InvalidTokenError: If the `token` is specified incorrectly or is missing
         :raises DatabaseError:
         :raises UnknownError:
         """
@@ -94,26 +105,30 @@ class ClientOrderService(ABC):
     @abstractmethod
     async def get_in_progress_orders(
             self,
-            client_id: int
+            token: str
     ) -> list[OrderEntity]:
         """
-        :param client_id:
+        :param token: A unique 16-digit line (A-Z|a-z|0-9) associated with the client account
+
         :return: The list of client's orders entities that have a group of states 'In Progress'.
-        :raises ClientAccountNotFoundError:
+
+        :raises InvalidTokenError: If the `token` is specified incorrectly or is missing
         :raises DatabaseError:
         :raises UnknownError:
         """
         pass
 
     @abstractmethod
-    async def get_archived_orders(
+    async def get_closed_orders(
             self,
-            client_id: int
+            token: str
     ) -> list[OrderEntity]:
         """
-        :param client_id:
+        :param token: A unique 16-digit line (A-Z|a-z|0-9) associated with the client account
+
         :return: The list of client's orders entities that have a group of states 'Closed'.
-        :raises ClientAccountNotFoundError:
+
+        :raises InvalidTokenError: If the `token` is specified incorrectly or is missing
         :raises DatabaseError:
         :raises UnknownError:
         """
@@ -122,14 +137,16 @@ class ClientOrderService(ABC):
     @abstractmethod
     async def get_product_quantity_in_draft_order(
             self,
-            client_id: int,
+            token: str,
             product_id: int
     ) -> int:
         """
-        :param client_id:
+        :param token: A unique 16-digit line (A-Z|a-z|0-9) associated with the client account
         :param product_id:
+
         :return: The quantity of the product in the draft order.
-        :raises ClientAccountNotFoundError:
+
+        :raises InvalidTokenError: If the `token` is specified incorrectly or is missing
         :raises DatabaseError:
         :raises UnknownError:
         """

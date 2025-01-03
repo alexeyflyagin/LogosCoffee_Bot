@@ -13,30 +13,50 @@ from src.data.logoscoffee.session_manager import SessionManager
 
 
 class AdminServiceImpl(AdminService):
+    COOLDOWN_DISTRIBUTE_ANNOUNCEMENT = timedelta(minutes=10)
 
     def __init__(self, session_manager: SessionManager):
         self.__session_manager = session_manager
 
-    async def __safe_get_announcement(self, s: AsyncSession, announcement_id) -> AnnouncementOrm:
+    @staticmethod
+    async def __delete_all_announcement(s: AsyncSession):
+        announcements = await dao_announcement.get_all(s, with_for_update=True)
+        for i in announcements:
+            await s.delete(i)
+        await s.flush()
+
+    @staticmethod
+    async def __get_account_by_token(s: AsyncSession, token: str) -> AdminAccountOrm:
+        account = await dao_admin_account.get_by_token(s, token, with_for_update=True)
+        raise_exception_if_none(account, e=InvalidTokenError(token=token))
+        return account
+
+    @staticmethod
+    async def __safe_get_announcement(s: AsyncSession, announcement_id) -> AnnouncementOrm:
         announcement = await dao_announcement.get_by_id(s, announcement_id)
         raise_exception_if_none(announcement, e=AnnouncementNotFoundError(id=announcement_id))
         return announcement
 
-    def __can_publish_announcement(self, account: AdminAccountOrm):
+    def __can_distribute_or_create_announcement(self, account: AdminAccountOrm):
         if account.date_last_announcement_distributing:
             delta_time = datetime.now() - account.date_last_announcement_distributing
-            if delta_time < timedelta(minutes=10):
+            if delta_time < self.COOLDOWN_DISTRIBUTE_ANNOUNCEMENT:
                 raise CooldownError(delta_time)
 
     async def get_new_reviews(
             self,
+            token: str,
             last_update: datetime
     ) -> list[ReviewEntity]:
         try:
             async with self.__session_manager.get_session() as s:
+                await self.__get_account_by_token(s, token)
                 reviews = await dao_review.get_created_since(s, last_update)
                 entities = [ReviewEntity.model_validate(i) for i in reviews]
                 return entities
+        except InvalidTokenError as e:
+            logger.warning(e)
+            raise
         except SQLAlchemyError as e:
             logger.error(e)
             raise DatabaseError(e)
@@ -44,21 +64,36 @@ class AdminServiceImpl(AdminService):
             logger.exception(e)
             raise UnknownError(e)
 
-    async def login(
+    async def authorization(
             self,
-            key: str
+            token: str
     ) -> AdminAccountEntity:
         try:
             async with self.__session_manager.get_session() as s:
-                account = await dao_admin_account.get_by_key(s, key)
-                if account is None or account.date_authorized:
-                    raise InvalidKeyError(key)
-                account.date_authorized = datetime.now()
-                await s.flush()
+                account = await self.__get_account_by_token(s, token)
                 entity = AdminAccountEntity.model_validate(account)
                 await s.commit()
                 return entity
-        except InvalidKeyError as e:
+        except InvalidTokenError as e:
+            logger.warning(e)
+            raise
+        except SQLAlchemyError as e:
+            logger.error(e)
+            raise DatabaseError(e)
+        except Exception as e:
+            logger.exception(e)
+            raise UnknownError(e)
+
+    async def can_create_or_distribute_announcement(self, token: str) -> bool:
+        try:
+            async with self.__session_manager.get_session() as s:
+                account = await self.__get_account_by_token(s, token)
+                try:
+                    self.__can_distribute_or_create_announcement(account)
+                except CooldownError:
+                    return False
+                return True
+        except InvalidTokenError as e:
             logger.warning(e)
             raise
         except SQLAlchemyError as e:
@@ -70,17 +105,25 @@ class AdminServiceImpl(AdminService):
 
     async def create_announcement(
             self,
+            token: str,
             text_content: str | None,
-            preview_photo: str | None
+            preview_photo_data: str | None
     ) -> AnnouncementEntity:
         try:
             async with self.__session_manager.get_session() as s:
-                created_announcement = AnnouncementOrm(text_content=text_content, preview_photo=preview_photo)
+                account = await self.__get_account_by_token(s, token)
+                self.__can_distribute_or_create_announcement(account)
+                await self.__delete_all_announcement(s)
+                created_announcement = AnnouncementOrm(text_content=text_content, preview_photo_data=preview_photo_data)
                 s.add(created_announcement)
                 await s.flush()
                 res = AnnouncementEntity.model_validate(created_announcement)
                 await s.commit()
+                logger.success(f"Created announcement (id={res.id})")
                 return res
+        except (InvalidTokenError, CooldownError) as e:
+            logger.warning(e)
+            raise
         except SQLAlchemyError as e:
             logger.error(e)
             raise DatabaseError(e)
@@ -90,14 +133,16 @@ class AdminServiceImpl(AdminService):
 
     async def get_announcement_by_id(
             self,
+            token: str,
             announcement_id: int
     ) -> AnnouncementEntity:
         try:
             async with self.__session_manager.get_session() as s:
+                await self.__get_account_by_token(s, token)
                 announcement = await self.__safe_get_announcement(s, announcement_id)
                 announcement_entity = AnnouncementEntity.model_validate(announcement)
                 return announcement_entity
-        except AnnouncementNotFoundError as e:
+        except (InvalidTokenError, AnnouncementNotFoundError) as e:
             logger.warning(e)
             raise
         except SQLAlchemyError as e:
@@ -109,14 +154,17 @@ class AdminServiceImpl(AdminService):
 
     async def delete_announcement(
             self,
+            token: str,
             announcement_id: int
     ):
         try:
             async with self.__session_manager.get_session() as s:
+                await self.__get_account_by_token(s, token)
                 announcement = await self.__safe_get_announcement(s, announcement_id)
                 await s.delete(announcement)
                 await s.commit()
-        except AnnouncementNotFoundError as e:
+                logger.success(f"Announcement (id={announcement_id}) deleted")
+        except (InvalidTokenError, AnnouncementNotFoundError) as e:
             logger.warning(e)
             raise
         except SQLAlchemyError as e:
@@ -128,18 +176,19 @@ class AdminServiceImpl(AdminService):
 
     async def distribute_announcement(
             self,
-            account_id: int,
+            token: str,
             announcement_id: int
     ):
         try:
             async with self.__session_manager.get_session() as s:
-                account = await dao_admin_account.get_by_id(s, account_id, with_for_update=True)
-                self.__can_publish_announcement(account)
+                account = await self.__get_account_by_token(s, token)
+                self.__can_distribute_or_create_announcement(account)
                 account.date_last_announcement_distributing = datetime.now()
                 announcement = await self.__safe_get_announcement(s, announcement_id)
                 announcement.date_last_distribute = datetime.now()
                 await s.commit()
-        except (AnnouncementNotFoundError, CooldownError) as e:
+                logger.success(f"Announcement (id={announcement_id}) distributed")
+        except (InvalidTokenError, AnnouncementNotFoundError, CooldownError) as e:
             logger.warning(e)
             raise
         except SQLAlchemyError as e:

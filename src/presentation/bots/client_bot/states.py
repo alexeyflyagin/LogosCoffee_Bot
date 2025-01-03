@@ -1,6 +1,6 @@
 from aiogram.fsm.state import StatesGroup, State
 
-class LoginStates(StatesGroup):
+class AuthorizationStates(StatesGroup):
     PressButton = State()
     EnterName = State()
 

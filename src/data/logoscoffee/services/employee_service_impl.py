@@ -5,7 +5,6 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.data.logoscoffee.dao import dao_order, dao_employee_account
-from src.data.logoscoffee.dao.units import raise_exception_if_none
 from src.data.logoscoffee.entities.enums import OrderState
 from src.data.logoscoffee.entities.orm_entities import EmployeeAccountEntity, OrderEntity
 from src.data.logoscoffee.interfaces.employee_service import EmployeeService
@@ -29,7 +28,7 @@ class EmployeeServiceImpl(EmployeeService):
         if order_entity.state != expected_state:
             raise OrderStateError(state=order_entity.state, expected_state=expected_state)
         if (order_entity.state == OrderState.CANCELED or
-            order_entity.state == OrderState.COMPLETED):
+                order_entity.state == OrderState.COMPLETED):
             return
         for i in range(1, expected_state.value):
             state = OrderState(i)
@@ -70,9 +69,9 @@ class EmployeeServiceImpl(EmployeeService):
             async with self.__session_manager.get_session() as s:
                 account = await dao_employee_account.get_by_key(s, key)
                 if account is None:
-                    raise InvalidKeyError(key)
+                    raise InvalidTokenError(key)
                 return EmployeeAccountEntity.model_validate(account)
-        except InvalidKeyError as e:
+        except InvalidTokenError as e:
             logger.warning(e)
             raise
         except SQLAlchemyError as e:

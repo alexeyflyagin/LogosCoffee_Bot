@@ -15,12 +15,13 @@ from src.presentation.bots.client_bot.states import *
 router = Router()
 event_service: EventService
 
+
 @router.message(State(None))
 async def start_handler(msg: Message, state: FSMContext):
-    await msg.answer(strings.CLIENT.LINKS)
-    await msg.answer(strings.CLIENT.AUTHORIZATION.PRESS_BTN, reply_markup=keyboards.AUTHORIZATION_KEYBOARD)
-    await state.set_state(LoginStates.PressButton)
     try:
+        await msg.answer(strings.CLIENT.LINKS)
+        await msg.answer(strings.CLIENT.AUTHORIZATION.PRESS_BTN, reply_markup=keyboards.AUTHORIZATION_KEYBOARD)
+        await state.set_state(AuthorizationStates.PressButton)
         await event_service.subscribe(constants.EVENT__NEW_ANNOUNCEMENT, msg.chat.id)
     except AlreadySubscribedError:
         pass
@@ -31,4 +32,3 @@ async def start_handler(msg: Message, state: FSMContext):
 @router.message(EnterReviewStates(), Command(commands.CANCEL_COMMAND))
 async def cancel_handler(msg: Message, state: FSMContext):
     await reset_state(msg, state, strings.GENERAL.ACTION_CANCELED)
-

@@ -13,9 +13,9 @@ admin_service: AdminService
 
 @router.message(State(None))
 async def other_handler(msg: Message):
-    await msg.answer(strings.GENERAL.LOGIN.KEY_WAS_NOT_ENTERED, reply_markup=ReplyKeyboardRemove())
+    await msg.answer(strings.GENERAL.LOGIN.TOKEN_WAS_NOT_ENTERED, reply_markup=ReplyKeyboardRemove())
+
 
 @router.message(MainStates.Main)
-async def other_handler(msg: Message):
+async def other_for_authorized_client_handler(msg: Message):
     await msg.answer(strings.GENERAL.SELECT_ACTION, reply_markup=keyboards.MAIN_KEYBOARD)
-

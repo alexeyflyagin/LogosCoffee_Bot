@@ -1,9 +1,11 @@
 from collections import defaultdict
 from datetime import datetime
 from decimal import Decimal
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict
 
+from src.data.logoscoffee.db.models import OrderOrm
 from src.data.logoscoffee.entities.enums import OrderState
 
 
@@ -23,6 +25,14 @@ class OrderEntity(BaseModel):
     product_and_orders_rs: list['ProductAndOrderEntity'] = None
 
     model_config = ConfigDict(from_attributes=True)
+
+    def set_relationships(self, order_orm: OrderOrm) -> "OrderEntity":
+        self.product_and_orders_rs = []
+        for i in order_orm.product_and_orders:
+            product_and_order_entity = ProductAndOrderEntity.model_validate(i)
+            product_and_order_entity.product_rs = i.product
+            self.product_and_orders_rs.append(product_and_order_entity)
+        return self
 
     @property
     def state(self) -> OrderState:
@@ -58,6 +68,7 @@ class OrderEntity(BaseModel):
         else:
             return sum([i.product_price for i in self.product_and_orders_rs], Decimal('0'))
 
+
 class ProductAndOrderEntity(BaseModel):
     id: int
     date_create: datetime
@@ -70,6 +81,7 @@ class ProductAndOrderEntity(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+
 class ProductEntity(BaseModel):
     id: int
     date_create: datetime
@@ -77,29 +89,31 @@ class ProductEntity(BaseModel):
     price: Decimal
     product_name: str
     description: str
-    preview_photo: str | None
+    preview_photo_data: str | None
 
     product_and_orders_rs: 'ProductAndOrderEntity' = None
 
     model_config = ConfigDict(from_attributes=True)
 
+
 class AdminAccountEntity(BaseModel):
     id: int
-    key: str
-    date_authorized: datetime | None
+    token: str
     date_last_announcement_distributing: datetime | None
 
     model_config = ConfigDict(from_attributes=True)
 
+
 class EmployeeAccountEntity(BaseModel):
     id: int
-    key: str
-    date_authorized: datetime | None
+    token: str
 
     model_config = ConfigDict(from_attributes=True)
 
+
 class ClientAccountEntity(BaseModel):
     id: int
+    token: str
     client_name: str | None
     phone_number: str
     date_create: datetime
@@ -108,6 +122,7 @@ class ClientAccountEntity(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+
 class ReviewEntity(BaseModel):
     id: int
     date_create: datetime
@@ -115,29 +130,33 @@ class ReviewEntity(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+
 class AnnouncementEntity(BaseModel):
     id: int
     date_create: datetime
     date_last_distribute: datetime | None
     text_content: str | None
-    preview_photo: str | None
+    preview_photo_data: str | None
 
     model_config = ConfigDict(from_attributes=True)
+
 
 class UserStateEntity(BaseModel):
     id: int
     bot_id: int
     user_id: int
     chat_id: int
-    state: str
+    state: str | None
     data: dict
 
     model_config = ConfigDict(from_attributes=True)
+
 
 class EventSubscriberEntity(BaseModel):
     id: int
     event_name: str
     date_create: datetime
     chat_id: int
+    data: dict[str, Any] | None
 
     model_config = ConfigDict(from_attributes=True)

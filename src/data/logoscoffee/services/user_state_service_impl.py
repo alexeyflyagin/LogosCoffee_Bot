@@ -13,7 +13,6 @@ class UserStateServiceImpl(UserStateService):
     def __init__(self, session_manager: SessionManager):
         self.__session_manager = session_manager
 
-
     async def __create_user_state(self, s: AsyncSession, user_data: UserData) -> UserStateOrm:
         user_state = UserStateOrm(bot_id=user_data.bot_id, user_id=user_data.user_id, chat_id=user_data.chat_id,
                                   state=None, data=dict())
