@@ -14,9 +14,8 @@
 ## Table of Contents
 1. [Features](#features)
 2. [Usage](#usage)  
-3. [Configuration](#configuration)   
+3. [Configuration](#configuration)
 
----
 
 ## Features
 Client:
@@ -36,7 +35,6 @@ Employee:
 - **Log in** by the secret token.
 - **Manage order states**. _(DEV)_
 
----
 
 ## Usage
 **1. Install:** Python 3.10+, PostgreSQL
@@ -57,7 +55,6 @@ alembic upgrade head
 python src/main.py
 ```
 
----
 
 ### Configuration
 Copy `template.env` and rename to `.env`. Settings are specified in the `.env` file:
