@@ -5,6 +5,7 @@ from dependency_injector import containers, providers
 from src import config
 
 from src.data.logoscoffee.db.session_manager_impl import SessionManagerImpl
+from src.data.logoscoffee.events.notifier import EventNotifier
 from src.data.logoscoffee.services.admin_service_impl import AdminServiceImpl
 from src.data.logoscoffee.services.client_service_impl import ClientServiceImpl
 from src.data.logoscoffee.services.event_service_impl import EventServiceImpl
@@ -41,7 +42,13 @@ class Container(containers.DeclarativeContainer):
     # Database providers
     session_manager = providers.Singleton(
         SessionManagerImpl,
-        url=config.DB_URL,
+        sqlalchemy_url=config.DB_URL_FOR_SQLALCHEMY,
+        base_url=config.DB_URL,
+    )
+
+    event_notifier = providers.Singleton(
+        EventNotifier,
+        session_manager=session_manager,
     )
 
     # Service providers
@@ -99,12 +106,14 @@ class Container(containers.DeclarativeContainer):
         bot=bot_for_admin,
         dp=dp,
         admin_token=config.DEFAULT_ADMIN_TOKEN_FOR_LOGIN,
+        event_notifier=event_notifier,
     )
 
     client_bot = providers.Factory(
         ClientBot,
         bot=bot_for_client,
         dp=dp,
+        event_notifier=event_notifier,
     )
 
     employee_bot = providers.Factory(
@@ -116,6 +125,7 @@ class Container(containers.DeclarativeContainer):
 
 di = Container()
 
+di.config.DB_URL_FOR_SQLALCHEMY.from_value(config.DB_URL_FOR_SQLALCHEMY)
 di.config.DB_URL.from_value(config.DB_URL)
 di.config.ADMIN_BOT_TOKEN.from_value(config.ADMIN_BOT_TOKEN)
 di.config.CLIENT_BOT_TOKEN.from_value(config.CLIENT_BOT_TOKEN)

@@ -9,7 +9,7 @@ from typing import Sequence, Union
 
 from alembic import op
 import sqlalchemy as sa
-from sqlalchemy import insert
+from sqlalchemy import insert, text
 
 from src import config
 from src.data.logoscoffee.db.models import AdminAccountOrm, EmployeeAccountOrm
@@ -105,6 +105,38 @@ def upgrade() -> None:
 
     op.execute(insert(AdminAccountOrm).values(token=config.DEFAULT_ADMIN_TOKEN_FOR_LOGIN))
     op.execute(insert(EmployeeAccountOrm).values(token=config.DEFAULT_EMPLOYEE_TOKEN_FOR_LOGIN))
+
+    op.execute(text("""
+        CREATE OR REPLACE FUNCTION notify_new_review()
+        RETURNS TRIGGER AS $$
+        BEGIN
+            PERFORM pg_notify('new_review', row_to_json(NEW)::text);
+            RETURN NEW;
+        END;
+        $$ LANGUAGE plpgsql;
+    """))
+    op.execute(text("""
+        CREATE TRIGGER trigger_new_review
+        AFTER INSERT ON review
+        FOR EACH ROW
+        EXECUTE FUNCTION notify_new_review();
+    """))
+
+    op.execute(text("""
+        CREATE OR REPLACE FUNCTION notify_new_distributed_announcement()
+        RETURNS TRIGGER AS $$
+        BEGIN
+            PERFORM pg_notify('new_distributed_announcement', row_to_json(NEW)::text);
+            RETURN NEW;
+        END;
+        $$ LANGUAGE plpgsql;
+    """))
+    op.execute(text("""
+        CREATE TRIGGER trigger_update_announcement
+        AFTER UPDATE ON announcement
+        FOR EACH ROW
+        EXECUTE FUNCTION notify_new_distributed_announcement();
+    """))
     # ### end Alembic commands ###
 
 

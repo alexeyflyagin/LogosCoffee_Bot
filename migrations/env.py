@@ -5,7 +5,7 @@ from sqlalchemy import pool
 
 from alembic import context
 from src.data.logoscoffee.db.models import *
-from src.config import DB_URL
+from src.config import DB_URL_FOR_SQLALCHEMY
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -16,7 +16,7 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-config.set_main_option("sqlalchemy.url", DB_URL + "?async_fallback=True")
+config.set_main_option("sqlalchemy.url", DB_URL_FOR_SQLALCHEMY + "?async_fallback=True")
 
 # add your model's MetaData object here
 # for 'autogenerate' support

@@ -8,6 +8,7 @@ PATH_TO_ENV = PATH_TO_PROJECT / '.env'
 
 load_dotenv(PATH_TO_ENV)
 
+DB_URL_FOR_SQLALCHEMY = os.getenv('DB_URL_FOR_SQLALCHEMY')
 DB_URL = os.getenv('DB_URL')
 
 ADMIN_BOT_TOKEN = os.getenv('ADMIN_BOT_TOKEN')

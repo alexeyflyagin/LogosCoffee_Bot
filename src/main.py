@@ -4,6 +4,7 @@ import sys
 from loguru import logger
 
 from src.di.container import di
+from src.data.logoscoffee.events.handlers import notifier
 
 
 async def main():
@@ -11,6 +12,7 @@ async def main():
     logger.add(sys.stdout)
     try:
         await asyncio.gather(
+            notifier.run(),
             di.admin_bot().run(),
             di.client_bot().run(),
             di.employee_bot().run(),
