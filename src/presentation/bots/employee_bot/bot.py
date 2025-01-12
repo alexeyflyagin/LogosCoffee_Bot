@@ -2,7 +2,6 @@ from asyncio import CancelledError
 
 from aiogram import Dispatcher, Bot
 from src.presentation.bots.bot import BaseBot
-from src.presentation.bots.employee_bot.handlers import handler
 
 
 class EmployeeBot(BaseBot):
@@ -12,7 +11,6 @@ class EmployeeBot(BaseBot):
 
     async def run(self):
         try:
-            self.dp.include_routers(handler.router)
             await self.bot.delete_webhook(drop_pending_updates=True)
             await self.dp.start_polling(self.bot)
         except CancelledError:
