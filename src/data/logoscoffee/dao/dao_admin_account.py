@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.data.logoscoffee.dao.units import set_with_for_update_if
+from src.data.logoscoffee.dao.utils import set_with_for_update_if
 from src.data.logoscoffee.db.models import AdminAccountOrm
 
 

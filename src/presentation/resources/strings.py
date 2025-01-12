@@ -6,7 +6,6 @@ CAFE_NAME = "LOGOSCOFFEE"
 
 
 class ERRORS(StrGroup):
-
     class UNKNOWN(StrGroup):
         V1 = "😧 Упс! Что-то пошло не по плану. Пожалуйста, повторите попытку."
 
@@ -32,7 +31,6 @@ class ERRORS(StrGroup):
         V5 = "😅 Ой! Это что-то другое. Пожалуйста, отправьте нужный формат."
 
 
-
 class BTN(StrGroup):
     AUTHORIZE = "🔑 Авторизоваться"
     WRITE_REVIEW = "💬 Написать отзыв"
@@ -45,18 +43,15 @@ class BTN(StrGroup):
     CONFIRM = "✅ Да, всё верно!"
     CANCEL = "❌ Отменить"
     MENU = "📋 Меню"
-    DRAFT_ORDER = "🛒 Корзина"
     ADD = "+ Добавить"
     ADD_TO_DRAFT_ORDER = "Добавить в корзину"
     PRODUCT_TEMPORARY_UNAVAILABLE = "Продукт временно недоступен!"
     ADD_SYMBOL = "+"
     REMOVE_SYMBOL = "-"
-    ADDED_TO_DRAFT_ORDER = "🛒: {counter}"
     BUTTON = "Кнопка"
     PAGE_PREVIOUS = "«"
     PAGE_NEXT = "»"
     PAGE_COUNTER = "{current} / {all}"
-
 
 
 class GENERAL(StrGroup):
@@ -81,7 +76,6 @@ class GENERAL(StrGroup):
             V3 = f"{b('Готово!')} Вы успешно вошли, можно начинать 🙌"
 
             V4 = f"{b('Отлично!')} Вход выполнен, приступим к работе 🌟"
-
 
 
 class CLIENT(StrGroup):
@@ -132,53 +126,8 @@ class CLIENT(StrGroup):
 
             V3 = f"{b('Спасибо за ваш отклик!')} Мы работаем над улучшениями, и ваш отзыв важен! ✨"
 
-    class MENU(StrGroup):
-        PAGE = dedent(f"""\
-            {b('Меню')}:
-            —
-            {{items}}
-            —
-            👉 Выберите номер позиции, чтобы заказать!
-        """)
-
-        ITEM = f"{b('{index}')}  {{product_name}} — {{price}}"
-
-    class PRODUCT(StrGroup):
-        MAIN = dedent(f"""\
-            {b('{product_name}')}
-            Цена: {{price}}
-            —
-            {{description}}
-        """)
-
-        NOT_FOUND_ERROR = "Продукт не найден."
-
-        class ADD(StrGroup):
-            IS_NOT_AVAILABLE = "😣 Извините, но данный продукт недоступен для заказа!"
-
-        class REMOVE(StrGroup):
-            IS_NOT_FOUND = "😣 Продукта нет уже нет в корзине."
-
-    class DRAFT_ORDER(StrGroup):
-        MAIN = dedent(f"""\
-            {b('🛒 Корзина')}:
-            —
-            {{items}}
-            —
-            {b('Итого: {total_price}')}
-        """)
-
-        MAIN_EMPTY = dedent(f"""\
-            {b('🛒 Корзина')}:
-            —
-            {i('Ваша корзина пока пуста. Добавьте что-нибудь вкусное из меню!')}
-        """)
-
-        ITEM = f"{b('{index}')}  {{product_name}} — {{price}} {{counter}}"
-        ITEM_COUNTER = "(x{counter})"
 
 class ADMIN(StrGroup):
-
     NEW_REVIEW_NOTIFICATION = dedent(f"""\
         💬 Вы получили новый отзыв!
         —
@@ -195,7 +144,6 @@ class ADMIN(StrGroup):
         SUCCESSFUL = "Успешно создано"
 
     class ANNOUNCEMENT(StrGroup):
-
         MAIN = dedent(f"""\
             {b('Объявление')} {code(f'#{{announcement_id}}')}
             Создано: {{date_create}}

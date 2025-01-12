@@ -4,11 +4,11 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.data.logoscoffee.dao import dao_review, dao_announcement, dao_admin_account
-from src.data.logoscoffee.dao.units import raise_exception_if_none
 from src.data.logoscoffee.entities.orm_entities import AnnouncementEntity, AdminAccountEntity
 from src.data.logoscoffee.exceptions import *
 from src.data.logoscoffee.interfaces.admin_service import AdminService, ReviewEntity
 from src.data.logoscoffee.db.models import *
+from src.data.logoscoffee.services.utils import raise_exception_if_none
 from src.data.logoscoffee.session_manager import SessionManager
 
 

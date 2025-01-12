@@ -76,32 +76,6 @@ class AnnouncementOrm(Base):
     preview_photo_data: Mapped[str | None] = mapped_column(VARCHAR, nullable=True)
 
 
-class ProductOrm(Base):
-    __tablename__ = "product"
-    id: Mapped[int] = mapped_column(BIGINT, primary_key=True, autoincrement=True)
-    date_create: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, nullable=False)
-    is_available: Mapped[bool] = mapped_column(BOOLEAN, default=False, nullable=False)
-    price: Mapped[Decimal] = mapped_column(DECIMAL, nullable=False)
-    product_name: Mapped[str] = mapped_column(VARCHAR, nullable=False)
-    description: Mapped[str] = mapped_column(TEXT, nullable=False)
-    preview_photo_data: Mapped[str | None] = mapped_column(VARCHAR, nullable=True)
-
-    product_and_orders: Mapped[list['ProductAndOrderOrm']] = relationship("ProductAndOrderOrm",
-                                                                          back_populates="product")
-
-
-class ProductAndOrderOrm(Base):
-    __tablename__ = "product_and_order"
-    id: Mapped[int] = mapped_column(BIGINT, primary_key=True, autoincrement=True)
-    date_create: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, nullable=False)
-    order_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("order.id", ondelete=CASCADE), nullable=False)
-    product_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("product.id", ondelete=CASCADE), nullable=False)
-    product_price: Mapped[Decimal | None] = mapped_column(DECIMAL, nullable=True)
-
-    product: Mapped[ProductOrm] = relationship("ProductOrm", back_populates="product_and_orders")
-    order: Mapped['OrderOrm'] = relationship("OrderOrm", back_populates="product_and_orders")
-
-
 class OrderOrm(Base):
     __tablename__ = "order"
     id: Mapped[int] = mapped_column(BIGINT, primary_key=True, autoincrement=True)
@@ -116,5 +90,3 @@ class OrderOrm(Base):
     date_canceled: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     cancel_details: Mapped[str | None] = mapped_column(TEXT, nullable=True)
     details: Mapped[str | None] = mapped_column(TEXT, nullable=True)
-
-    product_and_orders: Mapped[list[ProductAndOrderOrm]] = relationship("ProductAndOrderOrm", back_populates="order")

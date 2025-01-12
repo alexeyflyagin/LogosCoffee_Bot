@@ -6,9 +6,7 @@ from src import config
 
 from src.data.logoscoffee.db.session_manager_impl import SessionManagerImpl
 from src.data.logoscoffee.services.admin_service_impl import AdminServiceImpl
-from src.data.logoscoffee.services.client_order_service_impl import ClientOrderServiceImpl
 from src.data.logoscoffee.services.client_service_impl import ClientServiceImpl
-from src.data.logoscoffee.services.employee_service_impl import EmployeeServiceImpl
 from src.data.logoscoffee.services.event_service_impl import EventServiceImpl
 from src.data.logoscoffee.services.user_state_service_impl import UserStateServiceImpl
 from src.presentation.bots.admin_bot.bot import AdminBot
@@ -18,15 +16,11 @@ from src.presentation.user_state_storage import UserStateStorage
 
 
 def client_handlers__inject():
-    from src.presentation.bots.client_bot.handlers import handler, authorization_handler, review_handler, end_handler, \
-        menu_handler, draft_order_handler
+    from src.presentation.bots.client_bot.handlers import handler, authorization_handler, review_handler, end_handler
     authorization_handler.client_service = di.client_service()
     handler.event_service = di.event_service()
     end_handler.client_service = di.client_service()
     review_handler.client_service = di.client_service()
-    menu_handler.client_service = di.client_service()
-    menu_handler.order_service = di.client_order_service()
-    draft_order_handler.order_service = di.client_order_service()
 
 
 def admin_handlers__inject():
@@ -63,11 +57,6 @@ class Container(containers.DeclarativeContainer):
         session_manager=session_manager,
     )
 
-    employee_service = providers.Factory(
-        EmployeeServiceImpl,
-        session_manager=session_manager,
-    )
-
     user_state_service = providers.Factory(
         UserStateServiceImpl,
         session_manager=session_manager,
@@ -75,11 +64,6 @@ class Container(containers.DeclarativeContainer):
 
     event_service = providers.Factory(
         EventServiceImpl,
-        session_manager=session_manager,
-    )
-
-    client_order_service = providers.Factory(
-        ClientOrderServiceImpl,
         session_manager=session_manager,
     )
 

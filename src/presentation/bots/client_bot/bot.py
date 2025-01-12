@@ -1,17 +1,13 @@
 import asyncio
 from asyncio import CancelledError
 from datetime import datetime
-from html import escape
 
 from aiogram import Bot, Dispatcher
-from aiogram.types import URLInputFile
 from loguru import logger
 
 from src.presentation.bots.bot import BaseBot
 from src.presentation.bots.client_bot import constants
-from src.presentation.bots.client_bot.handlers import handler, review_handler, authorization_handler, end_handler, \
-    menu_handler
-from src.presentation.bots.client_bot.handlers import draft_order_handler
+from src.presentation.bots.client_bot.handlers import handler, review_handler, authorization_handler, end_handler
 from src.presentation.bots.utils import send_announcement
 
 
@@ -26,8 +22,6 @@ class ClientBot(BaseBot):
                 handler.router,
                 authorization_handler.router,
                 review_handler.router,
-                menu_handler.router,
-                draft_order_handler.router,
                 end_handler.router
             )
             await self.bot.delete_webhook(drop_pending_updates=True)

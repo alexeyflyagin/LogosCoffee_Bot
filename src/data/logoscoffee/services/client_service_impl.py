@@ -1,18 +1,15 @@
 import string
 
 from loguru import logger
-from pydantic import TypeAdapter
 from sqlalchemy.exc import SQLAlchemyError
 
 from src.data.logoscoffee.checks import check_text_is_not_empty, check_phone_number
-from src.data.logoscoffee.services.units import safe_get_product_by_id, get_client_account_by_token, generate_token
-from src.data.logoscoffee.dao import dao_announcement, dao_product, dao_client_account
-from src.data.logoscoffee.entities.general_entities import MenuEntity
-from src.data.logoscoffee.entities.orm_entities import AnnouncementEntity, ClientAccountEntity, ProductEntity
+from src.data.logoscoffee.services.utils import get_client_account_by_token, generate_token
+from src.data.logoscoffee.dao import dao_announcement, dao_client_account
+from src.data.logoscoffee.entities.orm_entities import AnnouncementEntity, ClientAccountEntity
 from src.data.logoscoffee.interfaces.client_service import ClientService
 from src.data.logoscoffee.exceptions import *
 from src.data.logoscoffee.db.models import ClientAccountOrm, ReviewOrm
-from src.data.logoscoffee.services.units import create_draft_orm
 from src.data.logoscoffee.session_manager import SessionManager
 
 TOKEN_SYMBOLS = string.ascii_letters + string.digits + "-_"
@@ -60,7 +57,6 @@ class ClientServiceImpl(ClientService):
                     account = ClientAccountOrm(phone_number=phone_number, token=token)
                     s.add(account)
                     await s.flush()
-                    await create_draft_orm(s, client_id=account.id)
                 account.token = token
                 entity = ClientAccountEntity.model_validate(account)
                 await s.commit()
@@ -117,40 +113,6 @@ class ClientServiceImpl(ClientService):
         except (InvalidTokenError, EmptyTextError, CooldownError) as e:
             logger.warning(e)
             raise
-        except SQLAlchemyError as e:
-            logger.error(e)
-            raise DatabaseError(e)
-        except Exception as e:
-            logger.exception(e)
-            raise UnknownError(e)
-
-    async def get_menu(self) -> MenuEntity:
-        try:
-            async with self.__session_manager.get_session() as s:
-                products = await dao_product.get_by_is_available(s, is_available=True)
-                type_adapter = TypeAdapter(list[ProductEntity])
-                entities = type_adapter.validate_python(products)
-                menu_entity = MenuEntity(all_products=entities)
-                return menu_entity
-        except SQLAlchemyError as e:
-            logger.error(e)
-            raise DatabaseError(e)
-        except Exception as e:
-            logger.exception(e)
-            raise UnknownError(e)
-
-    async def get_product_by_id(
-            self,
-            product_id: int
-    ) -> ProductEntity:
-        try:
-            async with self.__session_manager.get_session() as s:
-                product = await safe_get_product_by_id(s, product_id)
-                entity = ProductEntity.model_validate(product)
-                return entity
-        except ProductNotFoundError as e:
-            logger.warning(e)
-            raise UnknownError(e)
         except SQLAlchemyError as e:
             logger.error(e)
             raise DatabaseError(e)
