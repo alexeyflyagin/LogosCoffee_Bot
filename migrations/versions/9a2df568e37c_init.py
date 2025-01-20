@@ -137,6 +137,22 @@ def upgrade() -> None:
         FOR EACH ROW
         EXECUTE FUNCTION notify_new_distributed_announcement();
     """))
+
+    op.execute(text("""
+            CREATE OR REPLACE FUNCTION notify_new_order()
+            RETURNS TRIGGER AS $$
+            BEGIN
+                PERFORM pg_notify('new_order', row_to_json(NEW)::text);
+                RETURN NEW;
+            END;
+            $$ LANGUAGE plpgsql;
+        """))
+    op.execute(text("""
+            CREATE TRIGGER trigger_new_order
+            AFTER INSERT ON "order"
+            FOR EACH ROW
+            EXECUTE FUNCTION notify_new_order();
+        """))
     # ### end Alembic commands ###
 
 
@@ -150,4 +166,13 @@ def downgrade() -> None:
     op.drop_table('client_account')
     op.drop_table('announcement')
     op.drop_table('admin_account')
+
+    op.execute(text("""DROP TRIGGER trigger_new_order ON order"""))
+    op.execute(text("""DROP FUNCTION notify_new_order()"""))
+
+    op.execute(text("""DROP TRIGGER trigger_update_announcement ON announcement"""))
+    op.execute(text("""DROP FUNCTION notify_new_distributed_announcement()"""))
+
+    op.execute(text("""DROP TRIGGER trigger_new_review ON review"""))
+    op.execute(text("""DROP FUNCTION notify_new_review()"""))
     # ### end Alembic commands ###

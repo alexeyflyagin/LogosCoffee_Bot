@@ -2,15 +2,13 @@ from enum import Enum
 
 
 class OrderState(Enum):
-    CREATED = 0
-    PENDING = 1
-    COOKING = 2
-    READY = 3
-    COMPLETED = 4
-    CANCELED = 5
+    PENDING = 0
+    COOKING = 1
+    READY = 2
+    COMPLETED = 3
+    CANCELED = 4
 
 
 class OrderStateGroup(Enum):
-    DRAFT = 0
-    IN_PROGRESS = 1
-    CLOSED = 2
+    IN_PROGRESS = 0
+    CLOSED = 1

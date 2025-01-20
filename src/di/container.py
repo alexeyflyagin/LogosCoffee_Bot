@@ -120,6 +120,7 @@ class Container(containers.DeclarativeContainer):
         EmployeeBot,
         bot=bot_for_employee,
         dp=dp,
+        event_notifier=event_notifier,
     )
 
 

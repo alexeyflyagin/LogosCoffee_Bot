@@ -83,3 +83,8 @@ class ProductNotFoundError(LCError):
 class OrderNotFoundError(LCError):
     def __init__(self, **kwargs):
         super().__init__(f"The order ({kwargs}) doesn't exist")
+
+
+class OtherOrderIsPlacedAlreadyError(LCError):
+    def __init__(self, **kwargs):
+        super().__init__(f"Other order ({kwargs}) is already placed. New order can't be placed now")

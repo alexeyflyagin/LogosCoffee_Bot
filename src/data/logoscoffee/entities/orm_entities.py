@@ -68,3 +68,19 @@ class EventSubscriberEntity(BaseModel):
     data: dict[str, Any] | None
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class OrderEntity(BaseModel):
+    id: int
+    date_create: datetime
+    client_id: int
+    pickup_code: str | None
+    date_pending: datetime | None
+    date_cooking: datetime | None
+    date_ready: datetime | None
+    date_completed: datetime | None
+    date_canceled: datetime | None
+    cancel_details: str | None
+    details: str | None
+
+    model_config = ConfigDict(from_attributes=True)
