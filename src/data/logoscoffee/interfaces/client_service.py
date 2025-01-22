@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from src.data.logoscoffee.entities.orm_entities import ClientAccountEntity, AnnouncementEntity
+from src.data.logoscoffee.entities.orm_entities import ClientAccountEntity, AnnouncementEntity, MenuEntity
 
 
 class ClientService(ABC):
@@ -70,6 +70,13 @@ class ClientService(ABC):
         :raises InvalidTokenError: If the `token` is specified incorrectly or is missing
         :raises CooldownError: If a review has already been submitted recently
         :raises EmptyTextError: If `text` is empty
+        :raises DatabaseError:
+        :raises UnknownError:
+        """
+
+    @abstractmethod
+    async def get_menu(self) -> MenuEntity:
+        """
         :raises DatabaseError:
         :raises UnknownError:
         """

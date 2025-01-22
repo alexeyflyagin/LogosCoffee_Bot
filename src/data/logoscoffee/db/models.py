@@ -30,6 +30,19 @@ class EventSubscriberOrm(Base):
     data: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
 
 
+class MenuOrm(Base):
+    __tablename__ = "menu"
+    id: Mapped[int] = mapped_column(BIGINT, primary_key=True, autoincrement=True)
+    last_date_update: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, nullable=False)
+    text_content: Mapped[str | None] = mapped_column(TEXT, nullable=True, default=None)
+
+    @validates('text_content')
+    def validate_text_content(self, key, value):
+        if not value or value.strip() == '':
+            raise ValueError("{key} cannot be empty or contain only spaces.")
+        return value
+
+
 class AdminAccountOrm(Base):
     __tablename__ = "admin_account"
     id: Mapped[int] = mapped_column(BIGINT, primary_key=True, autoincrement=True)
@@ -50,7 +63,6 @@ class ClientAccountOrm(Base):
     client_name: Mapped[str | None] = mapped_column(VARCHAR, nullable=True)
     phone_number: Mapped[str] = mapped_column(VARCHAR, unique=True, nullable=False)
     date_create: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, nullable=False)
-    loyalty_points: Mapped[int] = mapped_column(INT, default=0, nullable=False)
     date_last_review: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
 
@@ -77,7 +89,7 @@ class AnnouncementOrm(Base):
 
 
 class OrderOrm(Base):
-    __tablename__ = "order"
+    __tablename__ = "client_order"
     id: Mapped[int] = mapped_column(BIGINT, primary_key=True, autoincrement=True)
     date_create: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, nullable=False)
     client_id: Mapped[int] = mapped_column(BIGINT, ForeignKey(column="client_account.id", ondelete=CASCADE),

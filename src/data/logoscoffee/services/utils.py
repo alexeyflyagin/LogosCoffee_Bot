@@ -4,8 +4,8 @@ import random
 from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.data.logoscoffee.dao import dao_client_account
-from src.data.logoscoffee.db.models import ClientAccountOrm
+from src.data.logoscoffee.dao import dao_client_account, dao_admin_account
+from src.data.logoscoffee.db.models import ClientAccountOrm, AdminAccountOrm
 from src.data.logoscoffee.exceptions import InvalidTokenError, TokenGenerateError
 
 TOKEN_SYMBOLS = string.ascii_letters + string.digits + "-_"
@@ -18,6 +18,12 @@ def raise_exception_if_none(it, e):
 
 async def get_client_account_by_token(s: AsyncSession, token: str) -> ClientAccountOrm:
     account = await dao_client_account.get_by_token(s, token, with_for_update=True)
+    raise_exception_if_none(account, e=InvalidTokenError(token=token))
+    return account
+
+
+async def get_admin_account_by_token(s: AsyncSession, token: str) -> AdminAccountOrm:
+    account = await dao_admin_account.get_by_token(s, token, with_for_update=True)
     raise_exception_if_none(account, e=InvalidTokenError(token=token))
     return account
 

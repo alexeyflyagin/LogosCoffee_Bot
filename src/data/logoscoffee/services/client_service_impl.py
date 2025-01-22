@@ -6,8 +6,8 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from src.data.logoscoffee.checks import check_text_is_not_empty, check_phone_number
 from src.data.logoscoffee.services.utils import get_client_account_by_token, generate_token
-from src.data.logoscoffee.dao import dao_announcement, dao_client_account
-from src.data.logoscoffee.entities.orm_entities import AnnouncementEntity, ClientAccountEntity
+from src.data.logoscoffee.dao import dao_announcement, dao_client_account, dao_menu
+from src.data.logoscoffee.entities.orm_entities import AnnouncementEntity, ClientAccountEntity, MenuEntity
 from src.data.logoscoffee.interfaces.client_service import ClientService
 from src.data.logoscoffee.exceptions import *
 from src.data.logoscoffee.db.models import ClientAccountOrm, ReviewOrm
@@ -114,6 +114,19 @@ class ClientServiceImpl(ClientService):
         except (InvalidTokenError, EmptyTextError, CooldownError) as e:
             logger.warning(e)
             raise
+        except SQLAlchemyError as e:
+            logger.error(e)
+            raise DatabaseError(e)
+        except Exception as e:
+            logger.exception(e)
+            raise UnknownError(e)
+
+    async def get_menu(self) -> MenuEntity:
+        try:
+            async with self.__session_manager.get_session() as s:
+                menu = await dao_menu.get(s)
+                entity = MenuEntity.model_validate(menu)
+                return entity
         except SQLAlchemyError as e:
             logger.error(e)
             raise DatabaseError(e)

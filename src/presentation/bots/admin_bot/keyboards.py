@@ -3,12 +3,18 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMar
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from src.presentation.bots.admin_bot import constants
+from src.presentation.bots.admin_bot.constants import CHANGE_MENU_CALLBACK_DATA
 from src.presentation.resources import strings
 
 MAIN_KEYBOARD = ReplyKeyboardMarkup(
     keyboard=[
+        [KeyboardButton(text=strings.BTN.MENU), KeyboardButton(text=strings.BTN.CHANGE_MENU)],
         [KeyboardButton(text=strings.BTN.WRITE_ANNOUNCEMENT)],
     ], resize_keyboard=True, input_field_placeholder=strings.GENERAL.SELECT_ACTION,
+)
+
+EMPTY_MENU_IK = InlineKeyboardMarkup(
+    inline_keyboard=[[InlineKeyboardButton(text=strings.BTN.CHANGE_MENU, callback_data=CHANGE_MENU_CALLBACK_DATA)]],
 )
 
 

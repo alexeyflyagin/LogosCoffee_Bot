@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.data.logoscoffee.checks import check_text_is_not_empty
 from src.data.logoscoffee.dao import dao_order
 from src.data.logoscoffee.db.models import OrderOrm, ClientAccountOrm
-from src.data.logoscoffee.exceptions import UnknownError, InvalidTokenError, EmptyTextError, CooldownError, \
+from src.data.logoscoffee.exceptions import UnknownError, InvalidTokenError, EmptyTextError, \
     OtherOrderIsPlacedAlreadyError
 from src.data.logoscoffee.interfaces.client_and_order_service import ClientAndOrderService
 from src.data.logoscoffee.models import PlaceOrderData
@@ -15,7 +15,7 @@ from src.data.logoscoffee.services.utils import get_client_account_by_token
 from src.data.logoscoffee.session_manager import SessionManager
 
 
-class ClientAndOrderService(ClientAndOrderService):
+class ClientAndOrderServiceImpl(ClientAndOrderService):
 
     def __init__(self, session_manager: SessionManager):
         self.__session_manager = session_manager

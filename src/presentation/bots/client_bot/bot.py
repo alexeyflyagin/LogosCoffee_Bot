@@ -11,8 +11,9 @@ from src.data.logoscoffee.events.channels import NEW_DISTRIBUTED_ANNOUNCEMENT
 from src.data.logoscoffee.events.notifier import EventNotifier
 from src.data.logoscoffee.exceptions import UnknownError, DatabaseError
 from src.presentation.bots.bot import BaseBot
-from src.presentation.bots.client_bot import constants
-from src.presentation.bots.client_bot.handlers import handler, review_handler, authorization_handler, end_handler
+from src.presentation.bots.client_bot import constants, commands
+from src.presentation.bots.client_bot.handlers import handler, review_handler, authorization_handler, end_handler, \
+    menu_handler
 from src.presentation.bots.utils import send_announcement
 
 
@@ -29,8 +30,10 @@ class ClientBot(BaseBot):
                 handler.router,
                 authorization_handler.router,
                 review_handler.router,
+                menu_handler.router,
                 end_handler.router
             )
+            await self.bot.set_my_commands([commands.MENU_COMMAND])
             await self.bot.delete_webhook(drop_pending_updates=True)
             await self.dp.start_polling(self.bot)
         except CancelledError:

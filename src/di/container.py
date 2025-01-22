@@ -6,6 +6,7 @@ from src import config
 
 from src.data.logoscoffee.db.session_manager_impl import SessionManagerImpl
 from src.data.logoscoffee.events.notifier import EventNotifier
+from src.data.logoscoffee.services.admin_menu_service_impl import AdminMenuServiceImpl
 from src.data.logoscoffee.services.admin_service_impl import AdminServiceImpl
 from src.data.logoscoffee.services.client_service_impl import ClientServiceImpl
 from src.data.logoscoffee.services.event_service_impl import EventServiceImpl
@@ -17,18 +18,21 @@ from src.presentation.user_state_storage import UserStateStorage
 
 
 def client_handlers__inject():
-    from src.presentation.bots.client_bot.handlers import handler, authorization_handler, review_handler, end_handler
+    from src.presentation.bots.client_bot.handlers import handler, authorization_handler, review_handler, end_handler, \
+        menu_handler
     authorization_handler.client_service = di.client_service()
     handler.event_service = di.event_service()
     end_handler.client_service = di.client_service()
     review_handler.client_service = di.client_service()
+    menu_handler.client_service = di.client_service()
 
 
 def admin_handlers__inject():
-    from src.presentation.bots.admin_bot.handlers import handler, end_handler, announcement_handler
+    from src.presentation.bots.admin_bot.handlers import handler, end_handler, announcement_handler, menu_handler
     handler.admin_service = di.admin_service()
     handler.event_service = di.event_service()
     announcement_handler.admin_service = di.admin_service()
+    menu_handler.menu_service = di.admin_menu_service()
     end_handler.admin_service = di.admin_service()
 
 
@@ -59,6 +63,11 @@ class Container(containers.DeclarativeContainer):
 
     admin_service = providers.Factory(
         AdminServiceImpl,
+        session_manager=session_manager,
+    )
+
+    admin_menu_service = providers.Factory(
+        AdminMenuServiceImpl,
         session_manager=session_manager,
     )
 

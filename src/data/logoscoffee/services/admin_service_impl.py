@@ -3,12 +3,12 @@ from loguru import logger
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.data.logoscoffee.dao import dao_review, dao_announcement, dao_admin_account
+from src.data.logoscoffee.dao import dao_review, dao_announcement
 from src.data.logoscoffee.entities.orm_entities import AnnouncementEntity, AdminAccountEntity
 from src.data.logoscoffee.exceptions import *
 from src.data.logoscoffee.interfaces.admin_service import AdminService, ReviewEntity
 from src.data.logoscoffee.db.models import *
-from src.data.logoscoffee.services.utils import raise_exception_if_none
+from src.data.logoscoffee.services.utils import raise_exception_if_none, get_admin_account_by_token
 from src.data.logoscoffee.session_manager import SessionManager
 
 
@@ -24,12 +24,6 @@ class AdminServiceImpl(AdminService):
         for i in announcements:
             await s.delete(i)
         await s.flush()
-
-    @staticmethod
-    async def __get_account_by_token(s: AsyncSession, token: str) -> AdminAccountOrm:
-        account = await dao_admin_account.get_by_token(s, token, with_for_update=True)
-        raise_exception_if_none(account, e=InvalidTokenError(token=token))
-        return account
 
     @staticmethod
     async def __safe_get_announcement(s: AsyncSession, announcement_id) -> AnnouncementOrm:
@@ -50,7 +44,7 @@ class AdminServiceImpl(AdminService):
     ) -> list[ReviewEntity]:
         try:
             async with self.__session_manager.get_session() as s:
-                await self.__get_account_by_token(s, token)
+                await get_admin_account_by_token(s, token)
                 reviews = await dao_review.get_created_since(s, last_update)
                 entities = [ReviewEntity.model_validate(i) for i in reviews]
                 return entities
@@ -70,7 +64,7 @@ class AdminServiceImpl(AdminService):
     ) -> AdminAccountEntity:
         try:
             async with self.__session_manager.get_session() as s:
-                account = await self.__get_account_by_token(s, token)
+                account = await get_admin_account_by_token(s, token)
                 entity = AdminAccountEntity.model_validate(account)
                 await s.commit()
                 return entity
@@ -87,7 +81,7 @@ class AdminServiceImpl(AdminService):
     async def can_create_or_distribute_announcement(self, token: str) -> bool:
         try:
             async with self.__session_manager.get_session() as s:
-                account = await self.__get_account_by_token(s, token)
+                account = await get_admin_account_by_token(s, token)
                 try:
                     self.__can_distribute_or_create_announcement(account)
                 except CooldownError:
@@ -111,7 +105,7 @@ class AdminServiceImpl(AdminService):
     ) -> AnnouncementEntity:
         try:
             async with self.__session_manager.get_session() as s:
-                account = await self.__get_account_by_token(s, token)
+                account = await get_admin_account_by_token(s, token)
                 self.__can_distribute_or_create_announcement(account)
                 await self.__delete_all_announcement(s)
                 created_announcement = AnnouncementOrm(text_content=text_content, preview_photo_data=preview_photo_data)
@@ -138,7 +132,7 @@ class AdminServiceImpl(AdminService):
     ) -> AnnouncementEntity:
         try:
             async with self.__session_manager.get_session() as s:
-                await self.__get_account_by_token(s, token)
+                await get_admin_account_by_token(s, token)
                 announcement = await self.__safe_get_announcement(s, announcement_id)
                 announcement_entity = AnnouncementEntity.model_validate(announcement)
                 return announcement_entity
@@ -159,7 +153,7 @@ class AdminServiceImpl(AdminService):
     ):
         try:
             async with self.__session_manager.get_session() as s:
-                await self.__get_account_by_token(s, token)
+                await get_admin_account_by_token(s, token)
                 announcement = await self.__safe_get_announcement(s, announcement_id)
                 await s.delete(announcement)
                 await s.commit()
@@ -181,7 +175,7 @@ class AdminServiceImpl(AdminService):
     ):
         try:
             async with self.__session_manager.get_session() as s:
-                account = await self.__get_account_by_token(s, token)
+                account = await get_admin_account_by_token(s, token)
                 self.__can_distribute_or_create_announcement(account)
                 account.date_last_announcement_distributing = datetime.now()
                 announcement = await self.__safe_get_announcement(s, announcement_id)

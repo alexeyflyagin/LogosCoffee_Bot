@@ -9,7 +9,7 @@ from src.data.logoscoffee.events.channels import NEW_REVIEW_CHANNEL
 from src.data.logoscoffee.events.notifier import EventNotifier
 from src.data.logoscoffee.exceptions import UnknownError, DatabaseError
 from src.presentation.bots.admin_bot import constants
-from src.presentation.bots.admin_bot.handlers import handler, announcement_handler, end_handler
+from src.presentation.bots.admin_bot.handlers import handler, announcement_handler, end_handler, menu_handler
 from src.presentation.bots.bot import BaseBot
 from src.presentation.resources import strings
 
@@ -24,7 +24,8 @@ class AdminBot(BaseBot):
 
     async def run(self):
         try:
-            self.dp.include_routers(handler.router, announcement_handler.router, end_handler.router)
+            self.dp.include_routers(handler.router, announcement_handler.router, menu_handler.router,
+                                    end_handler.router)
             await self.bot.delete_webhook(drop_pending_updates=True)
             await self.dp.start_polling(self.bot)
         except CancelledError:

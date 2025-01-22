@@ -43,6 +43,7 @@ class BTN(StrGroup):
     CONFIRM = "✅ Да, всё верно!"
     CANCEL = "❌ Отменить"
     MENU = "📋 Меню"
+    CHANGE_MENU = "✏️ Изменить меню"
     ADD = "+ Добавить"
     ADD_TO_DRAFT_ORDER = "Добавить в корзину"
     PRODUCT_TEMPORARY_UNAVAILABLE = "Продукт временно недоступен!"
@@ -80,6 +81,8 @@ class GENERAL(StrGroup):
 
 class CLIENT(StrGroup):
     LINKS = "Присоединяйся к нам в vk: https://vk.com/logoscoffee"
+
+    EMPTY_MENU_CONTENT = "Упс! Меню пока что ещё не готово 😣"
 
     class AUTHORIZATION(StrGroup):
         PRESS_BTN = f"""Нажмите '{b(BTN.AUTHORIZE)}', чтобы авторизоваться."""
@@ -133,6 +136,8 @@ class ADMIN(StrGroup):
         —
         {quote('{review_content}')}
     """)
+
+    EMPTY_MENU_CONTENT = "Упс! Меню пока что ещё не готово!"
 
     class MAKE_ANNOUNCEMENT(StrGroup):
         ENTER_CONTENT = dedent(f"""\

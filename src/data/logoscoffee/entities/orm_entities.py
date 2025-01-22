@@ -25,7 +25,6 @@ class ClientAccountEntity(BaseModel):
     client_name: str | None
     phone_number: str
     date_create: datetime
-    loyalty_points: int
     date_last_review: datetime | None
 
     model_config = ConfigDict(from_attributes=True)
@@ -82,5 +81,13 @@ class OrderEntity(BaseModel):
     date_canceled: datetime | None
     cancel_details: str | None
     details: str | None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class MenuEntity(BaseModel):
+    id: int
+    last_date_update: datetime
+    text_content: str | None
 
     model_config = ConfigDict(from_attributes=True)
