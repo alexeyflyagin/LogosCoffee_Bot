@@ -7,3 +7,7 @@ class MainStates(StatesGroup):
 
 class MakeAnnouncement(StatesGroup):
     Content = State()
+
+
+class ChangeMenu(StatesGroup):
+    TextContent = State()

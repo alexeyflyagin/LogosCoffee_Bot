@@ -32,6 +32,7 @@ def admin_handlers__inject():
     handler.admin_service = di.admin_service()
     handler.event_service = di.event_service()
     announcement_handler.admin_service = di.admin_service()
+    menu_handler.admin_service = di.admin_service()
     menu_handler.menu_service = di.admin_menu_service()
     end_handler.admin_service = di.admin_service()
 

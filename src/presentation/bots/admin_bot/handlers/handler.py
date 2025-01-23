@@ -48,6 +48,7 @@ async def menu_callback(callback: CallbackQuery, state: FSMContext):
         await unknown_error(callback.message, state)
 
 
+@router.message(ChangeMenu(), Command(commands.CANCEL_COMMAND))
 @router.message(MakeAnnouncement(), Command(commands.CANCEL_COMMAND))
 async def cancel_handler(msg: Message, state: FSMContext):
     await reset_state(msg, state, strings.GENERAL.ACTION_CANCELED)

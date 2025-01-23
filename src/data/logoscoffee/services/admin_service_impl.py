@@ -13,6 +13,7 @@ from src.data.logoscoffee.session_manager import SessionManager
 
 
 class AdminServiceImpl(AdminService):
+
     COOLDOWN_DISTRIBUTE_ANNOUNCEMENT = timedelta(minutes=10)
 
     def __init__(self, session_manager: SessionManager):
@@ -68,6 +69,20 @@ class AdminServiceImpl(AdminService):
                 entity = AdminAccountEntity.model_validate(account)
                 await s.commit()
                 return entity
+        except InvalidTokenError as e:
+            logger.warning(e)
+            raise
+        except SQLAlchemyError as e:
+            logger.error(e)
+            raise DatabaseError(e)
+        except Exception as e:
+            logger.exception(e)
+            raise UnknownError(e)
+
+    async def validate_token(self, token: str):
+        try:
+            async with self.__session_manager.get_session() as s:
+                await get_admin_account_by_token(s, token)
         except InvalidTokenError as e:
             logger.warning(e)
             raise

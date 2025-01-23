@@ -61,6 +61,21 @@ class AdminService(ABC):
         """
 
     @abstractmethod
+    async def validate_token(
+            self,
+            token: str
+    ):
+        """
+        Use it to verify the validity of the token.
+
+        :param token: A unique 16-digit line (A-Z|a-z|0-9) associated with the admin account
+
+        :raises InvalidTokenError: If the `token` is specified incorrectly or is missing
+        :raises DatabaseError:
+        :raises UnknownError:
+        """
+
+    @abstractmethod
     async def create_announcement(
             self,
             token: str,
