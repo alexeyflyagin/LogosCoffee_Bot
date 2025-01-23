@@ -13,7 +13,7 @@ from src.data.logoscoffee.exceptions import UnknownError, DatabaseError
 from src.presentation.bots.bot import BaseBot
 from src.presentation.bots.client_bot import constants, commands
 from src.presentation.bots.client_bot.handlers import handler, review_handler, authorization_handler, end_handler, \
-    menu_handler
+    menu_handler, order_handler
 from src.presentation.bots.utils import send_announcement
 
 
@@ -31,9 +31,9 @@ class ClientBot(BaseBot):
                 authorization_handler.router,
                 review_handler.router,
                 menu_handler.router,
+                order_handler.router,
                 end_handler.router
             )
-            await self.bot.set_my_commands([commands.MENU_COMMAND])
             await self.bot.delete_webhook(drop_pending_updates=True)
             await self.dp.start_polling(self.bot)
         except CancelledError:

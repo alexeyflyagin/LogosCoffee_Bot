@@ -7,5 +7,8 @@ class AuthorizationStates(StatesGroup):
 class MainStates(StatesGroup):
     Main = State()
 
+class MakeOrderStates(StatesGroup):
+    EnterDetails = State()
+
 class EnterReviewStates(StatesGroup):
     EnterText = State()

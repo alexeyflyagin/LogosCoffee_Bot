@@ -72,6 +72,20 @@ class ClientServiceImpl(ClientService):
             logger.exception(e)
             raise UnknownError(e)
 
+    async def validate_token(self, token: str):
+        try:
+            async with self.__session_manager.get_session() as s:
+                await get_client_account_by_token(s, token)
+        except InvalidTokenError as e:
+            logger.warning(e)
+            raise
+        except SQLAlchemyError as e:
+            logger.error(e)
+            raise DatabaseError(e)
+        except Exception as e:
+            logger.exception(e)
+            raise UnknownError(e)
+
     async def can_submit_review(
             self,
             token: str

@@ -29,6 +29,7 @@ async def start_handler(msg: Message, state: FSMContext):
         await unknown_error(msg, state)
 
 
+@router.message(MakeOrderStates(), Command(commands.CANCEL_COMMAND))
 @router.message(EnterReviewStates(), Command(commands.CANCEL_COMMAND))
 async def cancel_handler(msg: Message, state: FSMContext):
     await reset_state(msg, state, strings.GENERAL.ACTION_CANCELED)

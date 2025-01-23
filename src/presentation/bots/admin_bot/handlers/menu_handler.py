@@ -1,5 +1,5 @@
 from aiogram import Router, F
-from aiogram.enums import ParseMode
+from aiogram.enums import ParseMode, ContentType
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, ReplyKeyboardRemove, CallbackQuery
 from loguru import logger
@@ -13,6 +13,8 @@ from src.presentation.bots.admin_bot.handlers.utils import get_token, invalid_to
 from src.presentation.bots.admin_bot.handlers.utils import unknown_error
 from src.presentation.bots.admin_bot.states import MainStates, ChangeMenu
 from src.presentation.bots.utils import send_or_update_msg
+from src.presentation.checks.checks import check_content_type
+from src.presentation.checks.exceptions import ContentTypeError
 from src.presentation.resources import strings
 
 router = Router(name=__name__)
@@ -62,8 +64,13 @@ async def change_menu_handler(msg: Message, state: FSMContext):
 async def change_menu__text_content__handler(msg: Message, state: FSMContext):
     try:
         token = await get_token(state)
+        await admin_service.validate_token(token)
+        check_content_type(msg, ContentType.TEXT)
         await menu_service.update_menu(token, text_content=msg.text)
         await reset_state(msg, state, msg_text=strings.ADMIN.CHANGE_MENU.SUCCESS)
+    except ContentTypeError as e:
+        logger.debug(e.log_msg)
+        await msg.answer(e.msg)
     except InvalidTokenError as e:
         logger.debug(e)
         await invalid_token_error(msg, state)
