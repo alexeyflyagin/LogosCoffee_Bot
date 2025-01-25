@@ -1,4 +1,5 @@
 from asyncio import CancelledError
+from datetime import datetime
 
 from aiogram import Dispatcher, Bot
 from aiogram.exceptions import TelegramBadRequest
@@ -10,7 +11,7 @@ from src.data.logoscoffee.exceptions import DatabaseError, UnknownError
 from src.presentation.bots.bot import BaseBot
 from src.presentation.bots.employee_bot import constants
 from src.presentation.bots.employee_bot.handlers import handler, end_handler
-from src.presentation.resources.strings_builder.strings_builder import quote
+from src.presentation.resources.utils import show_order_view
 
 
 class EmployeeBot(BaseBot):
@@ -33,7 +34,7 @@ class EmployeeBot(BaseBot):
             subscribers = await handler.event_service.get_subscribers(constants.EVENT__NEW_ORDER)
             for subscriber in subscribers:
                 try:
-                    await self.bot.send_message(chat_id=subscriber.chat_id, text=quote(order.details))
+                    await show_order_view(bot=self.bot, chat_id=subscriber.chat_id, order=order)
                 except TelegramBadRequest:
                     pass
         except (DatabaseError, UnknownError):

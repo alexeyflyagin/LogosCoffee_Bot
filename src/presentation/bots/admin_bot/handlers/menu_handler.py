@@ -27,7 +27,7 @@ async def menu_handler(msg: Message, state: FSMContext):
     await show_menu(msg, state)
 
 
-@router.message(F.data == constants.CHANGE_MENU_CALLBACK_DATA)
+@router.callback_query(F.data == constants.CHANGE_MENU_CALLBACK_DATA)
 async def change_menu_callback(callback: CallbackQuery, state: FSMContext):
     try:
         token = await get_token(state)

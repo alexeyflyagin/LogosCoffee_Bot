@@ -3,6 +3,8 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict
 
+from src.data.logoscoffee.enums import OrderState, OrderStateGroup
+
 
 class EmployeeAccountEntity(BaseModel):
     id: int
@@ -89,7 +91,34 @@ class OrderEntity(BaseModel):
     cancel_details: str | None
     details: str | None
 
+    client: ClientAccountEntity | None = None
+
     model_config = ConfigDict(from_attributes=True)
+
+    @property
+    def state_group(self) -> OrderStateGroup:
+        state = self.state
+        if state in (OrderState.PENDING, OrderState.COOKING, OrderState.READY):
+            return OrderStateGroup.IN_PROGRESS
+        elif state in (OrderState.COMPLETED, OrderState.CANCELED):
+            return OrderStateGroup.CLOSED
+        else:
+            raise ValueError("Unexpected order state group.")
+
+    @property
+    def state(self) -> OrderState:
+        if self.date_canceled:
+            return OrderState.CANCELED
+        if self.date_completed:
+            return OrderState.COMPLETED
+        if self.date_ready:
+            return OrderState.READY
+        if self.date_cooking:
+            return OrderState.COOKING
+        if self.date_pending:
+            return OrderState.PENDING
+        else:
+            raise ValueError("Unexpected order state.")
 
 
 class MenuEntity(BaseModel):

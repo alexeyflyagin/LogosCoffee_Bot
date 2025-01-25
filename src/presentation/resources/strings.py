@@ -182,3 +182,39 @@ class ADMIN(StrGroup):
             """)
 
             COOLDOWN_ERROR = """Недавно вы уже рассылали объявление. Пожалуйста, попробуйте чуть позже ⏳"""
+
+
+class EMPLOYEE(StrGroup):
+    class ORDER(StrGroup):
+        NO_NICKNAME = i("No name")
+
+        IN_PROGRESS_VIEW = dedent(f"""\
+            🟢 {b('Заказ #{id}')}  {i('{date}')}
+            Получатель: {{nickname}} {i('(id: {client_id})')}
+            
+            Статус: {{state}}
+            —
+            {quote('{details}', expandable=True)}
+        """)
+
+        CLOSED_VIEW = dedent(f"""\
+            {b('Заказ #{id}')}  {i('{date}')}
+            Получатель: {{nickname}} {i('(id: {client_id})')}
+            
+            Статус: {{state}}
+            —
+            {quote('{details}', expandable=True)}
+        """)
+
+        class BTN(StrGroup):
+            ORDER_CONFIRM = "✅ Подвердить!"
+            ORDER_READY = "✅ Готов к выдаче!"
+            ORDER_COMPLETE = "✅ Вручён!"
+            ORDER_CANCEL = "🚫 Отклонить"
+
+        class STATES(StrGroup):
+            PENDING = f"{b('⌛️ Ожидает подтверждения')}"
+            COOKING = f"{b('👨‍🍳 Готовится...')}"
+            READY = f"{b('📦 Готов к выдаче!')}  {b('({code})')}"
+            COMPLETED = f"{b('🎉 Завершен')}"
+            CANCELED = f"{b('🚫 Отменен')}\n{i('{cancel_details}')}"

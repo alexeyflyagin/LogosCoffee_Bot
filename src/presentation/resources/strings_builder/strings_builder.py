@@ -11,8 +11,8 @@ def code(it: str) -> str:
 def i(it: str) -> str:
     return f"<i>{it}</i>"
 
-def quote(it: str) -> str:
-    return f"<blockquote>{it}</blockquote>"
+def quote(it: str, expandable: bool = False) -> str:
+    return f"<blockquote expandable>{it}</blockquote>" if expandable else f"<blockquote>{it}</blockquote>"
 
 class StrGroup:
     pass
