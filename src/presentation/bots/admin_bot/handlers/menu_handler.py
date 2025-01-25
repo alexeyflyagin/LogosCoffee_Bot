@@ -2,7 +2,7 @@ from aiogram import Router, F
 from aiogram.enums import ParseMode, ContentType
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, ReplyKeyboardRemove, CallbackQuery
-from loguru import logger
+from src.loggers import bot_logger as logger
 
 from src.data.logoscoffee.exceptions import DatabaseError, UnknownError, InvalidTokenError
 from src.data.logoscoffee.interfaces.admin_menu_service import AdminMenuService

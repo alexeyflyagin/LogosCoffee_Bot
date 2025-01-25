@@ -1,7 +1,7 @@
 import string
 from datetime import datetime
 
-from loguru import logger
+from src.loggers import service_logger as logger
 from sqlalchemy.exc import SQLAlchemyError
 
 from src.data.logoscoffee.checks import check_text_is_not_empty, check_phone_number

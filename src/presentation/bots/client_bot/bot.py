@@ -1,17 +1,14 @@
-import asyncio
 from asyncio import CancelledError
-from datetime import datetime
 
 from aiogram import Bot, Dispatcher
 from aiogram.exceptions import TelegramBadRequest
-from loguru import logger
 
 from src.data.logoscoffee.entities.orm_entities import AnnouncementEntity
 from src.data.logoscoffee.events.channels import NEW_DISTRIBUTED_ANNOUNCEMENT
 from src.data.logoscoffee.events.notifier import EventNotifier
 from src.data.logoscoffee.exceptions import UnknownError, DatabaseError
 from src.presentation.bots.bot import BaseBot
-from src.presentation.bots.client_bot import constants, commands
+from src.presentation.bots.client_bot import constants
 from src.presentation.bots.client_bot.handlers import handler, review_handler, authorization_handler, end_handler, \
     menu_handler, order_handler
 from src.presentation.bots.utils import send_announcement

@@ -1,4 +1,4 @@
-from loguru import logger
+from src.loggers import service_logger as logger
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
 from src.data.logoscoffee.session_manager import SessionManager

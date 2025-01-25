@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from aiogram import Bot
-from loguru import logger
+from src.loggers import bot_logger as logger
 
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message, URLInputFile

@@ -1,7 +1,7 @@
 from aiogram import Router, F
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
-from loguru import logger
+from src.loggers import bot_logger as logger
 
 from src.data.logoscoffee.exceptions import DatabaseError, UnknownError
 from src.data.logoscoffee.interfaces.client_service import ClientService

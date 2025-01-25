@@ -1,6 +1,6 @@
 from typing import Any
 
-from loguru import logger
+from src.loggers import service_logger as logger
 from sqlalchemy.exc import SQLAlchemyError
 
 from src.data.logoscoffee.dao import dao_event_subscriber

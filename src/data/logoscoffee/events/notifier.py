@@ -3,7 +3,7 @@ from typing import Callable, Awaitable, Any
 
 import asyncpg
 from asyncpg import Connection
-from loguru import logger
+from src.loggers import service_logger as logger
 
 from src.data.logoscoffee.events.exceptions import DuplicateEventHandlerError, SkipHandler
 from src.data.logoscoffee.session_manager import SessionManager

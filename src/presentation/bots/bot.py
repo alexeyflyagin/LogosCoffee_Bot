@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 from aiogram import Bot, Dispatcher
-from loguru import logger
+from src.loggers import bot_logger as logger
 
 
 class BaseBot(ABC):

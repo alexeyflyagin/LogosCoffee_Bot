@@ -1,7 +1,7 @@
 import random
 import string
 
-from loguru import logger
+from src.loggers import service_logger as logger
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.data.logoscoffee.dao import dao_client_account, dao_admin_account, dao_employee_account

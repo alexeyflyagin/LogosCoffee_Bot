@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from loguru import logger
+from src.loggers import service_logger as logger
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
