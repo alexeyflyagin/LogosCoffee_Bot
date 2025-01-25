@@ -4,6 +4,13 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict
 
 
+class EmployeeAccountEntity(BaseModel):
+    id: int
+    token: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class AdminAccountEntity(BaseModel):
     id: int
     token: str
