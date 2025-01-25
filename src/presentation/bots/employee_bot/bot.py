@@ -11,7 +11,10 @@ from src.data.logoscoffee.exceptions import DatabaseError, UnknownError
 from src.presentation.bots.bot import BaseBot
 from src.presentation.bots.employee_bot import constants
 from src.presentation.bots.employee_bot.handlers import handler, end_handler
-from src.presentation.resources.utils import show_order_view
+
+from src.presentation.bots.employee_bot.views.models.order import OrderViewData
+from src.presentation.bots.employee_bot.views.order import view__order
+from src.presentation.bots.view_system.utils import show_view
 
 
 class EmployeeBot(BaseBot):
@@ -34,7 +37,7 @@ class EmployeeBot(BaseBot):
             subscribers = await handler.event_service.get_subscribers(constants.EVENT__NEW_ORDER)
             for subscriber in subscribers:
                 try:
-                    await show_order_view(bot=self.bot, chat_id=subscriber.chat_id, order=order)
+                    await show_view(self.bot, subscriber.chat_id, view__order(OrderViewData.from_order_entity(order)))
                 except TelegramBadRequest:
                     pass
         except (DatabaseError, UnknownError):

@@ -208,9 +208,9 @@ class EMPLOYEE(StrGroup):
 
         class BTN(StrGroup):
             ORDER_CONFIRM = "✅ Подвердить!"
-            ORDER_READY = "✅ Готов к выдаче!"
-            ORDER_COMPLETE = "✅ Вручён!"
-            ORDER_CANCEL = "🚫 Отклонить"
+            ORDER_READY = "➡️ Готов к выдаче!"
+            ORDER_COMPLETE = "➡️ Вручён!"
+            ORDER_REJECT = "🚫 Отклонить"
 
         class STATES(StrGroup):
             PENDING = f"{b('⌛️ Ожидает подтверждения')}"
