@@ -2,14 +2,13 @@ from aiogram import Router, F
 from aiogram.enums import ParseMode, ContentType
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, ReplyKeyboardRemove
-from src.loggers import bot_logger as logger
 
-from src.data.logoscoffee.exceptions import DatabaseError, UnknownError, InvalidTokenError, \
-    OtherOrderIsPlacedAlreadyError
+from src.data.logoscoffee.exceptions import OtherOrderIsPlacedAlreadyError
 from src.data.logoscoffee.interfaces.client_service import ClientService
 from src.data.logoscoffee.models import PlaceOrderData
 from src.data.logoscoffee.services.client_order_service_impl import ClientOrderServiceImpl
-from src.presentation.bots.client_bot.handlers.utils import get_token, unknown_error, invalid_token_error, reset_state
+from src.loggers import bot_logger as logger
+from src.presentation.bots.client_bot.handlers.utils import get_token, reset_state
 from src.presentation.bots.client_bot.states import MainStates, MakeOrderStates
 from src.presentation.checks.checks import check_content_type
 from src.presentation.checks.exceptions import ContentTypeError
@@ -31,12 +30,6 @@ async def make_order_handler(msg: Message, state: FSMContext):
     except OtherOrderIsPlacedAlreadyError as e:
         logger.debug(e)
         await msg.answer(text=strings.CLIENT.MAKE_ORDER.ANOTHER_ORDER_ALREADY_PLACED)
-    except InvalidTokenError as e:
-        logger.debug(e)
-        await invalid_token_error(msg, state)
-    except (DatabaseError, UnknownError, Exception) as e:
-        logger.error(e)
-        await unknown_error(msg, state)
 
 
 @router.message(MakeOrderStates.EnterDetails)
@@ -53,9 +46,3 @@ async def make_order__details__handler(msg: Message, state: FSMContext):
     except OtherOrderIsPlacedAlreadyError as e:
         logger.debug(e)
         await msg.answer(text=strings.CLIENT.MAKE_ORDER.ANOTHER_ORDER_ALREADY_PLACED)
-    except InvalidTokenError as e:
-        logger.debug(e)
-        await invalid_token_error(msg, state)
-    except (DatabaseError, UnknownError, Exception) as e:
-        logger.error(e)
-        await unknown_error(msg, state)
