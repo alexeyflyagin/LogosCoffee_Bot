@@ -1,19 +1,17 @@
-from aiogram.enums import ContentType
-
 from aiogram import F
+from aiogram import Router
+from aiogram.enums import ContentType
+from aiogram.fsm.context import FSMContext
+from aiogram.types import Message, ReplyKeyboardRemove
 
 from src.data.logoscoffee.exceptions import DatabaseError, UnknownError, EmptyTextError, CooldownError, \
     InvalidTokenError
 from src.data.logoscoffee.interfaces.client_service import ClientService
-from src.presentation.resources import strings
-from aiogram import Router
-from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, ReplyKeyboardRemove
-
-from src.presentation.checks.checks import check_content_type, ContentTypeError
 from src.presentation.bots.client_bot.handlers.utils import reset_state, unknown_error, \
     get_token, invalid_token_error
 from src.presentation.bots.client_bot.states import *
+from src.presentation.checks.checks import check_content_type, ContentTypeError
+from src.presentation.resources import strings
 from src.presentation.resources.strings_builder.strings_builder import random_str
 
 router = Router()

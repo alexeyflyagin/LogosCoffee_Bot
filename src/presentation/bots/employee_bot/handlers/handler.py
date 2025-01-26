@@ -1,5 +1,5 @@
 from aiogram import Router, F
-from aiogram.filters import Command, CommandObject, CommandStart
+from aiogram.filters import CommandObject, CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State
 from aiogram.types import Message, ReplyKeyboardRemove, CallbackQuery
@@ -8,9 +8,9 @@ from src.data.logoscoffee.exceptions import DatabaseError, UnknownError, Already
 from src.data.logoscoffee.interfaces.employee_service import EmployeeService
 from src.data.logoscoffee.interfaces.event_service import EventService
 from src.presentation.bots.constants import CALLBACK_DATA__LIST_MENU
-from src.presentation.bots.employee_bot import commands, constants
+from src.presentation.bots.employee_bot import constants
 from src.presentation.bots.employee_bot.constants import TOKEN
-from src.presentation.bots.employee_bot.handlers.utils import unknown_error, reset_state
+from src.presentation.bots.employee_bot.handlers.utils import unknown_error
 from src.presentation.bots.employee_bot.states import MainStates
 from src.presentation.resources import strings
 from src.presentation.resources.strings_builder.strings_builder import random_str
@@ -48,7 +48,3 @@ async def menu_callback(callback: CallbackQuery, state: FSMContext):
         await callback.answer(strings.ADMIN.ANNOUNCEMENT.BUTTON_MENU_FOR_CLIENT)
     except (DatabaseError, UnknownError):
         await unknown_error(callback.message, state)
-
-
-async def cancel_handler(msg: Message, state: FSMContext):
-    await reset_state(msg, state, strings.GENERAL.ACTION_CANCELED)

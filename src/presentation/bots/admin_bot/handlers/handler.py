@@ -35,7 +35,6 @@ async def start_handler(msg: Message, state: FSMContext, command: CommandObject)
             pass
         await msg.answer(random_str(strings.GENERAL.LOGIN.SUCCESSFUL), reply_markup=keyboards.MAIN_KEYBOARD)
         await msg.delete()
-
     except InvalidTokenError:
         await msg.answer(text=strings.GENERAL.LOGIN.INVALID_TOKEN, reply_markup=ReplyKeyboardRemove())
     except (DatabaseError, UnknownError):

@@ -1,9 +1,9 @@
 from aiogram.filters.callback_data import CallbackData
 
-from src.presentation.bots.employee_bot.views import prefixes
+from src.presentation.bots.views.employee.constants import Prefix
 
 
-class OrderCD(CallbackData, prefix=prefixes.ORDER):
+class OrderCD(CallbackData, prefix=Prefix.ORDER):
     order_id: int
     action: int
 

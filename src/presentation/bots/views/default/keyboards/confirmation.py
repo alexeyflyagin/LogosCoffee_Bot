@@ -1,26 +1,17 @@
 import random
-from typing import Any
 
-from aiogram.filters.callback_data import CallbackData
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
+from src.presentation.bots.views.default.callbacks.confirmation import ConfirmationCD
 from src.presentation.resources import strings
 
-PREFIX__CONFIRMATION = "cnfrm"
 
-class ConfirmationCD(CallbackData, prefix=PREFIX__CONFIRMATION):
-    tag: str
-    p_arg: Any
-    s_arg: Any
-    action: int
-
-    class Action:
-        CANCEL = 0
-        CONFIRM = 1
-
-
-def confirmation_markup(tag: str, p_arg: Any = None, s_arg: Any = None) -> InlineKeyboardMarkup:
+def confirmation_ikm(
+        tag: int,
+        p_arg: int | str | bool | None = None,
+        s_arg: int | str | bool | None = None,
+) -> InlineKeyboardMarkup:
     ikb = InlineKeyboardBuilder()
     confirm_data = ConfirmationCD(tag=tag, p_arg=p_arg, s_arg=s_arg, action=ConfirmationCD.Action.CONFIRM).pack()
     cancel_data = ConfirmationCD(tag=tag, p_arg=p_arg, s_arg=s_arg, action=ConfirmationCD.Action.CANCEL).pack()
@@ -32,4 +23,3 @@ def confirmation_markup(tag: str, p_arg: Any = None, s_arg: Any = None) -> Inlin
     ikb.add(*buttons)
     ikb.adjust(2)
     return ikb.as_markup()
-

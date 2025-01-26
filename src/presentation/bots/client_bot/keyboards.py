@@ -1,6 +1,5 @@
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
-from src.presentation.bots import constants
 from src.presentation.resources import strings
 
 AUTHORIZATION_KEYBOARD = ReplyKeyboardMarkup(

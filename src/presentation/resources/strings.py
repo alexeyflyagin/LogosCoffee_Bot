@@ -63,7 +63,7 @@ class GENERAL(StrGroup):
 
     SELECT_ACTION = "Выберите действие."
 
-    NO_DATA = "Нет данных"
+    NO_DATA = "-"
 
     class LOGIN(StrGroup):
         TOKEN_WAS_NOT_ENTERED = "Для входа нужен токен! Просто напишите его после /start."
