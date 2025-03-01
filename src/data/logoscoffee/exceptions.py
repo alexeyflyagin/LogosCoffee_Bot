@@ -34,6 +34,11 @@ class TokenGenerateError(LCError):
         super().__init__("Token generation was wrong")
 
 
+class PickupCodeGenerateError(LCError):
+    def __init__(self):
+        super().__init__("Pickup code generation was wrong")
+
+
 class EmptyTextError(LCError):
     def __init__(self):
         super().__init__(f"Review content is empty")

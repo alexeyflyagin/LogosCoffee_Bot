@@ -94,7 +94,7 @@ class OrderOrm(Base):
     date_create: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, nullable=False)
     client_id: Mapped[int] = mapped_column(BIGINT, ForeignKey(column="client_account.id", ondelete=CASCADE),
                                            nullable=False)
-    pickup_code: Mapped[str | None] = mapped_column(VARCHAR(4), nullable=True)
+    pickup_code: Mapped[str | None] = mapped_column(VARCHAR(6), nullable=True)
     date_pending: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     date_cooking: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     date_ready: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)

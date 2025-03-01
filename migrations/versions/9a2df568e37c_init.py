@@ -90,7 +90,7 @@ def upgrade() -> None:
         sa.Column('id', sa.BIGINT(), autoincrement=True, nullable=False),
         sa.Column('date_create', sa.DateTime(), nullable=False),
         sa.Column('client_id', sa.BIGINT(), nullable=False),
-        sa.Column('pickup_code', sa.VARCHAR(length=4), nullable=True),
+        sa.Column('pickup_code', sa.VARCHAR(length=6), nullable=True),
         sa.Column('date_pending', sa.DateTime(), nullable=True),
         sa.Column('date_cooking', sa.DateTime(), nullable=True),
         sa.Column('date_ready', sa.DateTime(), nullable=True),

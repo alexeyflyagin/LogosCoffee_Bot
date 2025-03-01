@@ -1,4 +1,3 @@
-from aiohttp.payload import Order
 from sqlalchemy import select, ColumnElement, and_, Select, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -26,6 +25,7 @@ def __get_criteria_by_state(state: OrderState) -> ColumnElement[bool]:
         case OrderState.COMPLETED:
             return and_(OrderOrm.date_completed.is_not(None))
 
+
 def __set_state_filter(
         query: Select[tuple[OrderOrm]],
         state: OrderState
@@ -49,6 +49,29 @@ def __set_state_group_filter(
                 __get_criteria_by_state(OrderState.COMPLETED),
                 __get_criteria_by_state(OrderState.CANCELED),
             ))
+
+
+async def get_by_id(
+        s: AsyncSession,
+        _id: int,
+        with_for_update: bool = False
+) -> OrderOrm | None:
+    query = select(OrderOrm).filter(OrderOrm.id == _id)
+    query = set_with_for_update_if(query, with_for_update)
+    res = await s.execute(query)
+    return res.scalar_one_or_none()
+
+
+async def get_by_pickup_code(
+        s: AsyncSession,
+        pickup_code: str | None,
+        with_for_update: bool = False
+) -> OrderOrm | None:
+    query = select(OrderOrm).filter(OrderOrm.pickup_code == pickup_code)
+    query = set_with_for_update_if(query, with_for_update)
+    res = await s.execute(query)
+    return res.scalar_one_or_none()
+
 
 
 async def get_active_order_by_client_id(

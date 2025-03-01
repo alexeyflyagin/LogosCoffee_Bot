@@ -1,12 +1,12 @@
 import random
 import string
 
-from src.loggers import service_logger as logger
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.data.logoscoffee.dao import dao_client_account, dao_admin_account, dao_employee_account
+from src.data.logoscoffee.dao import dao_client_account, dao_admin_account, dao_employee_account, dao_order
 from src.data.logoscoffee.db.models import ClientAccountOrm, AdminAccountOrm, EmployeeAccountOrm
-from src.data.logoscoffee.exceptions import InvalidTokenError, TokenGenerateError
+from src.data.logoscoffee.exceptions import InvalidTokenError, TokenGenerateError, PickupCodeGenerateError
+from src.loggers import service_logger as logger
 
 TOKEN_SYMBOLS = string.ascii_letters + string.digits + "-_"
 
@@ -32,6 +32,22 @@ async def get_employee_account_by_token(s: AsyncSession, token: str) -> Employee
     account = await dao_employee_account.get_by_token(s, token, with_for_update=True)
     raise_exception_if_none(account, e=InvalidTokenError(token=token))
     return account
+
+
+async def generate_pickup_code(s: AsyncSession) -> str:
+    try:
+        pickup_code_length = 6
+        for i in range(600):
+            new_pickup_code = ''.join(random.choices(string.digits, k=pickup_code_length))
+            if new_pickup_code == '0' * pickup_code_length:
+                continue
+            order = await dao_order.get_by_pickup_code(s, new_pickup_code)
+            if not order:
+                return new_pickup_code
+        raise PickupCodeGenerateError()
+    except PickupCodeGenerateError as e:
+        logger.critical(e)
+        raise
 
 
 async def generate_token(s: AsyncSession) -> str:

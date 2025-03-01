@@ -186,6 +186,8 @@ class ADMIN(StrGroup):
 
 class EMPLOYEE(StrGroup):
     class ORDER(StrGroup):
+        NOT_FOUND_ERROR = "Заказ не найден!"
+
         NO_NICKNAME = i("No name")
 
         IN_PROGRESS_VIEW = dedent(f"""\
@@ -204,6 +206,17 @@ class EMPLOYEE(StrGroup):
             Статус: {{state}}
             —
             {quote('{details}', expandable=True)}
+        """)
+
+        NEXT_STATE_CONFIRMATION_VIEW = dedent(f"""\
+            {b('⚠️ Подтверждение действия')} 
+            Клиент будет уведомлен о смене статуса своего заказа.
+            
+            Вы уверены, что хотите обновить состояние заказа #{{order_id}}?
+        """)
+
+        INCORRECT_STATE = dedent(f"""\
+            Ошибка. Некорректное состояние заказа!
         """)
 
         class BTN(StrGroup):

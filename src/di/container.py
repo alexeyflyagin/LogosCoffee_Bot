@@ -2,14 +2,16 @@ from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from dependency_injector import containers, providers
-from src import config
 
+from src import config
 from src.data.logoscoffee.db.session_manager_impl import SessionManagerImpl
 from src.data.logoscoffee.events.notifier import EventNotifier
+from src.data.logoscoffee.interfaces.employee_order_service import EmployeeOrderService
 from src.data.logoscoffee.services.admin_menu_service_impl import AdminMenuServiceImpl
 from src.data.logoscoffee.services.admin_service_impl import AdminServiceImpl
 from src.data.logoscoffee.services.client_order_service_impl import ClientOrderServiceImpl
 from src.data.logoscoffee.services.client_service_impl import ClientServiceImpl
+from src.data.logoscoffee.services.employee_order_service_impl import EmployeeOrderServiceImpl
 from src.data.logoscoffee.services.emplyee_service_impl import EmployeeServiceImpl
 from src.data.logoscoffee.services.event_service_impl import EventServiceImpl
 from src.data.logoscoffee.services.user_state_service_impl import UserStateServiceImpl
@@ -43,8 +45,10 @@ def admin_handlers__inject():
 
 def employee_handlers__inject():
     from src.presentation.bots.employee_bot.handlers import handler
+    from src.presentation.bots.employee_bot.handlers import order_handler
     handler.employee_service = di.employee_service()
     handler.event_service = di.event_service()
+    order_handler.order_service = di.employee_order_service()
 
 
 class Container(containers.DeclarativeContainer):
@@ -80,6 +84,11 @@ class Container(containers.DeclarativeContainer):
 
     employee_service = providers.Factory(
         EmployeeServiceImpl,
+        session_manager=session_manager,
+    )
+
+    employee_order_service = providers.Factory(
+        EmployeeOrderServiceImpl,
         session_manager=session_manager,
     )
 

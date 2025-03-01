@@ -9,7 +9,7 @@ from src.data.logoscoffee.events.notifier import EventNotifier
 from src.data.logoscoffee.exceptions import DatabaseError, UnknownError
 from src.presentation.bots.bot import BaseBot
 from src.presentation.bots.employee_bot import constants
-from src.presentation.bots.employee_bot.handlers import handler, end_handler
+from src.presentation.bots.employee_bot.handlers import handler, end_handler, order_handler
 from src.presentation.bots.views.employee.models.order import OrderViewData
 
 
@@ -22,7 +22,7 @@ class EmployeeBot(BaseBot):
 
     async def run(self):
         try:
-            self.dp.include_routers(handler.router, end_handler.router)
+            self.dp.include_routers(handler.router, order_handler.router, end_handler.router)
             await self.bot.delete_webhook(drop_pending_updates=True)
             await self.dp.start_polling(self.bot)
         except CancelledError:
